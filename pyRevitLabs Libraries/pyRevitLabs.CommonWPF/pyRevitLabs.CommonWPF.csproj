@@ -54,6 +54,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Windows\AppWindow.cs" />
     <Compile Include="Controls\ActivityBar.xaml.cs">
       <DependentUpon>ActivityBar.xaml</DependentUpon>
     </Compile>
@@ -75,6 +76,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\SpinnerDotCircle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Icons.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

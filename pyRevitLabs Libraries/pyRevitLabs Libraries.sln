@@ -6,14 +6,29 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pyRevitLabs.Common", "pyRevitLabs.Common\pyRevitLabs.Common.csproj", "{C5A03112-6EE1-415F-B53D-5D732D9F47AD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pyRevitLabs.CommonWPF", "pyRevitLabs.CommonWPF\pyRevitLabs.CommonWPF.csproj", "{15E9A99D-11E3-4D46-B333-79A10427F682}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C5A03112-6EE1-415F-B53D-5D732D9F47AD} = {C5A03112-6EE1-415F-B53D-5D732D9F47AD}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pyRevitLabs.CommonCLI", "pyRevitLabs.CommonCLI\pyRevitLabs.CommonCLI.csproj", "{614720BA-C0E3-4199-9A5E-D2468FFCBFE5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C5A03112-6EE1-415F-B53D-5D732D9F47AD} = {C5A03112-6EE1-415F-B53D-5D732D9F47AD}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pyRevitLabs.TargetApps.Revit", "pyRevitLabs.TargetApps.Revit\pyRevitLabs.TargetApps.Revit.csproj", "{ED0FB7A2-E4A8-4490-A020-73140BFBCE0B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C5A03112-6EE1-415F-B53D-5D732D9F47AD} = {C5A03112-6EE1-415F-B53D-5D732D9F47AD}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pyRevitLabs.TargetApps.Navisworks", "pyRevitLabs.TargetApps.Navisworks\pyRevitLabs.TargetApps.Navisworks.csproj", "{57323698-75AF-4345-827D-2E625A56CBF2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C5A03112-6EE1-415F-B53D-5D732D9F47AD} = {C5A03112-6EE1-415F-B53D-5D732D9F47AD}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pyRevitLabs.TargetApps.AutoCAD", "pyRevitLabs.TargetApps.AutoCAD\pyRevitLabs.TargetApps.AutoCAD.csproj", "{0C382E44-C594-4F08-9469-20C0D25BA581}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C5A03112-6EE1-415F-B53D-5D732D9F47AD} = {C5A03112-6EE1-415F-B53D-5D732D9F47AD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
