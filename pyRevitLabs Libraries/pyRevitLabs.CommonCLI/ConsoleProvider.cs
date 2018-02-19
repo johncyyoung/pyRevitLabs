@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace pyRevitLabs.CommonWPF
+namespace pyRevitLabs.CommonCLI
 {
     public class ConsoleProvider
     {
