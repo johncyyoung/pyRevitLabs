@@ -31,6 +31,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pyRevitLabs.TargetApps.Auto
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pyRevitManager", "pyRevitManager\pyRevitManager.csproj", "{9561311E-A02A-4D5F-BD22-64258941BF2E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C5A03112-6EE1-415F-B53D-5D732D9F47AD} = {C5A03112-6EE1-415F-B53D-5D732D9F47AD}
+		{ED0FB7A2-E4A8-4490-A020-73140BFBCE0B} = {ED0FB7A2-E4A8-4490-A020-73140BFBCE0B}
+		{614720BA-C0E3-4199-9A5E-D2468FFCBFE5} = {614720BA-C0E3-4199-9A5E-D2468FFCBFE5}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
