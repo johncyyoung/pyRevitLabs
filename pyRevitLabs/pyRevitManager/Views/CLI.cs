@@ -24,7 +24,7 @@ namespace pyRevitManager.Views {
         pyrevit setremote <repo_path>
         pyrevit checkout <branch_name>
         pyrevit setversion <commit_hash_or_tag_name>
-        pyrevit update [<repo_path>]
+        pyrevit update [--all] [<repo_path>]
         pyrevit attach (--all | <revit_version>) [--allusers]
         pyrevit detach (--all | <revit_version>)
         pyrevit extensions add [--allusers] <repo_path> [--branch=<branch_name>] [--authgroup=<auth_groups>] <extensions_path>
