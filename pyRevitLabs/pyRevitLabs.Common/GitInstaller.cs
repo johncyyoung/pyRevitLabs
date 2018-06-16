@@ -18,6 +18,15 @@ namespace pyRevitLabs.Common {
             return new Repository(destPath);
         }
 
+        static void SetRemoteBranch(string remoteBranch) {
+
+        }
+
+
+        static void CheckoutBranch(string branchName) {
+
+        }
+
         //static void Update(string repoPath, ) {
         //    var repo = new Repository(repoPath);
         //    var options = new PullOptions();

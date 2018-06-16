@@ -36,7 +36,6 @@ namespace pyRevitManager.Views {
         pyrevit listrevits [--installed]
         pyrevit killrevits [--allusers]
         pyrevit clearcache (--all | <revit_version>)
-        pyrevit admintools (enable | disable) [--allusers]
         pyrevit rocketmode (enable | disable) [--allusers]
         pyrevit dynamocompat (enable | disable) [--allusers]
         pyrevit allowremotedll (enable | disable)
@@ -61,7 +60,7 @@ namespace pyRevitManager.Views {
         --purge                     Minimize installation file size.
         --allusers                  Make changes to manifest files for all users (%programdata%).
         --authgroup=<auth_groups>   User groups authorized to use the extension.
-    ";
+";
 
         public static void ProcessArguments(string[] args) {
             // process arguments for hidden debug mode switch
@@ -88,7 +87,9 @@ namespace pyRevitManager.Views {
                 }
 
             // now call methods based on inputs
+            // =======================================================================================================
             // $ pyrevit install
+            // =======================================================================================================
             if (arguments["install"].IsTrue) {
                 pyRevit.Install(
                     destPath: arguments["<dest_path>"].Value as string,
