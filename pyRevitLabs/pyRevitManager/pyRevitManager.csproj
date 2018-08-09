@@ -135,10 +135,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetDir)\lib\win32\x64\git2-15e1193.dll $(TargetDir)\git2-15e1193.dll
-rd /S /Q $(TargetDir)\lib
-del /Q $(TargetDir)\*.pdb
-del /Q $(TargetDir)\*.config
-del /Q $(TargetDir)\*.xml</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetDir)lib\win32\x64\git2-15e1193.dll" "$(TargetDir)git2-15e1193.dll"
+rd /S /Q "$(TargetDir)lib"
+del /Q "$(TargetDir)*.pdb"
+del /Q "$(TargetDir)*.config"
+del /Q "$(TargetDir)*.xml"</PostBuildEvent>
   </PropertyGroup>
 </Project>
