@@ -4,11 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using System.IO;
 
 using pyRevitManager.Properties;
 using pyRevitLabs.TargetApps.Revit;
+using pyRevitLabs.Language.Properties;
 
 using DocoptNet;
+using NLog;
 
 namespace pyRevitManager.Views {
 
@@ -25,7 +28,7 @@ namespace pyRevitManager.Views {
         pyrevit checkout <branch_name>
         pyrevit setversion <commit_hash_or_tag_name>
         pyrevit update [--all] [<repo_path>]
-        pyrevit attach (--all | <revit_version>) [--allusers]
+        pyrevit attach (--all | <revit_version>) [--allusers] [<repo_path>]
         pyrevit detach (--all | <revit_version>)
         pyrevit extensions add [--allusers] <repo_path> [--branch=<branch_name>] [--authgroup=<auth_groups>] <extensions_path>
         pyrevit extensions add [--allusers] <extensions_path>
@@ -75,8 +78,9 @@ namespace pyRevitManager.Views {
             var arguments = new Docopt().Apply(
             usage,
             argsList,
-            version: String.Format(Resources.ConsoleVersionFormat, Assembly.GetExecutingAssembly().GetName().Version.ToString()),
-            exit: true
+            version: String.Format(StringLib.ConsoleVersionFormat, Assembly.GetExecutingAssembly().GetName().Version.ToString()),
+            exit: true,
+            help: true
             );
 
             // print active arguments in debug mode
@@ -86,11 +90,21 @@ namespace pyRevitManager.Views {
                         Console.WriteLine("{0} = {1}", argument.Key, argument.Value);
                 }
 
+            // configure logger
+            var config = new NLog.Config.LoggingConfiguration();
+            var logconsole = new NLog.Targets.ConsoleTarget("logconsole");
+            logconsole.Layout = @"${level}: ${message}";
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, logconsole);
+            LogManager.Configuration = config;
+
+            var logger = LogManager.GetCurrentClassLogger();
+            
+
             // now call methods based on inputs
             // =======================================================================================================
             // $ pyrevit install
             // =======================================================================================================
-            if (arguments["install"].IsTrue) {
+            if (arguments.ContainsKey("install") && arguments["install"].IsTrue) {
                 pyRevit.Install(
                     destPath: arguments["<dest_path>"].Value as string,
                     repoPath: arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null,
@@ -99,6 +113,10 @@ namespace pyRevitManager.Views {
                     purge: arguments["--purge"].IsTrue
                     );
             }
+
+
+            // flush the logs
+            LogManager.Shutdown();
         }
     }
 }
