@@ -52,8 +52,9 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string pyRevitUsageLogFilePathKey = "logfilepath";
         public const string pyRevitUsageLogServerUrlKey = "logserverurl";
 
-        public const string pyRevitManagerConfigSectionName = "Manager";
-        public const string pyRevitManagerInstalledClonesKey = "Clones";
+        public const string pyRevitManagerConfigSectionName = "manager";
+        public const string pyRevitManagerInstalledClonesKey = "clones";
+        public const string pyRevitManagerPrimaryCloneKey = "primaryclone";
 
         // pyRevit config file path
         public static string pyRevitConfigFilePath {
@@ -79,7 +80,9 @@ namespace pyRevitLabs.TargetApps.Revit {
                 var repo = GitInstaller.Clone(repoSourcePath, branchToCheckout, destPath);
 
                 // record the installation path in config file
+                SetPrimaryClone(repo.Info.WorkingDirectory, allUsers: allUsers);
                 UpdateClonesList(repo.Info.WorkingDirectory, allUsers: allUsers);
+
 
                 if (coreOnly) {
                     // TODO: Add core checkout option. Figure out how to checkout certain folders in libgit2sharp
@@ -107,6 +110,26 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public static void Uninstall() {
 
+        }
+
+        public static void Update(string repoPath = null, bool allClones = false) {
+            // TODO: implement allClones
+            if (repoPath != null) {
+                GitInstaller.ForcedUpdate(GetPrimaryClone());
+                return;
+            }
+
+            // if repo path is not provided, check configs for primary repo to update
+            if (IsPrimaryCloneConfigured()) {
+                // current user config
+                GitInstaller.ForcedUpdate(GetPrimaryClone());
+                return;
+            }
+            else if (IsPrimaryCloneConfigured(allUsers: true)) {
+                // all users config
+                GitInstaller.ForcedUpdate(GetPrimaryClone(allUsers: true));
+                return;
+            }
         }
 
         public static void UninstallExtension() {
@@ -143,6 +166,25 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public static void DisableExtension() {
 
+        }
+
+        public static bool IsPrimaryCloneConfigured(bool allUsers = false) {
+            try {
+                GetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerPrimaryCloneKey, allUsers: allUsers);
+                return true;
+            }
+            catch {
+                return false;
+            }
+        }
+
+        public static string GetPrimaryClone(bool allUsers = false) {
+            return GetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerPrimaryCloneKey, allUsers: allUsers);
+        }
+
+        public static void SetPrimaryClone(string newClonePath, bool allUsers = false) {
+            if (Directory.Exists(newClonePath))
+                SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerPrimaryCloneKey, newClonePath, allUsers: allUsers);
         }
 
         public static bool GetUsageReporting(bool allUsers = false) {
@@ -249,7 +291,6 @@ namespace pyRevitLabs.TargetApps.Revit {
         public static void SetConfig(string paramName, string paramValue, bool allUsers = false) {
 
         }
-
 
         // configurations private access methods
         private static IniFile GetConfigFile(bool allUsers) {

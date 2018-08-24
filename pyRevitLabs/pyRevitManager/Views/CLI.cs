@@ -21,11 +21,13 @@ namespace pyRevitManager.Views {
         pyrevit (-h | --help)
         pyrevit (-V | --version)
         pyrevit install [--core] [--purge] [--branch=<branch_name>] <dest_path>
-        pyrevit install <repo_path> [--branch=<branch_name>] <dest_path>
-        pyrevit uninstall [--all] [--clear-configs]
+        pyrevit install <repo_url> [--branch=<branch_name>] <dest_path>
+        pyrevit uninstall [--all] [--clear-configs] [<repo_path>]
+        pyrevit setprimary <repo_path>
         pyrevit setremote <repo_path>
         pyrevit checkout <branch_name>
-        pyrevit setversion <commit_hash_or_tag_name>
+        pyrevit setcommit <commit_hash>
+        pyrevit setversion <tag_name>
         pyrevit update [--all] [<repo_path>]
         pyrevit attach (--all | <revit_version>) [--allusers] [<repo_path>]
         pyrevit detach (--all | <revit_version>)
@@ -98,11 +100,29 @@ namespace pyRevitManager.Views {
             if (arguments["install"].IsTrue) {
                 pyRevit.Install(
                     destPath: arguments["<dest_path>"].Value as string,
-                    repoPath: arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null,
+                    repoPath: arguments["<repo_url>"] != null ? arguments["<repo_url>"].Value as string : null,
                     branchName: arguments["--branch"] != null ? arguments["--branch"].Value as string : null,
                     coreOnly: arguments["--core"].IsTrue,
                     purge: arguments["--purge"].IsTrue
                     );
+            }
+
+
+            // =======================================================================================================
+            // $ pyrevit update [--all] [<repo_path>]
+            // =======================================================================================================
+            if (arguments["update"].IsTrue) {
+                pyRevit.Update(
+                    repoPath: arguments["<repo_url>"] != null ? arguments["<repo_url>"].Value as string : null
+                    );
+            }
+
+
+            // =======================================================================================================
+            // $ pyrevit setprimary <repo_path>
+            // =======================================================================================================
+            if (arguments["setprimary"].IsTrue) {
+                pyRevit.SetPrimaryClone(arguments["<repo_path>"].Value as string);
             }
 
 
