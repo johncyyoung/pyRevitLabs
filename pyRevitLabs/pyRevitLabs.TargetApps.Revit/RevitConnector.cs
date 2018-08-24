@@ -6,14 +6,20 @@ using System.Threading.Tasks;
 
 namespace pyRevitLabs.TargetApps.Revit
 {
+    public class RevitApp {
+
+    }
+
+
     public class RevitConnector
     {
         public static void ListRunningRevits() {
 
         }
 
-        public static void ListInstalledRevits() {
-
+        public static List<RevitApp> ListInstalledRevits() {
+            var installedRevits = new List<RevitApp>();
+            return installedRevits;
         }
 
         public static void KillRunningRevit() {

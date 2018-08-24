@@ -1,0 +1,34 @@
+✔ pyrevit (-h | --help) @done (8/23/2018, 12:53:28 PM)
+✔ pyrevit (-V | --version) @done (8/23/2018, 12:53:38 PM)
+☐ pyrevit install [--core] [--purge] [--branch=<branch_name>] <dest_path>
+☐ pyrevit install <repo_path> [--branch=<branch_name>] <dest_path>
+☐ pyrevit uninstall [--all] [--clear-configs]
+☐ pyrevit setremote <repo_path>
+☐ pyrevit checkout <branch_name>
+☐ pyrevit setversion <commit_hash_or_tag_name>
+☐ pyrevit update [--all] [<repo_path>]
+☐ pyrevit attach (--all | <revit_version>) [--allusers] [<repo_path>]
+☐ pyrevit detach (--all | <revit_version>)
+☐ pyrevit extensions add [--allusers] <repo_path> [--branch=<branch_name>] [--authgroup=<auth_groups>] <extensions_path>
+☐ pyrevit extensions add [--allusers] <extensions_path>
+☐ pyrevit extensions remove [--allusers] <extension_name>
+☐ pyrevit extensions (enable | disable) [--allusers] <extension_name>
+☐ pyrevit open
+☐ pyrevit info
+☐ pyrevit listrevits [--installed]
+☐ pyrevit killrevits [--allusers]
+☐ pyrevit clearcache (--all | <revit_version>)
+☐ pyrevit dynamocompat (enable | disable) [--allusers]
+☐ pyrevit allowremotedll (enable | disable)
+✔ pyrevit checkupdate (enable | disable) [--allusers] @done (8/24/2018, 11:40:21 AM)
+✔ pyrevit autoupdate (enable | disable) [--allusers] @done (8/24/2018, 11:45:04 AM)
+✔ pyrevit rocketmode (enable | disable) [--allusers] @done (8/24/2018, 11:45:06 AM)
+✔ pyrevit logs (none | verbose | debug) [--allusers] @done (8/24/2018, 12:12:19 PM)
+✔ pyrevit filelogging (enable | disable) [--allusers] @done (8/24/2018, 11:45:08 AM)ß
+✔ pyrevit loadbeta (enable | disable) [--allusers] @done (8/24/2018, 11:38:08 AM)
+✔ pyrevit usagereport enable [--allusers] (file | server) <dest_path> @done (8/24/2018, 11:09:06 AM)
+✔ pyrevit usagereport disable [--allusers] @done (8/24/2018, 11:09:07 AM)
+☐ pyrevit outputstyle [<css_path>]
+☐ pyrevit config [--allusers]
+☐ pyrevit config [--allusers] (enable | disable) <option_name>
+☐ pyrevit config [--allusers] <option_name> [<option_value>]
