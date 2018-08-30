@@ -14,6 +14,8 @@ namespace pyRevitLabs.Common {
         private static Identity commiterId = new Identity(commiterName, commiterEmail);
 
 
+        // public methods
+        // clone a repo to given destination
         public static Repository Clone(string repoPath, string branch, string destPath) {
             // build options and clone
             var cops = new CloneOptions() { Checkout = true, BranchName = branch };
@@ -23,15 +25,30 @@ namespace pyRevitLabs.Common {
             return new Repository(destPath);
         }
 
-        public static void SetRemoteBranch(string remoteBranch) {
+        // checkout a repo branch. Looks up remotes for that branch if the local doesn't exist
+        public static void CheckoutBranch(string repoPath, string branchName) {
+            var repo = new Repository(repoPath);
 
+            // get local branch
+            Branch targetBranch = repo.Branches[branchName];
+            if (targetBranch == null) {
+                // lookup remotes for the branch otherwise
+                foreach(Remote remote in repo.Network.Remotes) {
+                    Branch remoteBranch = repo.Branches[remote.Name + "/" + branchName];
+                    if (remoteBranch != null) {
+                        // create a local branch, with remote branch as tracking; update; and checkout
+                        Branch localBranch = repo.CreateBranch(branchName, remoteBranch.Tip);
+                        repo.Branches.Update(localBranch, b => b.UpstreamBranch = "refs/heads/" + branchName);
+                        Commands.Checkout(repo, branchName);
+                    }
+                }
+            }
+            else {
+                Commands.Checkout(repo, branchName);
+            }
         }
 
-
-        public static void CheckoutBranch(string branchName) {
-
-        }
-
+        // rebase current branch and pull from master
         public static void ForcedUpdate(string repoPath) {
             var repo = new Repository(repoPath);
             var options = new PullOptions();
@@ -59,34 +76,51 @@ namespace pyRevitLabs.Common {
                 Console.WriteLine("Failed updating repo to HEAD");
         }
 
-        public static void ChangeVersion(string repoPath, string commitHash) {
-            try {
-                var repo = new Repository(repoPath);
+        // rebase current branch to a specific commit by commit hash
+        public static void RebaseToCommit(string repoPath, string commitHash) {
+            var repo = new Repository(repoPath);
 
-                // trying to find commit in current branch
-                Commit desCommit = null;
-                foreach (Commit cmt in repo.Commits) {
-                    if (cmt.Id.ToString().StartsWith(commitHash)) {
-                        desCommit = cmt;
-                        break;
-                    }
-                }
-
-                if (desCommit != null) {
-                    Console.WriteLine(String.Format("Target commit found: {0}", desCommit.Id.ToString()));
-                    Console.WriteLine("Attempting rebase...");
-                    var tempBranch = repo.CreateBranch("rebasetemp", desCommit);
-                    repo.Rebase.Start(repo.Head, repo.Head, tempBranch, commiterId, new RebaseOptions());
-                    repo.Branches.Remove(tempBranch);
-                    Console.WriteLine(String.Format("Rebase successful. Repo is now at commit: {0}", repo.Head.Tip.Id.ToString()));
-                }
-                else {
-                    Console.WriteLine("Could not find target commit.");
+            // trying to find commit in current branch
+            Commit targetCommit = null;
+            foreach (Commit cmt in repo.Commits) {
+                if (cmt.Id.ToString().StartsWith(commitHash)) {
+                    targetCommit = cmt;
+                    break;
                 }
             }
-            catch (Exception ex) {
-                Console.WriteLine(String.Format("Error setting version. | {0}", ex.Message));
+
+            if (targetCommit != null) {
+                Console.WriteLine(String.Format("Target commit found: {0}", targetCommit.Id.ToString()));
+                Console.WriteLine("Attempting rebase...");
+                RebaseToCommit(repo, targetCommit);
+                Console.WriteLine(String.Format("Rebase successful. Repo is now at commit: {0}", repo.Head.Tip.Id.ToString()));
             }
+            else {
+                Console.WriteLine("Could not find target commit.");
+            }
+        }
+
+        // rebase current branch to a specific tag
+        public static void RebaseToTag(string repoPath, string tagName) {
+            var repo = new Repository(repoPath);
+
+            // try to find the tag commit hash and rebase to that commit
+            string targetCommit;
+            foreach(Tag tag in repo.Tags) {
+                if (tag.FriendlyName.ToLower() == tagName.ToLower()) {
+                    targetCommit = tag.Target.Id.ToString();
+                    RebaseToCommit(repoPath, targetCommit);
+                }
+            }
+        }
+
+
+        // private methods
+        // rebase current branch to a specific commit
+        private static void RebaseToCommit(Repository repo, Commit commit) {
+            var tempBranch = repo.CreateBranch("rebasetemp", commit);
+            repo.Rebase.Start(repo.Head, repo.Head, tempBranch, commiterId, new RebaseOptions());
+            repo.Branches.Remove(tempBranch);
         }
     }
 }

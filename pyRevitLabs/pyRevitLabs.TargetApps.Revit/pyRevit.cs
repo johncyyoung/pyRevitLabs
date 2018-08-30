@@ -30,7 +30,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         // consts for recording pyrevit.exe config in the pyRevit configuration file
         public const string pyRevitAppdataDirName = "pyRevit";
         public const string pyRevitConfigFileName = "pyRevit_config.ini";
-
+        // core configs
         public const string pyRevitCoreConfigSection = "core";
         public const string pyRevitCheckUpdatesKey = "checkupdates";
         public const string pyRevitAutoUpdateKey = "autoupdate";
@@ -46,12 +46,13 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string pyRevitBinaryCacheKey = "bincache";
         public const string pyRevitMinDriveSpaceKey = "minhostdrivefreespace";
         public const string pyRevitRequiredHostBuildKey = "requiredhostbuild";
-
+        public const string pyRevitOutputStyleSheet = "outputstylesheet";
+        // usage logging configs
         public const string pyRevitUsageLoggingSection = "usagelogging";
         public const string pyRevitUsageLoggingStatusKey = "active";
         public const string pyRevitUsageLogFilePathKey = "logfilepath";
         public const string pyRevitUsageLogServerUrlKey = "logserverurl";
-
+        // pyrevit.exe specific configs
         public const string pyRevitManagerConfigSectionName = "manager";
         public const string pyRevitManagerInstalledClonesKey = "clones";
         public const string pyRevitManagerPrimaryCloneKey = "primaryclone";
@@ -81,7 +82,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
                 // record the installation path in config file
                 SetPrimaryClone(repo.Info.WorkingDirectory, allUsers: allUsers);
-                UpdateClonesList(repo.Info.WorkingDirectory, allUsers: allUsers);
+                RegisterClone(repo.Info.WorkingDirectory, allUsers: allUsers);
 
 
                 if (coreOnly) {
@@ -99,17 +100,39 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
         }
 
+        public static void Uninstall() {
+
+        }
+
+        public static HashSet<string> RecordedInstalls() { return GetClones(); }
+
         public static bool InstallExtension() {
             return true;
         }
 
-        public static List<string> DetectInstalls() {
-            var installPaths = new List<string>();
-            return installPaths;
+        public static void UninstallExtension() {
+
         }
 
-        public static void Uninstall() {
+        public static void Checkout(string branchName, string repoPath = null) {
+            if (repoPath == null)
+                repoPath = GetPrimaryClone();
 
+            GitInstaller.CheckoutBranch(repoPath, branchName);
+        }
+
+        public static void SetCommit(string commitHash, string repoPath = null) {
+            if (repoPath == null)
+                repoPath = GetPrimaryClone();
+
+            GitInstaller.RebaseToCommit(repoPath, commitHash);
+        }
+
+        public static void SetVersion(string versionTagName, string repoPath = null) {
+            if (repoPath == null)
+                repoPath = GetPrimaryClone();
+
+            GitInstaller.RebaseToTag(repoPath, versionTagName);
         }
 
         public static void Update(string repoPath = null, bool allClones = false) {
@@ -130,10 +153,6 @@ namespace pyRevitLabs.TargetApps.Revit {
                 GitInstaller.ForcedUpdate(GetPrimaryClone(allUsers: true));
                 return;
             }
-        }
-
-        public static void UninstallExtension() {
-
         }
 
         public static void ClearCache() {
@@ -179,12 +198,38 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public static string GetPrimaryClone(bool allUsers = false) {
-            return GetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerPrimaryCloneKey, allUsers: allUsers);
+            var primaryClone = GetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerPrimaryCloneKey, allUsers: allUsers);
+            if (primaryClone != null && Directory.Exists(primaryClone)) {
+                primaryClone = Path.GetFullPath(primaryClone);
+                SetPrimaryClone(primaryClone);
+                return primaryClone;
+            }
+            else
+                return null;
         }
 
         public static void SetPrimaryClone(string newClonePath, bool allUsers = false) {
-            if (Directory.Exists(newClonePath))
+            if (Directory.Exists(newClonePath)) {
+                newClonePath = Path.GetFullPath(newClonePath);
                 SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerPrimaryCloneKey, newClonePath, allUsers: allUsers);
+            }
+        }
+
+        public static HashSet<string> GetClones(bool allUsers = false) {
+            var validatedClones = new HashSet<string>();
+            try {
+                // verify all registered clones, protect against tampering
+                foreach(string clone in GetKeyValueAsList(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, allUsers: allUsers)) {
+                    if (Directory.Exists(clone))
+                        validatedClones.Add(Path.GetFullPath(clone));
+                }
+                // rewrite the verified clones list back to config file
+                UpdateRegisteredClonesList(validatedClones.AsEnumerable(), allUsers: allUsers);
+            }
+            catch {
+            }
+
+            return validatedClones;
         }
 
         public static bool GetUsageReporting(bool allUsers = false) {
@@ -282,14 +327,26 @@ namespace pyRevitLabs.TargetApps.Revit {
             SetKeyValue(pyRevitCoreConfigSection, pyRevitLoadBetaKey, state, allUsers);
         }
 
-
-        // generic configuration public access
-        public static void GetConfig(string paramName, bool allUsers = false) {
-
+        public static string GetOutputStyleSheet(bool allUsers = false) {
+            return GetKeyValue(pyRevitCoreConfigSection, pyRevitOutputStyleSheet, allUsers);
         }
 
-        public static void SetConfig(string paramName, string paramValue, bool allUsers = false) {
+        public static void SetOutputStyleSheet(string outputCSSFilePath, bool allUsers = false) {
+            if (File.Exists(outputCSSFilePath))
+                SetKeyValue(pyRevitCoreConfigSection, pyRevitOutputStyleSheet, outputCSSFilePath, allUsers);
+        }
 
+        // generic configuration public access
+        public static string GetConfig(string sectionName, string paramName, bool allUsers = false) {
+            return GetKeyValue(sectionName, paramName, allUsers);
+        }
+
+        public static void SetConfig(string sectionName, string paramName, string paramValue, bool allUsers = false) {
+            SetKeyValue(sectionName, paramName, paramValue, allUsers);
+        }
+
+        public static void SetConfig(string sectionName, string paramName, bool paramState, bool allUsers = false) {
+            SetKeyValue(sectionName, paramName, paramState, allUsers);
         }
 
         // configurations private access methods
@@ -337,30 +394,22 @@ namespace pyRevitLabs.TargetApps.Revit {
             UpdateKeyValue(section, key, value, allUsers);
         }
 
-        private static void SetKeyValue(string section, string key, List<string> valueList, bool allUsers) {
+        private static void SetKeyValue(string section, string key, IEnumerable<string> valueList, bool allUsers) {
             UpdateKeyValue(section, key, String.Join(",", valueList), allUsers);
         }
 
-        private static void UpdateClonesList(string newClonePath, bool allUsers = false) {
-            var validClones = new HashSet<string>();
-
-            // get existing values
-            List<string> recordedClones;
-            try {
-                recordedClones  = GetKeyValueAsList(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, allUsers: allUsers);
-            }
-            catch {
-                recordedClones = new List<string>();
-            }
-
-            foreach (var clonePath in recordedClones)
-                if (Directory.Exists(clonePath))
-                    validClones.Add(clonePath);
+        private static void RegisterClone(string newClonePath, bool allUsers = false) {
+            var validClones = GetClones();
 
             if (Directory.Exists(newClonePath))
-                validClones.Add(newClonePath);
+                validClones.Add(Path.GetFullPath(newClonePath));
 
             SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, new List<string>(validClones), allUsers: allUsers);
         }
+
+        private static void UpdateRegisteredClonesList(IEnumerable<string> clonePaths, bool allUsers = false) {
+            SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, clonePaths, allUsers: allUsers);
+        }
+
     }
 }

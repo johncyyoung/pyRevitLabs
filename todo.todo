@@ -1,13 +1,16 @@
+☐ fix cmd.exe pyrevit output
+	for now I have set the wpf app to a Console application to fix this issue.
+☐ add verbose option for messaging?
+
 ✔ pyrevit (-h | --help) @done (8/23/2018, 12:53:28 PM)
 ✔ pyrevit (-V | --version) @done (8/23/2018, 12:53:38 PM)
 ✔ pyrevit install [--core] [--purge] [--branch=<branch_name>] <dest_path>
 ✔ pyrevit install <repo_path> [--branch=<branch_name>] <dest_path>
 ☐ pyrevit uninstall [--all] [--clear-configs]
 ✔ pyrevit setprimary <repo_path>
-☐ pyrevit setremote <repo_path>
-☐ pyrevit checkout <branch_name>
-☐ pyrevit setcommit <commit_hash>
-☐ pyrevit setversion <tag_name>
+✔ pyrevit checkout <branch_name>
+✔ pyrevit setcommit <commit_hash>
+✔ pyrevit setversion <tag_name>
 ✔ pyrevit update [--all] [<repo_path>]
 ☐ pyrevit attach (--all | <revit_version>) [--allusers] [<repo_path>]
 ☐ pyrevit detach (--all | <revit_version>)
@@ -15,10 +18,10 @@
 ☐ pyrevit extensions add [--allusers] <extensions_path>
 ☐ pyrevit extensions remove [--allusers] <extension_name>
 ☐ pyrevit extensions (enable | disable) [--allusers] <extension_name>
-☐ pyrevit open
-☐ pyrevit info
-☐ pyrevit listrevits [--installed]
-☐ pyrevit killrevits [--allusers]
+✔ pyrevit open
+✔ pyrevit info
+✔ pyrevit listrevits [--installed]
+✔ pyrevit killrevits
 ☐ pyrevit clearcache (--all | <revit_version>)
 ☐ pyrevit dynamocompat (enable | disable) [--allusers]
 ☐ pyrevit allowremotedll (enable | disable)
@@ -30,7 +33,7 @@
 ✔ pyrevit loadbeta (enable | disable) [--allusers] @done (8/24/2018, 11:38:08 AM)
 ✔ pyrevit usagereport enable [--allusers] (file | server) <dest_path> @done (8/24/2018, 11:09:06 AM)
 ✔ pyrevit usagereport disable [--allusers] @done (8/24/2018, 11:09:07 AM)
-☐ pyrevit outputstyle [<css_path>]
-☐ pyrevit config [--allusers]
-☐ pyrevit config [--allusers] (enable | disable) <option_name>
-☐ pyrevit config [--allusers] <option_name> [<option_value>]
+✔ pyrevit outputstyle [<css_path>]
+✔ pyrevit config [--allusers]
+✔ pyrevit config [--allusers] (enable | disable) <option_name>
+✔ pyrevit config [--allusers] <option_name> [<option_value>]
