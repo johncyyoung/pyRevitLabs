@@ -24,10 +24,12 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string pyRevitOriginalRepoMainBranch = "master";
 
         // consts for creating pyRevit addon manifest file
+        public const string pyRevitAddinFileName = "pyRevit";
         public const string pyRevitAddinName = "PyRevitLoader";
         public const string pyRevitAddinId = "B39107C3-A1D7-47F4-A5A1-532DDF6EDB5D";
         public const string pyRevitAddinClassName = "PyRevitLoader.PyRevitLoaderApplication";
         public const string pyRevitVendorId = "eirannejad";
+        public const string pyRevitDllName = "pyRevitLoader.dll";
 
         // consts for recording pyrevit.exe config in the pyRevit configuration file
         public const string pyRevitAppdataDirName = "pyRevit";
@@ -90,12 +92,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         // install pyRevit by cloning from git repo
-        public static void Install(
-            string destPath,
-            string repoPath,
-            string branchName,
-            bool coreOnly = false,
-            bool allUsers = false) {
+        public static void Install(string destPath, string repoPath, string branchName, bool coreOnly = false, bool allUsers = false) {
 
             string repoSourcePath = repoPath ?? pyRevitOriginalRepoPath;
             string branchToCheckout = branchName ?? pyRevitOriginalRepoMainBranch;
@@ -125,7 +122,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 repoPath = GetPrimaryClone(allUsers: allUsers);
 
             if (repoPath != null) {
-                UnregisterClone(repoPath,allUsers: allUsers);
+                UnregisterClone(repoPath, allUsers: allUsers);
                 pyRevitUtils.DeleteDirectory(repoPath);
             }
 
@@ -148,8 +145,6 @@ namespace pyRevitLabs.TargetApps.Revit {
             if (allUsers && File.Exists(pyRevitConfigFilePathAllUsers))
                 File.Delete(pyRevitConfigFilePathAllUsers);
         }
-
-        public static HashSet<string> RecordedInstalls() { return GetClones(); }
 
         public static void InstallExtension() {
         }
@@ -212,10 +207,29 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
         }
 
-        public static void Attach(int revitVersion, bool allVersions = true, bool allUsers = false) {
+        public static void Attach(int revitVersion, string repoPath = null, int engineVer = 000, bool allUsers = false) {
+            // use primary repo if none is specified
+            if (repoPath == null)
+                repoPath = GetPrimaryClone(allUsers: allUsers);
+
+            // make the addin manifest file
+            Addons.CreateManifestFile(revitVersion,
+                                      pyRevitAddinFileName,
+                                      pyRevitAddinName,
+                                      GetEnginePath(repoPath, engineVer),
+                                      pyRevitAddinId,
+                                      pyRevitAddinClassName,
+                                      pyRevitVendorId,
+                                      allusers: allUsers);
         }
 
-        public static void Detach(int revitVersion, bool allVersions = true) {
+        public static void AttachAll(string repoPath = null, int engineVer = 000, bool allUsers = false) {
+        }
+
+        public static void Detach(int revitVersion) {
+        }
+
+        public static void DetachAll() {
         }
 
         public static void GetExtentions() {
@@ -480,7 +494,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
             // remove the clone path from list
             var remainingClones = new List<string>();
-            foreach(string clonePath in GetClones()) {
+            foreach (string clonePath in GetClones()) {
                 if (normalizedExClonePath != clonePath.NormalizeAsPath())
                     remainingClones.Add(Path.GetFullPath(clonePath));
             }
@@ -492,5 +506,42 @@ namespace pyRevitLabs.TargetApps.Revit {
             SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, clonePaths, allUsers: allUsers);
         }
 
+        // other private helprs
+        private static string GetEnginePath(string repoPath, int engineVer = 000) {
+            string enginesDir = Path.Combine(repoPath, "bin", "engines");
+            if (!Directory.Exists(enginesDir))
+                enginesDir = Path.Combine(repoPath, "pyrevitlib", "pyrevit", "loader", "addin");
+
+            if (Directory.Exists(enginesDir)) {
+                if (engineVer == 000)
+                    return FindLatestEngine(enginesDir);
+                else {
+                    string fullEnginePath = Path.GetFullPath(Path.Combine(enginesDir, engineVer.ToString(), pyRevitDllName));
+                    if (File.Exists(fullEnginePath))
+                        return fullEnginePath;
+                }
+            }
+            
+            return null;
+        }
+
+        private static string FindLatestEngine(string enginesDir) {
+            var engineFinder = new Regex(@"\d\d\d");
+            int latestEnginerVer = 000;
+            foreach (string subDir in Directory.GetDirectories(enginesDir)) {
+                var engineDir = Path.GetFileName(subDir);
+                if (engineFinder.IsMatch(engineDir)) {
+                    var engineVer = int.Parse(engineDir);
+                    if (engineVer > latestEnginerVer)
+                        latestEnginerVer = engineVer;
+                }
+            }
+
+            string fullEnginePath = Path.GetFullPath(Path.Combine(enginesDir, latestEnginerVer.ToString(), pyRevitDllName));
+            if (File.Exists(fullEnginePath))
+                return fullEnginePath;
+
+            return null;
+        }
     }
 }

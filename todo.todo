@@ -12,7 +12,7 @@
 ✔ pyrevit setcommit <commit_hash>
 ✔ pyrevit setversion <tag_name>
 ✔ pyrevit update [--all] [<repo_path>]
-☐ pyrevit attach (--all | <revit_version>) [--allusers] [<repo_path>]
+✔ pyrevit attach (--all | <revit_version>) [--allusers] [<repo_path>]
 ☐ pyrevit detach (--all | <revit_version>)
 ☐ pyrevit setengine <enginer_version> (--all | <revit_version>)
 ☐ pyrevit extensions install <extension_name> <dest_path>

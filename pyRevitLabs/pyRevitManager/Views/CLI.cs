@@ -28,9 +28,10 @@ namespace pyRevitManager.Views {
         pyrevit setcommit <commit_hash> [<repo_path>]
         pyrevit setversion <tag_name> [<repo_path>]
         pyrevit update [--all] [<repo_path>]
-        pyrevit attach (--all | <revit_version>) [--allusers] [<repo_path>]
+        pyrevit attach (--all | <revit_version>) [<repo_path>] [--allusers]
         pyrevit detach (--all | <revit_version>)
-        pyrevit setengine <enginer_version> (--all | <revit_version>)
+        pyrevit setengine latest (--all | <revit_version>) [<repo_path>] [--allusers]
+        pyrevit setengine <engine_version> (--all | <revit_version>) [<repo_path>] [--allusers]
         pyrevit extensions install <extension_name> <dest_path>
         pyrevit extensions install <repo_url> <dest_path> [--branch=<branch_name>]
         pyrevit extensions uninstall <extension_name> <dest_path> [--branch=<branch_name>]
@@ -165,6 +166,53 @@ namespace pyRevitManager.Views {
                 pyRevit.Update(
                     repoPath: arguments["<repo_url>"] != null ? arguments["<repo_url>"].Value as string : null
                     );
+            }
+
+
+            // =======================================================================================================
+            // $ pyrevit attach (--all | <revit_version>) [<repo_path>] [--allusers]
+            // =======================================================================================================
+            if (arguments["attach"].IsTrue) {
+                string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
+                string repoPath = arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null;
+                if (revitVersion != null) {
+                    pyRevit.Attach(int.Parse(revitVersion), repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
+                }
+                // TODO: implement --all
+            }
+
+
+            // =======================================================================================================
+            // $ pyrevit detach (--all | <revit_version>)
+            // =======================================================================================================
+            if (arguments["detach"].IsTrue) {
+                string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
+                if (revitVersion != null)
+                    pyRevit.Detach(int.Parse(revitVersion));
+                // TODO: implement --all
+            }
+
+
+            // =======================================================================================================
+            // $ pyrevit setengine latest (--all | <revit_version>) [<repo_path>] [--allusers]
+            // $ pyrevit setengine <engine_version> (--all | <revit_version>) [<repo_path>] [--allusers]
+            // =======================================================================================================
+            if (arguments["setengine"].IsTrue) {
+                string engineVersion = arguments["<engine_version>"] != null ? arguments["<engine_version>"].Value as string : null;
+                // switch to latest if requested
+                if (arguments["latest"].IsTrue)
+                    engineVersion = "000";
+
+                string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
+                string repoPath = arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null;
+
+                if (engineVersion != null) {
+                    if (revitVersion != null)
+                        pyRevit.Attach(int.Parse(revitVersion), repoPath: repoPath, engineVer: int.Parse(engineVersion), allUsers: arguments["--allusers"].IsTrue);
+                    else if (arguments["--all"].IsTrue) {
+                        // TODO: implement --all
+                    }
+                }
             }
 
 
