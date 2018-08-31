@@ -6,7 +6,7 @@
 ✔ pyrevit (-V | --version) @done (8/23/2018, 12:53:38 PM)
 ✔ pyrevit install [--core] [--purge] [--branch=<branch_name>] <dest_path>
 ✔ pyrevit install <repo_path> [--branch=<branch_name>] <dest_path>
-☐ pyrevit uninstall [--all] [--clear-configs]
+☐ pyrevit uninstall [--all] [--clearconfigs]
 ✔ pyrevit setprimary <repo_path>
 ✔ pyrevit checkout <branch_name>
 ✔ pyrevit setcommit <commit_hash>
@@ -22,7 +22,7 @@
 ✔ pyrevit info
 ✔ pyrevit listrevits [--installed]
 ✔ pyrevit killrevits
-☐ pyrevit clearcache (--all | <revit_version>)
+✔ pyrevit clearcache (--all | <revit_version>)
 ☐ pyrevit dynamocompat (enable | disable) [--allusers]
 ☐ pyrevit allowremotedll (enable | disable)
 ✔ pyrevit checkupdate (enable | disable) [--allusers] @done (8/24/2018, 11:40:21 AM)

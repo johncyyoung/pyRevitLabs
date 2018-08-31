@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Text.RegularExpressions;
 
 using pyRevitLabs.Common;
 
@@ -57,10 +58,31 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string pyRevitManagerInstalledClonesKey = "clones";
         public const string pyRevitManagerPrimaryCloneKey = "primaryclone";
 
+        // pyRevit %appdata% path
+        public static string pyRevitAppDataPath {
+            get {
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), pyRevitAppdataDirName);
+            }
+        }
+
+        // pyRevit %programdata% path
+        public static string pyRevitProgramDataPath {
+            get {
+                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), pyRevitAppdataDirName);
+            }
+        }
+
         // pyRevit config file path
         public static string pyRevitConfigFilePath {
             get {
-                return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), pyRevitAppdataDirName, pyRevitConfigFileName);
+                return Path.Combine(pyRevitAppDataPath, pyRevitConfigFileName);
+            }
+        }
+
+        // pyRevit config file path
+        public static string pyRevitConfigFilePathAllUsers {
+            get {
+                return Path.Combine(pyRevitProgramDataPath, pyRevitConfigFileName);
             }
         }
 
@@ -155,12 +177,17 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
         }
 
-        public static void ClearCache() {
-
+        public static void ClearCache(string revitVersion) {
+            Directory.Delete(Path.Combine(pyRevitAppDataPath, revitVersion), true);
         }
 
         public static void ClearAllCaches() {
-
+            var cacheDirFinder = new Regex(@"\d\d\d\d");
+            foreach (string subDir in Directory.GetDirectories(pyRevitAppDataPath)) {
+                var dirName = Path.GetFileName(subDir);
+                if (cacheDirFinder.IsMatch(dirName))
+                    ClearCache(dirName);
+            }
         }
 
         public static bool Attach(int revitVersion, bool allVersions = true, bool allUsers = false) {
@@ -219,7 +246,7 @@ namespace pyRevitLabs.TargetApps.Revit {
             var validatedClones = new HashSet<string>();
             try {
                 // verify all registered clones, protect against tampering
-                foreach(string clone in GetKeyValueAsList(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, allUsers: allUsers)) {
+                foreach (string clone in GetKeyValueAsList(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, allUsers: allUsers)) {
                     if (Directory.Exists(clone))
                         validatedClones.Add(Path.GetFullPath(clone));
                 }

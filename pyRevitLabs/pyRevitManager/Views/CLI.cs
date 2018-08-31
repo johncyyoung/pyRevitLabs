@@ -22,7 +22,7 @@ namespace pyRevitManager.Views {
         pyrevit (-V | --version)
         pyrevit install [--core] [--purge] [--branch=<branch_name>] <dest_path>
         pyrevit install <repo_url> [--branch=<branch_name>] <dest_path>
-        pyrevit uninstall [--all] [--clear-configs] [<repo_path>]
+        pyrevit uninstall [--all] [--clearconfigs] [<repo_path>]
         pyrevit setprimary <repo_path>
         pyrevit checkout <branch_name> [<repo_path>]
         pyrevit setcommit <commit_hash> [<repo_path>]
@@ -195,6 +195,19 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             if (arguments["killrevits"].IsTrue) {
                 RevitConnector.KillAllRunningRevits();
+            }
+
+
+            // =======================================================================================================
+            // $ pyrevit clearcache (--all | <revit_version>)
+            // =======================================================================================================
+            if (arguments["clearcache"].IsTrue) {
+                if (arguments["--all"].IsTrue) {
+                    pyRevit.ClearAllCaches();
+                }
+                else if (arguments["<revit_version>"] != null) {
+                    pyRevit.ClearCache(arguments["<revit_version>"].Value as string);
+                }
             }
 
 
