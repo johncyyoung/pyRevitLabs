@@ -95,7 +95,6 @@ namespace pyRevitLabs.TargetApps.Revit {
             string repoPath,
             string branchName,
             bool coreOnly = false,
-            bool purge = false,
             bool allUsers = false) {
 
             string repoSourcePath = repoPath ?? pyRevitOriginalRepoPath;
@@ -114,10 +113,6 @@ namespace pyRevitLabs.TargetApps.Revit {
                     // TODO: Add core checkout option. Figure out how to checkout certain folders in libgit2sharp
                 }
 
-                if (purge) {
-
-                }
-
                 // TODO: implement addon manifest file creation? or use pyrevit attach?
             }
             catch (Exception ex) {
@@ -126,7 +121,6 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public static void Uninstall(string repoPath = null, bool clearConfigs = false, bool allUsers = true) {
-            // TODO: implement clear config
             if (repoPath == null)
                 repoPath = GetPrimaryClone(allUsers: allUsers);
 
@@ -136,7 +130,7 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
 
             if (clearConfigs)
-                ClearConfigs(allUsers: allUsers);
+                DeleteConfigs(allUsers: allUsers);
         }
 
         public static void UninstallAllClones(bool clearConfigs = false, bool allUsers = true) {
@@ -144,10 +138,10 @@ namespace pyRevitLabs.TargetApps.Revit {
                 Uninstall(clonePath, clearConfigs: false, allUsers: allUsers);
 
             if (clearConfigs)
-                ClearConfigs(allUsers: allUsers);
+                DeleteConfigs(allUsers: allUsers);
         }
 
-        public static void ClearConfigs(bool allUsers = true) {
+        public static void DeleteConfigs(bool allUsers = true) {
             if (File.Exists(pyRevitConfigFilePath))
                 File.Delete(pyRevitConfigFilePath);
 
@@ -289,6 +283,7 @@ namespace pyRevitLabs.TargetApps.Revit {
             return validatedClones;
         }
 
+        // pyrevit config getter/setter
         public static bool GetUsageReporting(bool allUsers = false) {
             return Boolean.Parse(GetKeyValue(pyRevitUsageLoggingSection, pyRevitUsageLoggingStatusKey, allUsers));
         }
@@ -408,15 +403,22 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         // configurations private access methods
         private static IniFile GetConfigFile(bool allUsers) {
-            // TODO: implement allusers
-            IniFile cfgFile = new IniFile();
-            cfgFile.Load(pyRevitConfigFilePath);
+            // INI formatting
+            var cfgOps = new IniOptions();
+            cfgOps.KeySpaceAroundDelimiter = true;
+            IniFile cfgFile = new IniFile(cfgOps);
+
+            // read or make the file
+            var configFile = allUsers ? pyRevitConfigFilePathAllUsers : pyRevitConfigFilePath;
+            pyRevitUtils.ConfirmFile(configFile);
+
+            cfgFile.Load(configFile);
             return cfgFile;
         }
 
         private static void SaveConfigFile(IniFile cfgFile, bool allUsers) {
-            // TODO: implement allusers
-            cfgFile.Save(pyRevitConfigFilePath);
+            var configFile = allUsers ? pyRevitConfigFilePathAllUsers : pyRevitConfigFilePath;
+            cfgFile.Save(configFile);
         }
 
         private static void UpdateKeyValue(string section, string key, string value, bool allUsers) {
@@ -444,6 +446,10 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         private static void SetKeyValue(string section, string key, bool value, bool allUsers) {
+            UpdateKeyValue(section, key, value.ToString(), allUsers);
+        }
+
+        private static void SetKeyValue(string section, string key, int value, bool allUsers) {
             UpdateKeyValue(section, key, value.ToString(), allUsers);
         }
 

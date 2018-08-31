@@ -20,7 +20,7 @@ namespace pyRevitManager.Views {
     Usage:
         pyrevit (-h | --help)
         pyrevit (-V | --version)
-        pyrevit install [--core] [--purge] [--branch=<branch_name>] <dest_path>
+        pyrevit install [--core] [--branch=<branch_name>] <dest_path>
         pyrevit install <repo_url> [--branch=<branch_name>] <dest_path>
         pyrevit uninstall [(--all | <repo_path>)] [--clearconfigs] [--allusers]
         pyrevit setprimary <repo_path>
@@ -63,7 +63,6 @@ namespace pyRevitManager.Views {
         -V --version                Show version.
         --core                      Install original pyRevit core only (no defualt tools).
         --all                       All applicable items.
-        --purge                     Minimize installation file size.
         --allusers                  Make changes to manifest files for all users (%programdata%).
         --authgroup=<auth_groups>   User groups authorized to use the extension.
 ";
@@ -105,8 +104,7 @@ namespace pyRevitManager.Views {
                     destPath: arguments["<dest_path>"].Value as string,
                     repoPath: arguments["<repo_url>"] != null ? arguments["<repo_url>"].Value as string : null,
                     branchName: arguments["--branch"] != null ? arguments["--branch"].Value as string : null,
-                    coreOnly: arguments["--core"].IsTrue,
-                    purge: arguments["--purge"].IsTrue
+                    coreOnly: arguments["--core"].IsTrue
                     );
             }
 
@@ -384,6 +382,7 @@ namespace pyRevitManager.Views {
                 else
                     pyRevit.SetOutputStyleSheet(arguments["<css_path>"].Value as string, allUsers: arguments["--allusers"].IsTrue);
             }
+
 
             // =======================================================================================================
             // $ pyrevit config <section_name> <option_path> [<option_value>] [--allusers]

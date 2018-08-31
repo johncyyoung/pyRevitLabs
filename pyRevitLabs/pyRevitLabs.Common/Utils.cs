@@ -25,5 +25,17 @@ namespace pyRevitLabs.Common {
             Directory.Delete(target_dir, false);
         }
 
+        public static void ConfirmPath(string path) {
+            Directory.CreateDirectory(path);
+        }
+
+        public static void ConfirmFile(string filepath) {
+            ConfirmPath(Path.GetDirectoryName(filepath));
+            if (!File.Exists(filepath)) {
+                var file = File.CreateText(filepath);
+                file.Close();
+            }
+        }
+
     }
 }
