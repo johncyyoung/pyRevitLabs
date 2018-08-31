@@ -30,10 +30,13 @@ namespace pyRevitManager.Views {
         pyrevit update [--all] [<repo_path>]
         pyrevit attach (--all | <revit_version>) [--allusers] [<repo_path>]
         pyrevit detach (--all | <revit_version>)
-        pyrevit extensions add [--allusers] <repo_path> [--branch=<branch_name>] [--authgroup=<auth_groups>] <extensions_path>
-        pyrevit extensions add [--allusers] <extensions_path>
-        pyrevit extensions remove [--allusers] <extension_name>
-        pyrevit extensions (enable | disable) [--allusers] <extension_name>
+        pyrevit setengine <enginer_version> (--all | <revit_version>)
+        pyrevit extensions install <extension_name> <dest_path>
+        pyrevit extensions install <repo_url> <dest_path> [--branch=<branch_name>]
+        pyrevit extensions uninstall <extension_name> <dest_path> [--branch=<branch_name>]
+        pyrevit extensions paths [--allusers]
+        pyrevit extensions paths (add | remove) <extensions_path> [--allusers]
+        pyrevit extensions <extension_name> (enable | disable) [--allusers]
         pyrevit open
         pyrevit info
         pyrevit listrevits [--installed]
@@ -59,6 +62,7 @@ namespace pyRevitManager.Views {
         -h --help                   Show this screen.
         -V --version                Show version.
         --core                      Install original pyRevit core only (no defualt tools).
+        --all                       All applicable items.
         --purge                     Minimize installation file size.
         --allusers                  Make changes to manifest files for all users (%programdata%).
         --authgroup=<auth_groups>   User groups authorized to use the extension.
@@ -153,6 +157,20 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             if (arguments["setprimary"].IsTrue) {
                 pyRevit.SetPrimaryClone(arguments["<repo_path>"].Value as string);
+            }
+
+
+            // =======================================================================================================
+            // $ pyrevit extensions <extension_name> (enable | disable) [--allusers]
+            // =======================================================================================================
+            if (arguments["extensions"].IsTrue) {
+                if (arguments["<extension_name>"] != null) {
+                    string extensionName = arguments["<extension_name>"].Value as string;
+                    if (arguments["enable"].IsTrue)
+                        pyRevit.EnableExtension(extensionName, allUsers: arguments["--allusers"].IsTrue);
+                    else if (arguments["disable"].IsTrue)
+                        pyRevit.DisableExtension(extensionName, allUsers: arguments["--allusers"].IsTrue);                
+                }
             }
 
 

@@ -57,6 +57,8 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string pyRevitManagerConfigSectionName = "manager";
         public const string pyRevitManagerInstalledClonesKey = "clones";
         public const string pyRevitManagerPrimaryCloneKey = "primaryclone";
+        // extensions
+        public const string pyRevitExtensionDisabledKey = "disabled";
 
         // pyRevit %appdata% path
         public static string pyRevitAppDataPath {
@@ -123,13 +125,15 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public static void Uninstall() {
-
+            // TODO: get primary or all
+            // TODO: uninstall and remove from config
+            // TODO: get config file locations
+            // TODO: Attempt removing config files
         }
 
         public static HashSet<string> RecordedInstalls() { return GetClones(); }
 
-        public static bool InstallExtension() {
-            return true;
+        public static void InstallExtension() {
         }
 
         public static void UninstallExtension() {
@@ -190,12 +194,10 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
         }
 
-        public static bool Attach(int revitVersion, bool allVersions = true, bool allUsers = false) {
-            return true;
+        public static void Attach(int revitVersion, bool allVersions = true, bool allUsers = false) {
         }
 
-        public static bool Detach(int revitVersion, bool allVersions = true) {
-            return true;
+        public static void Detach(int revitVersion, bool allVersions = true) {
         }
 
         public static void GetExtentions() {
@@ -206,12 +208,12 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         }
 
-        public static void EnableExtension() {
-
+        public static void EnableExtension(string extName, bool allUsers = true) {
+            SetKeyValue(extName, pyRevitExtensionDisabledKey, false, allUsers);
         }
 
-        public static void DisableExtension() {
-
+        public static void DisableExtension(string extName, bool allUsers = true) {
+            SetKeyValue(extName, pyRevitExtensionDisabledKey, true, allUsers);
         }
 
         public static bool IsPrimaryCloneConfigured(bool allUsers = false) {
