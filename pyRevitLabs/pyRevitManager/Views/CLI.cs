@@ -22,7 +22,7 @@ namespace pyRevitManager.Views {
         pyrevit (-V | --version)
         pyrevit install [--core] [--purge] [--branch=<branch_name>] <dest_path>
         pyrevit install <repo_url> [--branch=<branch_name>] <dest_path>
-        pyrevit uninstall [--all] [--clearconfigs] [<repo_path>]
+        pyrevit uninstall [(--all | <repo_path>)] [--clearconfigs] [--allusers]
         pyrevit setprimary <repo_path>
         pyrevit checkout <branch_name> [<repo_path>]
         pyrevit setcommit <commit_hash> [<repo_path>]
@@ -97,7 +97,8 @@ namespace pyRevitManager.Views {
 
             // now call methods based on inputs
             // =======================================================================================================
-            // $ pyrevit install
+            // $ pyrevit install <dest_path> [--core] [--branch=<branch_name>] 
+            // $ pyrevit install <repo_url> <dest_path> [--core] [--branch=<branch_name>]
             // =======================================================================================================
             if (arguments["install"].IsTrue) {
                 pyRevit.Install(
@@ -109,6 +110,23 @@ namespace pyRevitManager.Views {
                     );
             }
 
+
+            // =======================================================================================================
+            // $ pyrevit uninstall [(--all | <repo_path>)] [--clearconfigs] [--allusers]
+            // =======================================================================================================
+            if (arguments["uninstall"].IsTrue) {
+                if (arguments["--all"].IsTrue)
+                    pyRevit.UninstallAllClones(
+                        clearConfigs: arguments["--clearconfigs"].IsTrue,
+                        allUsers: arguments["--allusers"].IsTrue
+                        );
+                else
+                    pyRevit.Uninstall(
+                        repoPath: arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null,
+                        clearConfigs: arguments["--clearconfigs"].IsTrue,
+                        allUsers: arguments["--allusers"].IsTrue
+                        );
+            }
 
             // =======================================================================================================
             // $ pyrevit checkout <branch_name> [<repo_path>]
@@ -169,7 +187,7 @@ namespace pyRevitManager.Views {
                     if (arguments["enable"].IsTrue)
                         pyRevit.EnableExtension(extensionName, allUsers: arguments["--allusers"].IsTrue);
                     else if (arguments["disable"].IsTrue)
-                        pyRevit.DisableExtension(extensionName, allUsers: arguments["--allusers"].IsTrue);                
+                        pyRevit.DisableExtension(extensionName, allUsers: arguments["--allusers"].IsTrue);
                 }
             }
 

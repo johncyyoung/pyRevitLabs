@@ -59,6 +59,12 @@ namespace pyRevitLabs.Common.Extensions {
             else
                 return sourceString;
         }
+
+        public static string NormalizeAsPath(this string path) {
+            return Path.GetFullPath(new Uri(path).LocalPath)
+                       .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                       .ToUpperInvariant();
+        }
     }
 
     public static class DateTimeExtensions {

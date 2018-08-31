@@ -7,6 +7,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 
 using pyRevitLabs.Common;
+using pyRevitLabs.Common.Extensions;
 
 using MadMilkman.Ini;
 
@@ -124,11 +125,34 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
         }
 
-        public static void Uninstall() {
-            // TODO: get primary or all
-            // TODO: uninstall and remove from config
-            // TODO: get config file locations
-            // TODO: Attempt removing config files
+        public static void Uninstall(string repoPath = null, bool clearConfigs = false, bool allUsers = true) {
+            // TODO: implement clear config
+            if (repoPath == null)
+                repoPath = GetPrimaryClone(allUsers: allUsers);
+
+            if (repoPath != null) {
+                UnregisterClone(repoPath,allUsers: allUsers);
+                pyRevitUtils.DeleteDirectory(repoPath);
+            }
+
+            if (clearConfigs)
+                ClearConfigs(allUsers: allUsers);
+        }
+
+        public static void UninstallAllClones(bool clearConfigs = false, bool allUsers = true) {
+            foreach (string clonePath in GetClones())
+                Uninstall(clonePath, clearConfigs: false, allUsers: allUsers);
+
+            if (clearConfigs)
+                ClearConfigs(allUsers: allUsers);
+        }
+
+        public static void ClearConfigs(bool allUsers = true) {
+            if (File.Exists(pyRevitConfigFilePath))
+                File.Delete(pyRevitConfigFilePath);
+
+            if (allUsers && File.Exists(pyRevitConfigFilePathAllUsers))
+                File.Delete(pyRevitConfigFilePathAllUsers);
         }
 
         public static HashSet<string> RecordedInstalls() { return GetClones(); }
@@ -182,7 +206,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public static void ClearCache(string revitVersion) {
-            Directory.Delete(Path.Combine(pyRevitAppDataPath, revitVersion), true);
+            pyRevitUtils.DeleteDirectory(Path.Combine(pyRevitAppDataPath, revitVersion));
         }
 
         public static void ClearAllCaches() {
@@ -242,6 +266,10 @@ namespace pyRevitLabs.TargetApps.Revit {
                 newClonePath = Path.GetFullPath(newClonePath);
                 SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerPrimaryCloneKey, newClonePath, allUsers: allUsers);
             }
+        }
+
+        public static void ClearPrimaryClone(bool allUsers = false) {
+            SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerPrimaryCloneKey, "", allUsers: allUsers);
         }
 
         public static HashSet<string> GetClones(bool allUsers = false) {
@@ -434,6 +462,24 @@ namespace pyRevitLabs.TargetApps.Revit {
                 validClones.Add(Path.GetFullPath(newClonePath));
 
             SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, new List<string>(validClones), allUsers: allUsers);
+        }
+
+        private static void UnregisterClone(string existigClonePath, bool allUsers = false) {
+            // make sure if this clone is primary, remove it
+            var normalizedExClonePath = existigClonePath.NormalizeAsPath();
+            var primaryClone = GetPrimaryClone();
+            if (primaryClone != null
+                && normalizedExClonePath == primaryClone.NormalizeAsPath())
+                ClearPrimaryClone(allUsers: allUsers);
+
+            // remove the clone path from list
+            var remainingClones = new List<string>();
+            foreach(string clonePath in GetClones()) {
+                if (normalizedExClonePath != clonePath.NormalizeAsPath())
+                    remainingClones.Add(Path.GetFullPath(clonePath));
+            }
+
+            SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, new List<string>(remainingClones), allUsers: allUsers);
         }
 
         private static void UpdateRegisteredClonesList(IEnumerable<string> clonePaths, bool allUsers = false) {

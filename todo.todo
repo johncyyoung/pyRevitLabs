@@ -6,7 +6,7 @@
 ✔ pyrevit (-V | --version) @done (8/23/2018, 12:53:38 PM)
 ✔ pyrevit install [--core] [--purge] [--branch=<branch_name>] <dest_path>
 ✔ pyrevit install <repo_path> [--branch=<branch_name>] <dest_path>
-☐ pyrevit uninstall [--all] [--clearconfigs]
+✔ pyrevit uninstall [--all] [--clearconfigs]
 ✔ pyrevit setprimary <repo_path>
 ✔ pyrevit checkout <branch_name>
 ✔ pyrevit setcommit <commit_hash>
