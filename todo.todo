@@ -13,8 +13,8 @@
 ✔ pyrevit setversion <tag_name>
 ✔ pyrevit update [--all] [<repo_path>]
 ✔ pyrevit attach (--all | <revit_version>) [--allusers] [<repo_path>]
-☐ pyrevit detach (--all | <revit_version>)
-☐ pyrevit setengine <enginer_version> (--all | <revit_version>)
+✔ pyrevit detach (--all | <revit_version>)
+✔ pyrevit setengine <enginer_version> (--all | <revit_version>)
 ☐ pyrevit extensions install <extension_name> <dest_path>
 ☐ pyrevit extensions install <repo_url> <dest_path> [--branch=<branch_name>]
 ☐ pyrevit extensions uninstall <extension_name> <dest_path> [--branch=<branch_name>]
@@ -26,8 +26,8 @@
 ✔ pyrevit listrevits [--installed]
 ✔ pyrevit killrevits
 ✔ pyrevit clearcache (--all | <revit_version>)
-☐ pyrevit dynamocompat (enable | disable) [--allusers]
-☐ pyrevit allowremotedll (enable | disable)
+✔ pyrevit dynamocompat (enable | disable) [--allusers]
+- pyrevit allowremotedll (enable | disable)
 ✔ pyrevit checkupdate (enable | disable) [--allusers] @done (8/24/2018, 11:40:21 AM)
 ✔ pyrevit autoupdate (enable | disable) [--allusers] @done (8/24/2018, 11:45:04 AM)
 ✔ pyrevit rocketmode (enable | disable) [--allusers] @done (8/24/2018, 11:45:06 AM)

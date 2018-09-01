@@ -65,6 +65,12 @@ namespace pyRevitLabs.Common.Extensions {
                        .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
                        .ToUpperInvariant();
         }
+
+        public static Version ConvertToVersion(this string version) {
+            if (!version.Contains("."))
+                version = version + ".0";
+            return new Version(version);
+        }
     }
 
     public static class DateTimeExtensions {

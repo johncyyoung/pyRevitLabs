@@ -5,12 +5,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32;
+using System.Text.RegularExpressions;
+
+using pyRevitLabs.Common.Extensions;
 
 namespace pyRevitLabs.TargetApps.Revit {
-    public class RevitApp {
+    public class RevitProcess {
         private Process _process;
 
-        public RevitApp(Process runningRevitProcess) {
+        public RevitProcess(Process runningRevitProcess) {
             _process = runningRevitProcess;
         }
 
@@ -51,31 +55,71 @@ namespace pyRevitLabs.TargetApps.Revit {
     }
 
 
+    public class RevitInstall {
+        public Version DisplayVersion;
+        public string InstallLocation;
+        public int LanguageCode;
+
+        public RevitInstall(string version, string installLoc, int langCode) {
+            DisplayVersion = version.ConvertToVersion();
+            InstallLocation = installLoc;
+            LanguageCode = langCode;
+        }
+
+        public override string ToString() {
+            return String.Format("Version: {0}:{2} Path: {1}", Version, InstallLocation, LanguageCode);
+        }
+
+        public Version Version {
+            get {
+                return new Version(
+                    2000 + DisplayVersion.Major,
+                    DisplayVersion.Minor,
+                    DisplayVersion.Build,
+                    DisplayVersion.Revision
+                    );
+            }
+        }
+    }
+
+
     public class RevitConnector {
-        public static List<RevitApp> ListRunningRevits() {
-            var runningRevits = new List<RevitApp>();
+        public static List<RevitProcess> ListRunningRevits() {
+            var runningRevits = new List<RevitProcess>();
             foreach (Process ps in Process.GetProcesses()) {
-                if (RevitApp.IsRevitProcess(ps))
-                    runningRevits.Add(new RevitApp(ps));
+                if (RevitProcess.IsRevitProcess(ps))
+                    runningRevits.Add(new RevitProcess(ps));
             }
             return runningRevits;
         }
 
-        public static List<RevitApp> ListInstalledRevits() {
-            var installedRevits = new List<RevitApp>();
+        public static List<RevitInstall> ListInstalledRevits() {
+            var revitFinder = new Regex(@"^Revit \d\d\d\d");
+            var installedRevits = new List<RevitInstall>();
+            var uninstallKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
+            foreach (var key in uninstallKey.GetSubKeyNames()) {
+                var subkey = uninstallKey.OpenSubKey(key);
+                var appName = subkey.GetValue("DisplayName") as string;
+                if (appName != null && revitFinder.IsMatch(appName))
+                    installedRevits.Add(new RevitInstall(
+                        subkey.GetValue("DisplayVersion") as string,
+                        subkey.GetValue("InstallLocation") as string,
+                        (int) subkey.GetValue("Language")
+                        ));
+            }
             return installedRevits;
         }
 
         public static void KillAllRunningRevits() {
-            foreach (RevitApp revit in ListRunningRevits())
+            foreach (RevitProcess revit in ListRunningRevits())
                 revit.Kill();
         }
 
-        public static void EnableRemoteDLLLoading(RevitApp targetRevit = null) {
+        public static void EnableRemoteDLLLoading(RevitProcess targetRevit = null) {
 
         }
 
-        public static void DisableRemoteDLLLoading(RevitApp targetRevit = null) {
+        public static void DisableRemoteDLLLoading(RevitProcess targetRevit = null) {
 
         }
     }

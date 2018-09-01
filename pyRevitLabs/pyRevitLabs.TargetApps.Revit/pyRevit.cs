@@ -51,6 +51,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string pyRevitMinDriveSpaceKey = "minhostdrivefreespace";
         public const string pyRevitRequiredHostBuildKey = "requiredhostbuild";
         public const string pyRevitOutputStyleSheet = "outputstylesheet";
+        public const int pyRevitDynamoCompatibleEnginerVer = 273;
         // usage logging configs
         public const string pyRevitUsageLoggingSection = "usagelogging";
         public const string pyRevitUsageLoggingStatusKey = "active";
@@ -109,8 +110,6 @@ namespace pyRevitLabs.TargetApps.Revit {
                 if (coreOnly) {
                     // TODO: Add core checkout option. Figure out how to checkout certain folders in libgit2sharp
                 }
-
-                // TODO: implement addon manifest file creation? or use pyrevit attach?
             }
             catch (Exception ex) {
                 Console.WriteLine(String.Format("Error Installing pyRevit. | {0}", ex.ToString()));
@@ -207,13 +206,13 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
         }
 
-        public static void Attach(int revitVersion, string repoPath = null, int engineVer = 000, bool allUsers = false) {
+        public static void Attach(string revitVersion, string repoPath = null, int engineVer = 000, bool allUsers = false) {
             // use primary repo if none is specified
             if (repoPath == null)
                 repoPath = GetPrimaryClone(allUsers: allUsers);
 
             // make the addin manifest file
-            Addons.CreateManifestFile(revitVersion,
+            Addons.CreateManifestFile(revitVersion.ConvertToVersion(),
                                       pyRevitAddinFileName,
                                       pyRevitAddinName,
                                       GetEnginePath(repoPath, engineVer),
@@ -224,12 +223,28 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public static void AttachAll(string repoPath = null, int engineVer = 000, bool allUsers = false) {
+            foreach (var revit in RevitConnector.ListInstalledRevits())
+                Attach(revit.Version.Major.ToString(), repoPath: repoPath, engineVer: engineVer, allUsers: allUsers);
         }
 
-        public static void Detach(int revitVersion) {
+        public static void Detach(string revitVersion) {
+            Addons.RemoveManifestFile(revitVersion.ConvertToVersion(), pyRevitAddinName);
         }
 
         public static void DetachAll() {
+            foreach (var revit in RevitConnector.ListInstalledRevits())
+                Addons.RemoveManifestFile(revit.Version, pyRevitAddinName);
+        }
+
+        public static List<Version> GetAttachedRevitVersions() {
+            var attachedRevits = new List<Version>();
+
+            foreach (var revit in RevitConnector.ListInstalledRevits()) {
+                if (Addons.GetManifestFile(revit.Version, pyRevitAddinName) != null)
+                    attachedRevits.Add(revit.Version);
+            }
+
+            return attachedRevits;
         }
 
         public static void GetExtentions() {
@@ -521,7 +536,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                         return fullEnginePath;
                 }
             }
-            
+
             return null;
         }
 

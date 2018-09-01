@@ -30,8 +30,9 @@ namespace pyRevitManager.Views {
         pyrevit update [--all] [<repo_path>]
         pyrevit attach (--all | <revit_version>) [<repo_path>] [--allusers]
         pyrevit detach (--all | <revit_version>)
-        pyrevit setengine latest (--all | <revit_version>) [<repo_path>] [--allusers]
-        pyrevit setengine <engine_version> (--all | <revit_version>) [<repo_path>] [--allusers]
+        pyrevit setengine latest (--all | --attached | <revit_version>) [<repo_path>] [--allusers]
+        pyrevit setengine dynamosafe (--all | --attached | <revit_version>) [<repo_path>] [--allusers]
+        pyrevit setengine <engine_version> (--all | --attached | <revit_version>) [<repo_path>] [--allusers]
         pyrevit extensions install <extension_name> <dest_path>
         pyrevit extensions install <repo_url> <dest_path> [--branch=<branch_name>]
         pyrevit extensions uninstall <extension_name> <dest_path> [--branch=<branch_name>]
@@ -43,7 +44,6 @@ namespace pyRevitManager.Views {
         pyrevit listrevits [--installed]
         pyrevit killrevits
         pyrevit clearcache (--all | <revit_version>)
-        pyrevit dynamocompat [(enable | disable)] [--allusers]
         pyrevit allowremotedll [(enable | disable)]
         pyrevit checkupdates [(enable | disable)] [--allusers]
         pyrevit autoupdate [(enable | disable)] [--allusers]
@@ -175,10 +175,11 @@ namespace pyRevitManager.Views {
             if (arguments["attach"].IsTrue) {
                 string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
                 string repoPath = arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null;
-                if (revitVersion != null) {
-                    pyRevit.Attach(int.Parse(revitVersion), repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
-                }
-                // TODO: implement --all
+
+                if (revitVersion != null)
+                    pyRevit.Attach(revitVersion, repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
+                else if (arguments["--all"].IsTrue)
+                    pyRevit.AttachAll(repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
             }
 
 
@@ -188,8 +189,9 @@ namespace pyRevitManager.Views {
             if (arguments["detach"].IsTrue) {
                 string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
                 if (revitVersion != null)
-                    pyRevit.Detach(int.Parse(revitVersion));
-                // TODO: implement --all
+                    pyRevit.Detach(revitVersion);
+                else if (arguments["--all"].IsTrue)
+                    pyRevit.DetachAll();
             }
 
 
@@ -198,19 +200,36 @@ namespace pyRevitManager.Views {
             // $ pyrevit setengine <engine_version> (--all | <revit_version>) [<repo_path>] [--allusers]
             // =======================================================================================================
             if (arguments["setengine"].IsTrue) {
-                string engineVersion = arguments["<engine_version>"] != null ? arguments["<engine_version>"].Value as string : null;
+                int engineVersion = -001;
+                
                 // switch to latest if requested
                 if (arguments["latest"].IsTrue)
-                    engineVersion = "000";
+                    engineVersion = 000;
 
-                string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
-                string repoPath = arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null;
+                // switch to latest if requested
+                else if (arguments["dynamosafe"].IsTrue)
+                    engineVersion = pyRevit.pyRevitDynamoCompatibleEnginerVer;
 
-                if (engineVersion != null) {
+                // check to see if engine version is specified
+                else {
+                    string engineVersionString = arguments["<engine_version>"] != null ? arguments["<engine_version>"].Value as string : null;
+                    if (engineVersionString != null) {
+                        engineVersion = int.Parse(engineVersionString);
+                    }
+                }
+
+                if (engineVersion > -1) {
+                    string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
+                    string repoPath = arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null;
+
                     if (revitVersion != null)
-                        pyRevit.Attach(int.Parse(revitVersion), repoPath: repoPath, engineVer: int.Parse(engineVersion), allUsers: arguments["--allusers"].IsTrue);
+                        pyRevit.Attach(revitVersion, repoPath: repoPath, engineVer: engineVersion, allUsers: arguments["--allusers"].IsTrue);
                     else if (arguments["--all"].IsTrue) {
-                        // TODO: implement --all
+                        pyRevit.AttachAll(repoPath: repoPath, engineVer: engineVersion, allUsers: arguments["--allusers"].IsTrue);
+                    }
+                    else if (arguments["--attached"].IsTrue) {
+                        foreach (var revitVer in pyRevit.GetAttachedRevitVersions())
+                            pyRevit.Attach(revitVer.Major.ToString(), repoPath: repoPath, engineVer: engineVersion, allUsers: arguments["--allusers"].IsTrue);
                     }
                 }
             }
@@ -265,10 +284,13 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             // $ pyrevit listrevits [--installed]
             // =======================================================================================================
-            // TODO: implement --installed
             if (arguments["listrevits"].IsTrue) {
-                foreach (var revit in RevitConnector.ListRunningRevits())
-                    Console.WriteLine(revit);
+                if (arguments["--installed"].IsTrue)
+                    foreach (var revit in RevitConnector.ListInstalledRevits())
+                        Console.WriteLine(revit);
+                else
+                    foreach (var revit in RevitConnector.ListRunningRevits())
+                        Console.WriteLine(revit);
             }
 
 
@@ -291,6 +313,14 @@ namespace pyRevitManager.Views {
                     pyRevit.ClearCache(arguments["<revit_version>"].Value as string);
                 }
             }
+
+
+            // =======================================================================================================
+            // $ pyrevit clearcache (--all | <revit_version>)
+            // =======================================================================================================
+            // TODO: Implement allowremotedll
+            if (arguments["allowremotedll"].IsTrue)
+                Console.WriteLine("Not Yet Implemented.");
 
 
             // =======================================================================================================
