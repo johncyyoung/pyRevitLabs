@@ -5,23 +5,30 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.IO;
+using System.Diagnostics;
 
-using pyRevitManager.Properties;
+using pyRevitLabs.Common;
 using pyRevitLabs.TargetApps.Revit;
 using pyRevitLabs.Language.Properties;
+
+using pyRevitManager.Properties;
 
 using DocoptNet;
 
 namespace pyRevitManager.Views {
 
     class pyRevitCLI {
+        private const string helpUrl = "https://github.com/eirannejad/pyRevitLabs";
         private const string usage = @"pyrevit command line tool
 
     Usage:
         pyrevit (-h | --help)
         pyrevit (-V | --version)
-        pyrevit install [--core] [--branch=<branch_name>] <dest_path>
-        pyrevit install <repo_url> [--branch=<branch_name>] <dest_path>
+        pyrevit help
+        pyrevit install <dest_path> [--core] [--branch=<branch_name>] 
+        pyrevit install <repo_url> <dest_path> [--core] [--branch=<branch_name>]
+        pyrevit register <repo_path> [--allusers]
+        pyrevit unregister <repo_path> [--allusers]
         pyrevit uninstall [(--all | <repo_path>)] [--clearconfigs] [--allusers]
         pyrevit setprimary <repo_path>
         pyrevit checkout <branch_name> [<repo_path>]
@@ -64,8 +71,10 @@ namespace pyRevitManager.Views {
         -V --version                Show version.
         --core                      Install original pyRevit core only (no defualt tools).
         --all                       All applicable items.
+        --attached                  All Revits that are configured to load pyRevit.
         --allusers                  Make changes to manifest files for all users (%programdata%).
         --authgroup=<auth_groups>   User groups authorized to use the extension.
+        --branch=<branch_name>      Target git branch name.
 ";
 
         public static void ProcessArguments(string[] args) {
@@ -97,17 +106,48 @@ namespace pyRevitManager.Views {
 
             // now call methods based on inputs
             // =======================================================================================================
+            // $ pyrevit help
+            // =======================================================================================================
+            if (arguments["help"].IsTrue)
+                Process.Start(helpUrl);
+
+
+            // =======================================================================================================
             // $ pyrevit install <dest_path> [--core] [--branch=<branch_name>] 
             // $ pyrevit install <repo_url> <dest_path> [--core] [--branch=<branch_name>]
             // =======================================================================================================
-            if (arguments["install"].IsTrue) {
+            if (arguments["install"].IsTrue)
                 pyRevit.Install(
-                    destPath: arguments["<dest_path>"].Value as string,
-                    repoPath: arguments["<repo_url>"] != null ? arguments["<repo_url>"].Value as string : null,
-                    branchName: arguments["--branch"] != null ? arguments["--branch"].Value as string : null,
+                    destPath: TryGetValue(arguments, "<dest_path>"),
+                    repoPath: TryGetValue(arguments, "<repo_url>"),
+                    branchName: TryGetValue(arguments, "--branch"),
                     coreOnly: arguments["--core"].IsTrue
                     );
+
+
+            // =======================================================================================================
+            // $ pyrevit register <repo_path> [--allusers]
+            // $ pyrevit unregister <repo_path> [--allusers]
+            // =======================================================================================================
+            if (arguments["register"].IsTrue) {
+                string repoPath = TryGetValue(arguments, "<repo_path>");
+                if (repoPath != null)
+                    pyRevit.RegisterClone(repoPath, allUsers: arguments["--allusers"].IsTrue);
+                
+                switch (Errors.LatestError) {
+                    case ErrorCodes.PathDoesNotExist:
+                        Console.WriteLine("Path does not exist."); break;
+                    case ErrorCodes.PathIsNotValidGitRepo:
+                        Console.WriteLine("Path is not a valid pyRevit repository."); break;
+                }
             }
+
+            if (arguments["unregister"].IsTrue) {
+                string repoPath = TryGetValue(arguments, "<repo_path>");
+                if (repoPath != null)
+                    pyRevit.UnregisterClone(repoPath, allUsers: arguments["--allusers"].IsTrue);
+            }
+
 
 
             // =======================================================================================================
@@ -121,60 +161,62 @@ namespace pyRevitManager.Views {
                         );
                 else
                     pyRevit.Uninstall(
-                        repoPath: arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null,
+                        repoPath: TryGetValue(arguments, "<repo_path>"),
                         clearConfigs: arguments["--clearconfigs"].IsTrue,
                         allUsers: arguments["--allusers"].IsTrue
                         );
             }
 
+
+            // =======================================================================================================
+            // $ pyrevit setprimary <repo_path>
+            // =======================================================================================================
+            if (arguments["setprimary"].IsTrue)
+                pyRevit.SetPrimaryClone(TryGetValue(arguments, "<repo_path>"));
+
+
             // =======================================================================================================
             // $ pyrevit checkout <branch_name> [<repo_path>]
             // =======================================================================================================
-            if (arguments["checkout"].IsTrue) {
+            if (arguments["checkout"].IsTrue)
                 pyRevit.Checkout(
-                    arguments["<branch_name>"] != null ? arguments["<branch_name>"].Value as string : null,
-                    arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null
+                    TryGetValue(arguments, "<branch_name>"),
+                    TryGetValue(arguments, "<repo_path>")
                     );
-            }
 
             // =======================================================================================================
             // $ pyrevit setcommit <commit_hash> [<repo_path>]
             // =======================================================================================================
-            if (arguments["setcommit"].IsTrue) {
+            if (arguments["setcommit"].IsTrue)
                 pyRevit.SetCommit(
-                    arguments["<commit_hash>"] != null ? arguments["<commit_hash>"].Value as string : null,
-                    arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null
+                    TryGetValue(arguments, "<commit_hash>"),
+                    TryGetValue(arguments, "<repo_path>")
                     );
-            }
 
 
             // =======================================================================================================
             // $ pyrevit setversion <tag_name> [<repo_path>]
             // =======================================================================================================
-            if (arguments["setversion"].IsTrue) {
+            if (arguments["setversion"].IsTrue)
                 pyRevit.SetVersion(
-                    arguments["<tag_name>"] != null ? arguments["<tag_name>"].Value as string : null,
-                    arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null
+                    TryGetValue(arguments, "<tag_name>"),
+                    TryGetValue(arguments, "<repo_path>")
                     );
-            }
 
 
             // =======================================================================================================
             // $ pyrevit update [--all] [<repo_path>]
             // =======================================================================================================
-            if (arguments["update"].IsTrue) {
-                pyRevit.Update(
-                    repoPath: arguments["<repo_url>"] != null ? arguments["<repo_url>"].Value as string : null
-                    );
-            }
+            if (arguments["update"].IsTrue)
+                pyRevit.Update(repoPath: TryGetValue(arguments, "<repo_url>"));
 
 
             // =======================================================================================================
             // $ pyrevit attach (--all | <revit_version>) [<repo_path>] [--allusers]
             // =======================================================================================================
             if (arguments["attach"].IsTrue) {
-                string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
-                string repoPath = arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null;
+                string revitVersion = TryGetValue(arguments, "<revit_version>");
+                string repoPath = TryGetValue(arguments, "<repo_path>");
 
                 if (revitVersion != null)
                     pyRevit.Attach(revitVersion, repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
@@ -187,7 +229,7 @@ namespace pyRevitManager.Views {
             // $ pyrevit detach (--all | <revit_version>)
             // =======================================================================================================
             if (arguments["detach"].IsTrue) {
-                string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
+                string revitVersion = TryGetValue(arguments, "<revit_version>");
                 if (revitVersion != null)
                     pyRevit.Detach(revitVersion);
                 else if (arguments["--all"].IsTrue)
@@ -212,35 +254,65 @@ namespace pyRevitManager.Views {
 
                 // check to see if engine version is specified
                 else {
-                    string engineVersionString = arguments["<engine_version>"] != null ? arguments["<engine_version>"].Value as string : null;
-                    if (engineVersionString != null) {
+                    string engineVersionString = TryGetValue(arguments, "<engine_version>");
+                    if (engineVersionString != null)
                         engineVersion = int.Parse(engineVersionString);
-                    }
                 }
 
                 if (engineVersion > -1) {
-                    string revitVersion = arguments["<revit_version>"] != null ? arguments["<revit_version>"].Value as string : null;
-                    string repoPath = arguments["<repo_path>"] != null ? arguments["<repo_path>"].Value as string : null;
+                    string revitVersion = TryGetValue(arguments, "<revit_version>");
+                    string repoPath = TryGetValue(arguments, "<repo_path>");
 
                     if (revitVersion != null)
-                        pyRevit.Attach(revitVersion, repoPath: repoPath, engineVer: engineVersion, allUsers: arguments["--allusers"].IsTrue);
+                        pyRevit.Attach(
+                            revitVersion,
+                            repoPath: repoPath,
+                            engineVer: engineVersion,
+                            allUsers: arguments["--allusers"].IsTrue
+                            );
                     else if (arguments["--all"].IsTrue) {
-                        pyRevit.AttachAll(repoPath: repoPath, engineVer: engineVersion, allUsers: arguments["--allusers"].IsTrue);
+                        pyRevit.AttachAll(
+                            repoPath: repoPath,
+                            engineVer: engineVersion,
+                            allUsers: arguments["--allusers"].IsTrue
+                            );
                     }
                     else if (arguments["--attached"].IsTrue) {
                         foreach (var revitVer in pyRevit.GetAttachedRevitVersions())
-                            pyRevit.Attach(revitVer.Major.ToString(), repoPath: repoPath, engineVer: engineVersion, allUsers: arguments["--allusers"].IsTrue);
+                            pyRevit.Attach(
+                                revitVer.Major.ToString(),
+                                repoPath: repoPath,
+                                engineVer: engineVersion,
+                                allUsers: arguments["--allusers"].IsTrue
+                                );
                     }
                 }
             }
 
+            // =======================================================================================================
+            // $ pyrevit extensions install <extension_name> <dest_path>
+            // $ pyrevit extensions install <repo_url> <dest_path> [--branch=<branch_name>]
+            // =======================================================================================================
+            // TODO: Implement extensions install
+            if (arguments["extensions"].IsTrue && arguments["install"].IsTrue)
+                Console.WriteLine("Not Yet Implemented.");
+
 
             // =======================================================================================================
-            // $ pyrevit setprimary <repo_path>
+            // $ pyrevit extensions uninstall <extension_name> <dest_path> [--branch=<branch_name>]
             // =======================================================================================================
-            if (arguments["setprimary"].IsTrue) {
-                pyRevit.SetPrimaryClone(arguments["<repo_path>"].Value as string);
-            }
+            // TODO: Implement extensions uninstall
+            if (arguments["extensions"].IsTrue && arguments["uninstall"].IsTrue)
+                Console.WriteLine("Not Yet Implemented.");
+
+
+            // =======================================================================================================
+            // $ pyrevit extensions paths [--allusers]
+            // $ pyrevit extensions paths (add | remove) <extensions_path> [--allusers]
+            // =======================================================================================================
+            // TODO: Implement extensions paths
+            if (arguments["extensions"].IsTrue && arguments["paths"].IsTrue)
+                Console.WriteLine("Not Yet Implemented.");
 
 
             // =======================================================================================================
@@ -248,7 +320,7 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             if (arguments["extensions"].IsTrue) {
                 if (arguments["<extension_name>"] != null) {
-                    string extensionName = arguments["<extension_name>"].Value as string;
+                    string extensionName = TryGetValue(arguments, "<extension_name>");
                     if (arguments["enable"].IsTrue)
                         pyRevit.EnableExtension(extensionName, allUsers: arguments["--allusers"].IsTrue);
                     else if (arguments["disable"].IsTrue)
@@ -269,6 +341,7 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             // $ pyrevit info
             // =======================================================================================================
+            // TODO: List attached revits
             if (arguments["info"].IsTrue) {
                 var defaultConsoleColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Blue;
@@ -310,7 +383,7 @@ namespace pyRevitManager.Views {
                     pyRevit.ClearAllCaches();
                 }
                 else if (arguments["<revit_version>"] != null) {
-                    pyRevit.ClearCache(arguments["<revit_version>"].Value as string);
+                    pyRevit.ClearCache(TryGetValue(arguments, "<revit_version>"));
                 }
             }
 
@@ -432,10 +505,10 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             if (arguments["usagelogging"].IsTrue && arguments["enable"].IsTrue) {
                 if (arguments["file"].IsTrue)
-                    pyRevit.EnableUsageReporting(logFilePath: arguments["<dest_path>"].Value as string,
+                    pyRevit.EnableUsageReporting(logFilePath: TryGetValue(arguments, "<dest_path>"),
                                                  allUsers: arguments["--allusers"].IsTrue);
                 else
-                    pyRevit.EnableUsageReporting(logServerUrl: arguments["<dest_path>"].Value as string,
+                    pyRevit.EnableUsageReporting(logServerUrl: TryGetValue(arguments, "<dest_path>"),
                                                  allUsers: arguments["--allusers"].IsTrue);
             }
 
@@ -458,17 +531,20 @@ namespace pyRevitManager.Views {
                         pyRevit.GetOutputStyleSheet(allUsers: arguments["--allusers"].IsTrue)
                         ));
                 else
-                    pyRevit.SetOutputStyleSheet(arguments["<css_path>"].Value as string, allUsers: arguments["--allusers"].IsTrue);
+                    pyRevit.SetOutputStyleSheet(
+                        TryGetValue(arguments, "<css_path>"),
+                        allUsers: arguments["--allusers"].IsTrue
+                        );
             }
 
 
             // =======================================================================================================
-            // $ pyrevit config <section_name> <option_path> [<option_value>] [--allusers]
-            // $ pyrevit config (enable | disable) <section_name> <option_path> [--allusers]
+            // $ pyrevit config <option_path> (enable | disable) [--allusers]
+            // $ pyrevit config <option_path> [<option_value>] [--allusers]
             // =======================================================================================================
             if (arguments["config"].IsTrue && arguments["<option_path>"] != null) {
                 // extract section and option names
-                string orignalOptionValue = arguments["<option_path>"].Value as string;
+                string orignalOptionValue = TryGetValue(arguments, "<option_path>");
                 if (orignalOptionValue.Split(':').Count() == 2) {
                     string configSection = orignalOptionValue.Split(':')[0];
                     string configOption = orignalOptionValue.Split(':')[1];
@@ -492,11 +568,16 @@ namespace pyRevitManager.Views {
                         pyRevit.SetConfig(
                             configSection,
                             configOption,
-                            arguments["<option_value>"].Value as string,
+                            TryGetValue(arguments, "<option_value>"),
                             allUsers: arguments["--allusers"].IsTrue
                             );
                 }
             }
         }
+
+        private static string TryGetValue(IDictionary<string, ValueObject> arguments, string key, string defaultValue = null) {
+            return arguments[key] != null ? arguments[key].Value as string : defaultValue;
+        }
     }
+
 }

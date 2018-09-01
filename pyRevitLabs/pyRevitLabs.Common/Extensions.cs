@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace pyRevitLabs.Common.Extensions {
     public static class FileSizeExtension {
@@ -71,6 +72,10 @@ namespace pyRevitLabs.Common.Extensions {
                 version = version + ".0";
             return new Version(version);
         }
+
+        public static List<string> ConvertFromCommaSeparated(this string commaSeparatedValue) {
+            return new List<string>(commaSeparatedValue.Split(','));
+        }
     }
 
     public static class DateTimeExtensions {
@@ -78,4 +83,11 @@ namespace pyRevitLabs.Common.Extensions {
             return String.Format("{0:dd/MM/yyyy HH:mm:ss}", sourceDate);
         }
     }
+
+    public static class StringEnumerableExtensions {
+        public static string ConvertToCommaSeparated(this IEnumerable<string> sourceValues) {
+            return String.Join(",", sourceValues);
+        }
+    }
+
 }

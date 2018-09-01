@@ -114,6 +114,10 @@ namespace pyRevitLabs.Common {
             }
         }
 
+        // check to see if a directory is a git repo
+        public static bool IsGitRepo(string repoPath) {
+            return Repository.IsValid(repoPath);
+        }
 
         // private methods
         // rebase current branch to a specific commit

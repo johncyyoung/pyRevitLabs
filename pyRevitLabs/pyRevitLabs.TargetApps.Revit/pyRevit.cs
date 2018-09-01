@@ -58,9 +58,9 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string pyRevitUsageLogFilePathKey = "logfilepath";
         public const string pyRevitUsageLogServerUrlKey = "logserverurl";
         // pyrevit.exe specific configs
-        public const string pyRevitManagerConfigSectionName = "manager";
-        public const string pyRevitManagerInstalledClonesKey = "clones";
+        public const string pyRevitManagerConfigSectionName = "environment";
         public const string pyRevitManagerPrimaryCloneKey = "primaryclone";
+        public const string pyRevitManagerInstalledClonesKey = "clones";
         // extensions
         public const string pyRevitExtensionDisabledKey = "disabled";
 
@@ -430,6 +430,37 @@ namespace pyRevitLabs.TargetApps.Revit {
             SetKeyValue(sectionName, paramName, paramState, allUsers);
         }
 
+        // managing clones
+        public static void RegisterClone(string newClonePath, bool allUsers = false) {
+            if (!Directory.Exists(newClonePath))
+                Errors.LatestError = ErrorCodes.PathDoesNotExist;
+            else if (!GitInstaller.IsGitRepo(newClonePath))
+                Errors.LatestError = ErrorCodes.PathIsNotValidGitRepo;
+            else {
+                var validClones = GetClones();
+                validClones.Add(Path.GetFullPath(newClonePath));
+                SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, new List<string>(validClones), allUsers: allUsers);
+            }
+        }
+
+        public static void UnregisterClone(string existigClonePath, bool allUsers = false) {
+            // make sure if this clone is primary, remove it
+            var normalizedExClonePath = existigClonePath.NormalizeAsPath();
+            var primaryClone = GetPrimaryClone();
+            if (primaryClone != null
+                && normalizedExClonePath == primaryClone.NormalizeAsPath())
+                ClearPrimaryClone(allUsers: allUsers);
+
+            // remove the clone path from list
+            var remainingClones = new List<string>();
+            foreach (string clonePath in GetClones()) {
+                if (normalizedExClonePath != clonePath.NormalizeAsPath())
+                    remainingClones.Add(Path.GetFullPath(clonePath));
+            }
+
+            SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, new List<string>(remainingClones), allUsers: allUsers);
+        }
+
         // configurations private access methods
         private static IniFile GetConfigFile(bool allUsers) {
             // INI formatting
@@ -471,7 +502,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         private static List<string> GetKeyValueAsList(string section, string key, bool allUsers) {
             var c = GetConfigFile(allUsers);
-            return new List<string>(c.Sections[section].Keys[key].Value.Split(','));
+            return c.Sections[section].Keys[key].Value.ConvertFromCommaSeparated();
         }
 
         private static void SetKeyValue(string section, string key, bool value, bool allUsers) {
@@ -487,34 +518,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         private static void SetKeyValue(string section, string key, IEnumerable<string> valueList, bool allUsers) {
-            UpdateKeyValue(section, key, String.Join(",", valueList), allUsers);
-        }
-
-        private static void RegisterClone(string newClonePath, bool allUsers = false) {
-            var validClones = GetClones();
-
-            if (Directory.Exists(newClonePath))
-                validClones.Add(Path.GetFullPath(newClonePath));
-
-            SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, new List<string>(validClones), allUsers: allUsers);
-        }
-
-        private static void UnregisterClone(string existigClonePath, bool allUsers = false) {
-            // make sure if this clone is primary, remove it
-            var normalizedExClonePath = existigClonePath.NormalizeAsPath();
-            var primaryClone = GetPrimaryClone();
-            if (primaryClone != null
-                && normalizedExClonePath == primaryClone.NormalizeAsPath())
-                ClearPrimaryClone(allUsers: allUsers);
-
-            // remove the clone path from list
-            var remainingClones = new List<string>();
-            foreach (string clonePath in GetClones()) {
-                if (normalizedExClonePath != clonePath.NormalizeAsPath())
-                    remainingClones.Add(Path.GetFullPath(clonePath));
-            }
-
-            SetKeyValue(pyRevitManagerConfigSectionName, pyRevitManagerInstalledClonesKey, new List<string>(remainingClones), allUsers: allUsers);
+            UpdateKeyValue(section, key, valueList.ConvertToCommaSeparated(), allUsers);
         }
 
         private static void UpdateRegisteredClonesList(IEnumerable<string> clonePaths, bool allUsers = false) {
