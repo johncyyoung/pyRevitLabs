@@ -19,6 +19,11 @@ using NLog.Config;
 using NLog.Targets;
 
 namespace pyRevitManager.Views {
+    public enum pyRevitManagerLogLevel {
+        Quiet,
+        Info,
+        Debug,
+    }
 
     class pyRevitCLI {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -80,6 +85,7 @@ namespace pyRevitManager.Views {
         -V --version                Show version.
         --verbose                   Print logger non-debug messages.
         --debug                     Print docopt options and logger debug messages.
+        --quiet                     Do not print any logger messages.
         --core                      Install original pyRevit core only (no defualt tools).
         --all                       All applicable items.
         --attached                  All Revits that are configured to load pyRevit.
@@ -89,19 +95,25 @@ namespace pyRevitManager.Views {
 
         public static void ProcessArguments(string[] args) {
             // process arguments for hidden debug mode switch
-            bool debugMode = false;
-            bool verboseMode = false;
+            pyRevitManagerLogLevel logLevel  = pyRevitManagerLogLevel.Info;
 
+            // process arguments for logging level
             var argsList = new List<string>(args);
-            if (argsList.Contains("--debug")) {
-                argsList.Remove("--debug");
-                debugMode = true;
+
+            if (argsList.Contains("--quiet")) {
+                argsList.Remove("--quiet");
+                logLevel = pyRevitManagerLogLevel.Quiet;
             }
 
-            // process arguments for verbose
+            // TODO: keep verbose??
             if (argsList.Contains("--verbose")) {
                 argsList.Remove("--verbose");
-                verboseMode = true;
+                logLevel = pyRevitManagerLogLevel.Info;
+            }
+
+            if (argsList.Contains("--debug")) {
+                argsList.Remove("--debug");
+                logLevel = pyRevitManagerLogLevel.Debug;
             }
 
             // setup logger
@@ -124,18 +136,20 @@ namespace pyRevitManager.Views {
             );
 
             // print active arguments in debug mode
-            if (debugMode)
+            if (logLevel == pyRevitManagerLogLevel.Debug)
                 foreach (var argument in arguments.OrderBy(x => x.Key)) {
                     if (argument.Value != null && (argument.Value.IsTrue || argument.Value.IsString))
                         Console.WriteLine("{0} = {1}", argument.Key, argument.Value);
                 }
 
-            if (!verboseMode)
+            if (logLevel <= pyRevitManagerLogLevel.Quiet)
+                LogManager.DisableLogging();
+
+            if (logLevel < pyRevitManagerLogLevel.Info)
                 foreach (var rule in LogManager.Configuration.LoggingRules)
                     rule.DisableLoggingForLevel(LogLevel.Info);
 
-            // set log level status
-            if (!debugMode)
+            if (logLevel < pyRevitManagerLogLevel.Debug)
                 foreach (var rule in LogManager.Configuration.LoggingRules)
                     rule.DisableLoggingForLevel(LogLevel.Debug);
 
@@ -190,7 +204,12 @@ namespace pyRevitManager.Views {
             else if (arguments["unregister"].IsTrue) {
                 string repoPath = TryGetValue(arguments, "<repo_path>");
                 if (repoPath != null)
-                    pyRevit.UnregisterClone(repoPath);
+                    try {
+                        pyRevit.UnregisterClone(repoPath);
+                    }
+                    catch (pyRevitException ex) {
+                        logger.Error(ex.ToString());
+                    }
             }
 
 
@@ -264,10 +283,15 @@ namespace pyRevitManager.Views {
                 string revitVersion = TryGetValue(arguments, "<revit_version>");
                 string repoPath = TryGetValue(arguments, "<repo_path>");
 
-                if (revitVersion != null)
-                    pyRevit.Attach(revitVersion, repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
-                else if (arguments["--all"].IsTrue)
-                    pyRevit.AttachAll(repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
+                try {
+                    if (revitVersion != null)
+                        pyRevit.Attach(revitVersion, repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
+                    else if (arguments["--all"].IsTrue)
+                        pyRevit.AttachAll(repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
+                }
+                catch (Exception ex) {
+                    logger.Error(ex.ToString());
+                }
             }
 
 
@@ -411,20 +435,39 @@ namespace pyRevitManager.Views {
             // $ pyrevit open
             // =======================================================================================================
             else if (arguments["open"].IsTrue) {
-                string primaryRepo = pyRevit.GetPrimaryClone();
-                Process.Start("explorer.exe", primaryRepo);
+                try {
+                    string primaryRepo = pyRevit.GetPrimaryClone();
+                    Process.Start("explorer.exe", primaryRepo);
+                }
+                catch (pyRevitConfigValueNotSet) {
+                    logger.Error("Primary repo is not set. Run with \"--debug\" for details.");
+                }
             }
 
 
             // =======================================================================================================
             // $ pyrevit info
             // =======================================================================================================
-            // TODO: List attached revits
             else if (arguments["info"].IsTrue) {
-                Console.Write(String.Format("Primary Repository: {0}", pyRevit.GetPrimaryClone()));
-                Console.WriteLine("\nRegistered Repositories:");
-                foreach (string clone in pyRevit.GetClones()) {
-                    Console.WriteLine(clone);
+                try {
+                    // reprt primary repo
+                    Console.WriteLine("==> Primary Repository:");
+                    Console.WriteLine(pyRevit.IsPrimaryCloneConfigured() ? pyRevit.GetPrimaryClone() : "Not Set");
+
+                    // report registered repos
+                    Console.WriteLine("\n==> Registered Repositories:");
+                    foreach (string clone in pyRevit.GetRegisteredClones()) {
+                        Console.WriteLine(clone);
+                    }
+
+                    // report attached revits
+                    Console.WriteLine("\n==> Attached to Revit versions:");
+                    foreach (Version revitVersion in pyRevit.GetAttachedRevitVersions()) {
+                        Console.WriteLine(revitVersion);
+                    }
+                }
+                catch (Exception ex) {
+                    logger.Error(ex.ToString());
                 }
             }
 
@@ -477,10 +520,15 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             else if (arguments["checkupdates"].IsTrue) {
                 if (arguments["enable"].IsFalse && arguments["disable"].IsFalse)
-                    Console.WriteLine(
-                        String.Format("Check Updates is {0}.",
-                        pyRevit.GetCheckUpdates() ? "Enabled" : "Disabled")
-                        );
+                    try {
+                        Console.WriteLine(
+                            String.Format("Check Updates is {0}.",
+                            pyRevit.GetCheckUpdates() ? "Enabled" : "Disabled")
+                            );
+                    }
+                    catch (Exception ex) {
+                        logger.Error(ex.Message);
+                    }
                 else
                     pyRevit.SetCheckUpdates(arguments["enable"].IsTrue);
             }
@@ -565,12 +613,17 @@ namespace pyRevitManager.Views {
             else if (arguments["usagelogging"].IsTrue
                     && arguments["enable"].IsFalse
                     && arguments["disable"].IsFalse) {
-                Console.WriteLine(
-                    String.Format("Usage logging is {0}.",
-                    pyRevit.GetUsageReporting() ? "Enabled" : "Disabled")
-                    );
-                Console.WriteLine(String.Format("Log File Path: {0}", pyRevit.GetUsageLogFilePath()));
-                Console.WriteLine(String.Format("Log Server Url: {0}", pyRevit.GetUsageLogServerUrl()));
+                try {
+                    Console.WriteLine(
+                        String.Format("Usage logging is {0}.",
+                        pyRevit.GetUsageReporting() ? "Enabled" : "Disabled")
+                        );
+                    Console.WriteLine(String.Format("Log File Path: {0}", pyRevit.GetUsageLogFilePath()));
+                    Console.WriteLine(String.Format("Log Server Url: {0}", pyRevit.GetUsageLogServerUrl()));
+                }
+                catch (Exception ex) {
+                    logger.Error(ex.Message);
+                }
             }
 
 

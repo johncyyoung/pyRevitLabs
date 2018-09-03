@@ -7,9 +7,12 @@ using System.Threading.Tasks;
 using System.Xml;
 
 using pyRevitLabs.Common;
+using NLog;
 
 namespace pyRevitLabs.TargetApps.Revit {
     public static class Addons {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private const string ManifestTemplate = @"<?xml version=""1.0"" encoding=""utf-8"" standalone=""no""?>
 <RevitAddIns>
     <AddIn Type = ""Application"">
@@ -35,7 +38,9 @@ namespace pyRevitLabs.TargetApps.Revit {
                                               string addinName, string assemblyPath, string addinId, string addinClassName, string vendorId,
                                               bool allusers = false) {
             string manifest = String.Format(ManifestTemplate, addinName, assemblyPath, addinId, addinClassName, vendorId);
+            logger.Debug(string.Format("Creating addin manifest...\n{0}", manifest));
             var addinFile = GetRevitAddonsFilePath(revitVersion, addinFileName, allusers: allusers);
+            logger.Debug(string.Format("Creating manifest file {0}", addinFile));
             CommonUtils.ConfirmFile(addinFile);
             var f = File.CreateText(addinFile);
             f.Write(manifest);

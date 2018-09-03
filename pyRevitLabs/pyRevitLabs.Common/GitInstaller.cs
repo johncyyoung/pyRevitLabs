@@ -8,6 +8,21 @@ using LibGit2Sharp;
 using NLog;
 
 namespace pyRevitLabs.Common {
+    // git exceptions
+    public class pyRevitInvalidGitCloneException : pyRevitException {
+        public pyRevitInvalidGitCloneException() { }
+
+        public pyRevitInvalidGitCloneException(string invalidClonePath) { Path = invalidClonePath; }
+
+        public string Path { get; set; }
+
+        public override string Message {
+            get {
+                return String.Format("Path \"{0}\" is not a valid git clone.", Path);
+            }
+        }
+    }
+
     public enum UpdateStatus {
         UpToDate,
         FastForward,
