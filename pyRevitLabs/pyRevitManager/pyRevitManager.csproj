@@ -64,12 +64,19 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Colorful.Console, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Colorful.Console.1.1.0\lib\net461\Colorful.Console.dll</HintPath>
+    </Reference>
     <Reference Include="DocoptNet, Version=0.6.1.4, Culture=neutral, PublicKeyToken=7a38c71da49a547e, processorArchitecture=MSIL">
       <HintPath>..\packages\docopt.net.0.6.1.9\lib\net40\DocoptNet.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.5.9\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />

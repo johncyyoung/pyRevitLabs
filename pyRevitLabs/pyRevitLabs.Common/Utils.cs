@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace pyRevitLabs.Common {
-    public static class pyRevitUtils {
-        
+    public static class CommonUtils {
+
         // helper for deleting directories recursively
         public static void DeleteDirectory(string target_dir) {
             string[] files = Directory.GetFiles(target_dir);
@@ -37,5 +38,13 @@ namespace pyRevitLabs.Common {
             }
         }
 
+        public static string DownloadFile(string url, string destPath) {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            using (var client = new WebClient()) {
+                client.DownloadFile(url, destPath);
+            }
+
+            return destPath;
+        }
     }
 }
