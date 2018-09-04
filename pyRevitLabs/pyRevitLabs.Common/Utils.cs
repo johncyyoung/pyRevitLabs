@@ -6,24 +6,36 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
+using NLog;
+
 namespace pyRevitLabs.Common {
     public static class CommonUtils {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         // helper for deleting directories recursively
-        public static void DeleteDirectory(string target_dir) {
-            string[] files = Directory.GetFiles(target_dir);
-            string[] dirs = Directory.GetDirectories(target_dir);
+        // @handled @logs
+        public static void DeleteDirectory(string targetDir) {
+            if (Directory.Exists(targetDir)) {
+                logger.Debug(string.Format("Recursive deleting directory {0}", targetDir));
+                string[] files = Directory.GetFiles(targetDir);
+                string[] dirs = Directory.GetDirectories(targetDir);
 
-            foreach (string file in files) {
-                File.SetAttributes(file, FileAttributes.Normal);
-                File.Delete(file);
+                try {
+                    foreach (string file in files) {
+                        File.SetAttributes(file, FileAttributes.Normal);
+                        File.Delete(file);
+                    }
+
+                    foreach (string dir in dirs) {
+                        DeleteDirectory(dir);
+                    }
+
+                    Directory.Delete(targetDir, false);
+                }
+                catch (Exception ex) {
+                    throw new pyRevitException(string.Format("Error recursive deleting directory {0}", targetDir));
+                }
             }
-
-            foreach (string dir in dirs) {
-                DeleteDirectory(dir);
-            }
-
-            Directory.Delete(target_dir, false);
         }
 
         public static void ConfirmPath(string path) {

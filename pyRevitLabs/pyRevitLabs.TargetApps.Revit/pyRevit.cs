@@ -218,6 +218,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 throw new pyRevitException("Primary clone is not set and clone path is not provided.");
         }
 
+        // @handled @logs
         public static void UninstallAllClones(bool clearConfigs = false) {
             foreach (string clonePath in GetRegisteredClones())
                 Uninstall(clonePath, clearConfigs: false);
@@ -226,9 +227,16 @@ namespace pyRevitLabs.TargetApps.Revit {
                 DeleteConfigs();
         }
 
+        // @handled @logs
         public static void DeleteConfigs() {
             if (File.Exists(pyRevitConfigFilePath))
-                File.Delete(pyRevitConfigFilePath);
+                try {
+                    File.Delete(pyRevitConfigFilePath);
+                }
+                catch (Exception ex) {
+                    throw new pyRevitException(string.Format("Failed deleting config file {0} | {1}",
+                                                              pyRevitConfigFilePath, ex.Message));
+                }
         }
 
         public static List<pyRevitExtension> LookupRegisteredExtensions(string searchPattern = null) {
@@ -291,6 +299,8 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         }
 
+        // checkout branch in git repo
+        // @handled @logs
         public static void Checkout(string branchName, string repoPath = null) {
             if (repoPath == null)
                 repoPath = GetPrimaryClone();
@@ -298,6 +308,8 @@ namespace pyRevitLabs.TargetApps.Revit {
             GitInstaller.CheckoutBranch(repoPath, branchName);
         }
 
+        // rebase clone to specific commit
+        // @handled @logs
         public static void SetCommit(string commitHash, string repoPath = null) {
             if (repoPath == null)
                 repoPath = GetPrimaryClone();
@@ -305,6 +317,8 @@ namespace pyRevitLabs.TargetApps.Revit {
             GitInstaller.RebaseToCommit(repoPath, commitHash);
         }
 
+        // rebase clone to specific tag
+        // @handled @logs
         public static void SetVersion(string versionTagName, string repoPath = null) {
             if (repoPath == null)
                 repoPath = GetPrimaryClone();
@@ -312,36 +326,56 @@ namespace pyRevitLabs.TargetApps.Revit {
             GitInstaller.RebaseToTag(repoPath, versionTagName);
         }
 
+        // force update given or all registered clones
+        // @handled @logs
         public static void Update(string repoPath = null, bool allClones = false) {
-            // TODO: implement allClones
-            if (repoPath != null) {
-                GitInstaller.ForcedUpdate(GetPrimaryClone());
-                return;
+            if (allClones) {
+                foreach(var clonePath in GetRegisteredClones())
+                    GitInstaller.ForcedUpdate(clonePath);
             }
+            else {
+                if (repoPath == null)
+                    repoPath = GetPrimaryClone();
 
-            // if repo path is not provided, check configs for primary repo to update
-            if (IsPrimaryCloneConfigured()) {
                 // current user config
-                GitInstaller.ForcedUpdate(GetPrimaryClone());
-                return;
+                GitInstaller.ForcedUpdate(repoPath);
             }
         }
 
+        // clear cache
+        // @handled @logs
         public static void ClearCache(string revitVersion) {
-            CommonUtils.DeleteDirectory(Path.Combine(pyRevitAppDataPath, revitVersion));
+            // make sure all revit instances are closed
+            if (Directory.Exists(pyRevitAppDataPath)) {
+                // TODO: implement kill by revit version?
+                RevitConnector.KillAllRunningRevits();
+                CommonUtils.DeleteDirectory(Path.Combine(pyRevitAppDataPath, revitVersion));
+            }
+            else
+                throw new pyRevitResourceMissingException(pyRevitAppDataPath);
         }
 
+        // clear all caches
+        // @handled @logs
         public static void ClearAllCaches() {
             var cacheDirFinder = new Regex(@"\d\d\d\d");
-            foreach (string subDir in Directory.GetDirectories(pyRevitAppDataPath)) {
-                var dirName = Path.GetFileName(subDir);
-                if (cacheDirFinder.IsMatch(dirName))
-                    ClearCache(dirName);
+            if (Directory.Exists(pyRevitAppDataPath)) {
+                foreach (string subDir in Directory.GetDirectories(pyRevitAppDataPath)) {
+                    var dirName = Path.GetFileName(subDir);
+                    if (cacheDirFinder.IsMatch(dirName))
+                        ClearCache(dirName);
+                }
             }
+            else
+                throw new pyRevitResourceMissingException(pyRevitAppDataPath);
         }
 
-
-        public static void Attach(string revitVersion, string repoPath = null, int engineVer = 000, bool allUsers = false) {
+        // attach primary or given clone to revit version
+        // @handled @logs
+        public static void Attach(string revitVersion,
+                                  string repoPath = null,
+                                  int engineVer = 000,
+                                  bool allUsers = false) {
             // use primary repo if none is specified
             if (repoPath == null)
                 repoPath = GetPrimaryClone();
@@ -358,26 +392,50 @@ namespace pyRevitLabs.TargetApps.Revit {
                                       allusers: allUsers);
         }
 
+        // attach clone to all installed revit versions
+        // @handled @logs
         public static void AttachAll(string repoPath = null, int engineVer = 000, bool allUsers = false) {
             foreach (var revit in RevitConnector.ListInstalledRevits())
                 Attach(revit.Version.Major.ToString(), repoPath: repoPath, engineVer: engineVer, allUsers: allUsers);
         }
 
+        // detach from revit version
+        // @handled @logs
         public static void Detach(string revitVersion) {
+            logger.Debug(string.Format("Detaching from Revit {0}", revitVersion));
             Addons.RemoveManifestFile(revitVersion.ConvertToVersion(), pyRevitAddinName);
         }
 
+        // detach from all attached revits
+        // @handled @logs
         public static void DetachAll() {
-            foreach (var revit in RevitConnector.ListInstalledRevits())
-                Addons.RemoveManifestFile(revit.Version, pyRevitAddinName);
+            foreach (var revitVersion in GetAttachedRevitVersions()) {
+                Detach(revitVersion.ToString());
+            }
         }
 
+        public static string GetAttachedClone(Version revitVersion) {
+            logger.Debug(string.Format("Querying clone attached to Revit {0}", revitVersion));
+            var localManif = Addons.GetManifest(revitVersion, pyRevitAddinName, allUsers: false);
+            if (localManif != null)
+                return localManif.Assembly;
+            else {
+                var alluserManif = Addons.GetManifest(revitVersion, pyRevitAddinName, allUsers: true);
+                if (alluserManif != null)
+                    return alluserManif.Assembly;
+            }
+
+            return null;
+        }
+
+        // get all attached revit versions
+        // @handled @logs
         public static List<Version> GetAttachedRevitVersions() {
             var attachedRevits = new List<Version>();
 
             foreach (var revit in RevitConnector.ListInstalledRevits()) {
-                if (Addons.GetManifestFile(revit.Version, pyRevitAddinName, allUsers: false) != null
-                    || Addons.GetManifestFile(revit.Version, pyRevitAddinName, allUsers: true) != null)
+                if (Addons.GetManifest(revit.Version, pyRevitAddinName, allUsers: false) != null
+                    || Addons.GetManifest(revit.Version, pyRevitAddinName, allUsers: true) != null)
                     attachedRevits.Add(revit.Version);
             }
 
@@ -407,16 +465,16 @@ namespace pyRevitLabs.TargetApps.Revit {
         // register a clone in a configs
         // @handled @logs
         public static void RegisterClone(string newClonePath) {
-            logger.Debug(string.Format("Request to register {0}", newClonePath));
-            if (!Directory.Exists(newClonePath))
-                throw new pyRevitResourceMissingException(newClonePath);
-            else if (!GitInstaller.IsGitRepo(newClonePath))
+            var normalPath = newClonePath.NormalizeAsPath();
+            logger.Debug(string.Format("Registering clone {0}", normalPath));
+            if (!Directory.Exists(normalPath))
+                throw new pyRevitResourceMissingException(normalPath);
+            else if (!GitInstaller.IsGitRepo(normalPath))
                 throw new pyRevitInvalidGitCloneException();
             else {
-                var fullPath = Path.GetFullPath(newClonePath);
-                logger.Debug(string.Format("Clone is valid. Registering {0}", fullPath));
+                logger.Debug(string.Format("Clone is valid. Registering {0}", normalPath));
                 var validClones = GetRegisteredClones();
-                validClones.Add(fullPath);
+                validClones.Add(normalPath);
                 SetKeyValue(pyRevitManagerConfigSectionName,
                             pyRevitManagerInstalledClonesKey,
                             new List<string>(validClones));
@@ -424,23 +482,30 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         // unregister a clone from configs
+        // @handled @logs
         public static void UnregisterClone(string existigClonePath, bool replacePrimary = true) {
-            // make sure if this clone is primary, remove it
-            var normalizedExClonePath = existigClonePath.NormalizeAsPath();
-            var primaryClone = GetPrimaryClone();
-            if (primaryClone != null
-                && normalizedExClonePath == primaryClone.NormalizeAsPath())
-                ClearPrimaryClone();
+            var normalPath = existigClonePath.NormalizeAsPath();
+            logger.Debug(string.Format("Unregistering clone {0}", normalPath));
 
             // remove the clone path from list
             var remainingClones = new List<string>();
             foreach (string clonePath in GetRegisteredClones()) {
-                if (normalizedExClonePath != clonePath.NormalizeAsPath())
-                    remainingClones.Add(Path.GetFullPath(clonePath));
+                if (normalPath != clonePath.NormalizeAsPath())
+                    remainingClones.Add(clonePath.NormalizeAsPath());
             }
 
-            if (replacePrimary && remainingClones.Count > 0)
+            // set a new primary if requested
+            if (replacePrimary && remainingClones.Count > 0) {
+                logger.Debug(string.Format("Setting new primary {0}", remainingClones[0]));
                 SetPrimaryClone(remainingClones[0]);
+            }
+            else {
+                // otherwise make sure if this clone is primary, remove it
+                var primaryClone = GetPrimaryClone();
+                if (primaryClone != null
+                    && normalPath == primaryClone.NormalizeAsPath())
+                    ClearPrimaryClone();
+            }
 
             UpdateRegisteredClonesList(remainingClones);
         }
@@ -465,7 +530,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
             // otherwise test
             if (Directory.Exists(primaryClone)) {
-                var fullClonePath = Path.GetFullPath(primaryClone);
+                var fullClonePath = primaryClone.NormalizeAsPath();
                 if (fullClonePath != primaryClone) {
                     logger.Debug(string.Format("Updating primary clone to full path {0}", primaryClone));
                     SetPrimaryClone(primaryClone);
@@ -481,7 +546,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         // @handled @logs
         public static void SetPrimaryClone(string newClonePath) {
             // make sure this clone is registered
-            newClonePath = Path.GetFullPath(newClonePath);
+            newClonePath = newClonePath.NormalizeAsPath();
             RegisterClone(newClonePath);
 
             // set primary clone config
@@ -510,7 +575,7 @@ namespace pyRevitLabs.TargetApps.Revit {
             foreach (string clone in clonesList) {
                 if (Directory.Exists(clone)) {
                     logger.Debug(string.Format("Verified clone {0}", clone));
-                    validatedClones.Add(Path.GetFullPath(clone));
+                    validatedClones.Add(clone.NormalizeAsPath());
                 }
             }
             // rewrite the verified clones list back to config file
@@ -822,9 +887,9 @@ namespace pyRevitLabs.TargetApps.Revit {
                 enginesDir = FindLatestEngine(enginesDir);
             }
             else {
-                string fullEnginePath = Path.GetFullPath(
-                    Path.Combine(enginesDir, engineVer.ToString(), pyRevitDllName)
-                    );
+                string fullEnginePath = Path.Combine(enginesDir,
+                                                     engineVer.ToString(),
+                                                     pyRevitDllName).NormalizeAsPath();
                 if (File.Exists(fullEnginePath))
                     enginesDir = fullEnginePath;
             }
@@ -851,9 +916,9 @@ namespace pyRevitLabs.TargetApps.Revit {
                     }
                 }
 
-                string fullEnginePath = Path.GetFullPath(
-                    Path.Combine(enginesDir, latestEnginerVer.ToString(), pyRevitDllName)
-                    );
+                string fullEnginePath = Path.Combine(enginesDir,
+                                                     latestEnginerVer.ToString(),
+                                                     pyRevitDllName).NormalizeAsPath();
                 if (File.Exists(fullEnginePath))
                     latestEnginePath = fullEnginePath;
             }

@@ -41,7 +41,7 @@ namespace pyRevitLabs.Common {
 
         // public methods
         // clone a repo to given destination
-        // @handled
+        // @handled @logs
         public static Repository Clone(string repoPath, string branchName, string destPath, bool checkout = true) {
             // build options and clone
             var cloneOps = new CloneOptions() { Checkout = checkout, BranchName = branchName };
@@ -60,7 +60,7 @@ namespace pyRevitLabs.Common {
         }
 
         // checkout a repo branch. Looks up remotes for that branch if the local doesn't exist
-        // @handled
+        // @handled @logs
         public static void CheckoutBranch(string repoPath, string branchName) {
             try {
                 var repo = new Repository(repoPath);
@@ -68,6 +68,8 @@ namespace pyRevitLabs.Common {
                 // get local branch, or make one (and fetch from remote) if doesn't exist
                 Branch targetBranch = repo.Branches[branchName];
                 if (targetBranch == null) {
+                    logger.Debug(string.Format("Branch \"{0}\" does not exist in local clone. " +
+                                               "Attemping to checkout from remotes...", branchName));
                     // lookup remotes for the branch otherwise
                     foreach (Remote remote in repo.Network.Remotes) {
                         Branch remoteBranch = repo.Branches[remote.Name + "/" + branchName];
@@ -80,6 +82,7 @@ namespace pyRevitLabs.Common {
                 }
 
                 // now checkout the branch
+                logger.Debug(string.Format("Checkign out branch \"{0}\"...", branchName));
                 Commands.Checkout(repo, branchName);
             }
             catch (Exception ex) {
@@ -88,8 +91,9 @@ namespace pyRevitLabs.Common {
         }
 
         // rebase current branch and pull from master
-        // @handled
+        // @handled @logs
         public static UpdateStatus ForcedUpdate(string repoPath) {
+            logger.Debug(string.Format("Force updating repo {0}...", repoPath));
             try {
                 var repo = new Repository(repoPath);
                 var options = new PullOptions();
@@ -103,7 +107,11 @@ namespace pyRevitLabs.Common {
                 Commands.Checkout(repo, repo.Head, checkoutOptions);
 
                 // now let's pull from the tracked remote
-                var res = Commands.Pull(repo, new Signature("GitInstaller", commiterEmail, new DateTimeOffset(DateTime.Now)), options);
+                var res = Commands.Pull(repo,
+                                        new Signature("GitInstaller",
+                                                      commiterEmail,
+                                                      new DateTimeOffset(DateTime.Now)),
+                                        options);
 
                 // process the results and let user know
                 if (res.Status == MergeStatus.FastForward)
@@ -121,14 +129,16 @@ namespace pyRevitLabs.Common {
         }
 
         // rebase current branch to a specific commit by commit hash
-        // @handled
+        // @handled @logs
         public static void RebaseToCommit(string repoPath, string commitHash) {
             try {
                 var repo = new Repository(repoPath);
 
                 // trying to find commit in current branch
+                logger.Debug(string.Format("Searching for commit {0}...", commitHash));
                 foreach (Commit cmt in repo.Commits) {
                     if (cmt.Id.ToString().StartsWith(commitHash)) {
+                        logger.Debug("Commit found.");
                         RebaseToCommit(repo, cmt);
                         break;
                     }
@@ -144,15 +154,17 @@ namespace pyRevitLabs.Common {
         }
 
         // rebase current branch to a specific tag
-        // @handled
+        // @handled @logs
         public static void RebaseToTag(string repoPath, string tagName) {
             try {
                 var repo = new Repository(repoPath);
 
                 // try to find the tag commit hash and rebase to that commit
+                logger.Debug(string.Format("Searching for tag \"{0}\" target commit...", tagName));
                 foreach (Tag tag in repo.Tags) {
                     if (tag.FriendlyName.ToLower() == tagName.ToLower()) {
                         // rebase using commit hash
+                        logger.Debug("Tag target commit found.");
                         RebaseToCommit(repoPath, tag.Target.Id.ToString());
                         return;
                     }
@@ -168,15 +180,17 @@ namespace pyRevitLabs.Common {
         }
 
         // check to see if a directory is a git repo
-        // @handled
+        // @handled @logs
         public static bool IsGitRepo(string repoPath) {
+            logger.Debug(string.Format("Verifying repo validity {0}", repoPath));
             return Repository.IsValid(repoPath);
         }
 
         // private methods
         // rebase current branch to a specific commit
-        // @handled
+        // @handled @logs
         private static void RebaseToCommit(Repository repo, Commit commit) {
+            logger.Debug(string.Format("Rebasing to commit {0}", commit.Id));
             var tempBranch = repo.CreateBranch("rebasetemp", commit);
             repo.Rebase.Start(repo.Head, repo.Head, tempBranch, commiterId, new RebaseOptions());
             repo.Branches.Remove(tempBranch);

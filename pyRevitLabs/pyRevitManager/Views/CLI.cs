@@ -199,6 +199,8 @@ namespace pyRevitManager.Views {
                         logger.Error(ex.ToString());
                     }
                 }
+
+                ProcessErrorCodes();
             }
 
             else if (arguments["unregister"].IsTrue) {
@@ -210,6 +212,8 @@ namespace pyRevitManager.Views {
                     catch (pyRevitException ex) {
                         logger.Error(ex.ToString());
                     }
+
+                ProcessErrorCodes();
             }
 
 
@@ -218,13 +222,20 @@ namespace pyRevitManager.Views {
             // $ pyrevit uninstall [(--all | <repo_path>)] [--clearconfigs]
             // =======================================================================================================
             else if (arguments["uninstall"].IsTrue) {
-                if (arguments["--all"].IsTrue)
-                    pyRevit.UninstallAllClones(clearConfigs: arguments["--clearconfigs"].IsTrue);
-                else
-                    pyRevit.Uninstall(
-                        repoPath: TryGetValue(arguments, "<repo_path>"),
-                        clearConfigs: arguments["--clearconfigs"].IsTrue
-                        );
+                try {
+                    if (arguments["--all"].IsTrue)
+                        pyRevit.UninstallAllClones(clearConfigs: arguments["--clearconfigs"].IsTrue);
+                    else
+                        pyRevit.Uninstall(
+                            repoPath: TryGetValue(arguments, "<repo_path>"),
+                            clearConfigs: arguments["--clearconfigs"].IsTrue
+                            );
+                }
+                catch (pyRevitException ex) {
+                    logger.Error(ex.ToString());
+                }
+
+                ProcessErrorCodes();
             }
 
 
@@ -232,7 +243,14 @@ namespace pyRevitManager.Views {
             // $ pyrevit setprimary <repo_path>
             // =======================================================================================================
             else if (arguments["setprimary"].IsTrue) {
-                pyRevit.SetPrimaryClone(TryGetValue(arguments, "<repo_path>"));
+                try {
+                    pyRevit.SetPrimaryClone(TryGetValue(arguments, "<repo_path>"));
+                }
+                catch (pyRevitException ex) {
+                    logger.Error(ex.ToString());
+                }
+
+                ProcessErrorCodes();
             }
 
 
@@ -240,20 +258,34 @@ namespace pyRevitManager.Views {
             // $ pyrevit checkout <branch_name> [<repo_path>]
             // =======================================================================================================
             else if (arguments["checkout"].IsTrue) {
-                pyRevit.Checkout(
-                    TryGetValue(arguments, "<branch_name>"),
-                    TryGetValue(arguments, "<repo_path>")
-                    );
+                try {
+                    pyRevit.Checkout(
+                        TryGetValue(arguments, "<branch_name>"),
+                        TryGetValue(arguments, "<repo_path>")
+                        );
+                }
+                catch (pyRevitException ex) {
+                    logger.Error(ex.ToString());
+                }
+
+                ProcessErrorCodes();
             }
 
             // =======================================================================================================
             // $ pyrevit setcommit <commit_hash> [<repo_path>]
             // =======================================================================================================
             else if (arguments["setcommit"].IsTrue) {
-                pyRevit.SetCommit(
-                    TryGetValue(arguments, "<commit_hash>"),
-                    TryGetValue(arguments, "<repo_path>")
-                    );
+                try {
+                    pyRevit.SetCommit(
+                        TryGetValue(arguments, "<commit_hash>"),
+                        TryGetValue(arguments, "<repo_path>")
+                        );
+                }
+                catch (pyRevitException ex) {
+                    logger.Error(ex.ToString());
+                }
+
+                ProcessErrorCodes();
             }
 
 
@@ -261,10 +293,17 @@ namespace pyRevitManager.Views {
             // $ pyrevit setversion <tag_name> [<repo_path>]
             // =======================================================================================================
             else if (arguments["setversion"].IsTrue) {
-                pyRevit.SetVersion(
-                    TryGetValue(arguments, "<tag_name>"),
-                    TryGetValue(arguments, "<repo_path>")
-                    );
+                try {
+                    pyRevit.SetVersion(
+                        TryGetValue(arguments, "<tag_name>"),
+                        TryGetValue(arguments, "<repo_path>")
+                        );
+                }
+                catch (pyRevitException ex) {
+                    logger.Error(ex.ToString());
+                }
+
+                ProcessErrorCodes();
             }
 
 
@@ -272,7 +311,14 @@ namespace pyRevitManager.Views {
             // $ pyrevit update [--all] [<repo_path>]
             // =======================================================================================================
             else if (arguments["update"].IsTrue) {
-                pyRevit.Update(repoPath: TryGetValue(arguments, "<repo_url>"));
+                try {
+                    pyRevit.Update(repoPath: TryGetValue(arguments, "<repo_url>"));
+                }
+                catch (pyRevitException ex) {
+                    logger.Error(ex.ToString());
+                }
+
+                ProcessErrorCodes();
             }
 
 
@@ -292,6 +338,8 @@ namespace pyRevitManager.Views {
                 catch (Exception ex) {
                     logger.Error(ex.ToString());
                 }
+
+                ProcessErrorCodes();
             }
 
 
@@ -300,10 +348,18 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             else if (arguments["detach"].IsTrue) {
                 string revitVersion = TryGetValue(arguments, "<revit_version>");
-                if (revitVersion != null)
-                    pyRevit.Detach(revitVersion);
-                else if (arguments["--all"].IsTrue)
-                    pyRevit.DetachAll();
+
+                try {
+                    if (revitVersion != null)
+                        pyRevit.Detach(revitVersion);
+                    else if (arguments["--all"].IsTrue)
+                        pyRevit.DetachAll();
+                }
+                catch (Exception ex) {
+                    logger.Error(ex.ToString());
+                }
+
+                ProcessErrorCodes();
             }
 
 
@@ -333,26 +389,33 @@ namespace pyRevitManager.Views {
                     string revitVersion = TryGetValue(arguments, "<revit_version>");
                     string repoPath = TryGetValue(arguments, "<repo_path>");
 
-                    if (revitVersion != null)
-                        pyRevit.Attach(
-                            revitVersion,
-                            repoPath: repoPath,
-                            engineVer: engineVersion
-                            );
-                    else if (arguments["--all"].IsTrue) {
-                        pyRevit.AttachAll(
-                            repoPath: repoPath,
-                            engineVer: engineVersion
-                            );
-                    }
-                    else if (arguments["--attached"].IsTrue) {
-                        foreach (var revitVer in pyRevit.GetAttachedRevitVersions())
+                    try {
+                        if (revitVersion != null)
                             pyRevit.Attach(
-                                revitVer.Major.ToString(),
+                                revitVersion,
                                 repoPath: repoPath,
                                 engineVer: engineVersion
                                 );
+                        else if (arguments["--all"].IsTrue) {
+                            pyRevit.AttachAll(
+                                repoPath: repoPath,
+                                engineVer: engineVersion
+                                );
+                        }
+                        else if (arguments["--attached"].IsTrue) {
+                            foreach (var revitVer in pyRevit.GetAttachedRevitVersions())
+                                pyRevit.Attach(
+                                    revitVer.Major.ToString(),
+                                    repoPath: repoPath,
+                                    engineVer: engineVersion
+                                    );
+                        }
                     }
+                    catch (Exception ex) {
+                        logger.Error(ex.ToString());
+                    }
+
+                    ProcessErrorCodes();
                 }
             }
 
@@ -442,6 +505,11 @@ namespace pyRevitManager.Views {
                 catch (pyRevitConfigValueNotSet) {
                     logger.Error("Primary repo is not set. Run with \"--debug\" for details.");
                 }
+                catch (Exception ex) {
+                    logger.Error(ex.ToString());
+                }
+
+                ProcessErrorCodes();
             }
 
 
@@ -463,12 +531,15 @@ namespace pyRevitManager.Views {
                     // report attached revits
                     Console.WriteLine("\n==> Attached to Revit versions:");
                     foreach (Version revitVersion in pyRevit.GetAttachedRevitVersions()) {
-                        Console.WriteLine(revitVersion);
+                        var attachedClone = pyRevit.GetAttachedClone(revitVersion);
+                        Console.WriteLine(string.Format("{0} <==> {1}", revitVersion, attachedClone));
                     }
                 }
                 catch (Exception ex) {
                     logger.Error(ex.ToString());
                 }
+
+                ProcessErrorCodes();
             }
 
 
