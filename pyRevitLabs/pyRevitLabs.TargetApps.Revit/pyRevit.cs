@@ -239,34 +239,67 @@ namespace pyRevitLabs.TargetApps.Revit {
                 }
         }
 
+        // list registered extensions based on search pattern if provided, if not list all
+        // @handled @logs
         public static List<pyRevitExtension> LookupRegisteredExtensions(string searchPattern = null) {
-            // download and read file
-            string extDefJson = CommonUtils.DownloadFile(
-                pyRevitExtensionsDefinitionFileUri,
-                Path.Combine(Environment.GetEnvironmentVariable("TEMP"), "pyrevitextensions.json")
-                );
-            dynamic extensionsObj = JObject.Parse(File.ReadAllText(extDefJson));
-
-            // make extension list
             var pyrevtExts = new List<pyRevitExtension>();
-            foreach (JObject extObj in extensionsObj.extensions) {
-                var ext = new pyRevitExtension(extObj);
-                if (searchPattern != null) {
-                    var extMatcher = new Regex(searchPattern, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
-                    if (extMatcher.IsMatch(ext.Name))
+            string extDefJson = null;
+
+            // download and read file
+            try {
+                logger.Debug(string.Format("Downloding extensions metadata file {0}...",
+                                           pyRevitExtensionsDefinitionFileUri));
+                extDefJson = CommonUtils.DownloadFile(
+                    pyRevitExtensionsDefinitionFileUri,
+                    Path.Combine(Environment.GetEnvironmentVariable("TEMP"), "pyrevitextensions.json")
+                    );
+            }
+            catch (Exception ex) {
+                throw new pyRevitException(
+                    string.Format("Error downloading extension metadata file. | {0}", ex.Message)
+                    );
+            }
+
+            logger.Debug("Parsing extension metadata file...");
+            dynamic extensionsObj;
+            if (extDefJson != null) {
+                try {
+                    extensionsObj = JObject.Parse(File.ReadAllText(extDefJson));
+                }
+                catch (Exception ex) {
+                    throw new pyRevitException(string.Format("Error parsing extension metadata. | {0}", ex.Message));
+                }
+
+                // make extension list
+                foreach (JObject extObj in extensionsObj.extensions) {
+                    var ext = new pyRevitExtension(extObj);
+                    logger.Debug(string.Format("Registered extension {0}", ext.Name));
+                    if (searchPattern != null) {
+                        var extMatcher = new Regex(searchPattern, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+                        if (extMatcher.IsMatch(ext.Name)) {
+                            logger.Debug(string.Format("Matching extension {0}", ext.Name));
+                            pyrevtExts.Add(ext);
+                        }
+                    }
+                    else
                         pyrevtExts.Add(ext);
                 }
-                else
-                    pyrevtExts.Add(ext);
             }
 
             return pyrevtExts;
         }
 
+        // lookup registered extension by name
+        // @handled @logs
         public static pyRevitExtension LookupExtension(string extensionName) {
+            logger.Debug(string.Format("Looking up registered extension \"{0}\"...", extensionName));
             var matchingExts = LookupRegisteredExtensions(extensionName);
-            if (matchingExts.Count == 1)
+            if (matchingExts.Count == 1) {
+                logger.Debug(string.Format("Extension found \"{0}\"...", matchingExts[0].Name));
                 return matchingExts[0];
+            }
+            else if (matchingExts.Count > 1)
+                Errors.LatestError = ErrorCodes.MoreThanOneItemMatched;
 
             return null;
         }
@@ -330,7 +363,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         // @handled @logs
         public static void Update(string repoPath = null, bool allClones = false) {
             if (allClones) {
-                foreach(var clonePath in GetRegisteredClones())
+                foreach (var clonePath in GetRegisteredClones())
                     GitInstaller.ForcedUpdate(clonePath);
             }
             else {

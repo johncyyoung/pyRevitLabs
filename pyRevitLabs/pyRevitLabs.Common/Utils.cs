@@ -33,7 +33,8 @@ namespace pyRevitLabs.Common {
                     Directory.Delete(targetDir, false);
                 }
                 catch (Exception ex) {
-                    throw new pyRevitException(string.Format("Error recursive deleting directory {0}", targetDir));
+                    throw new pyRevitException(string.Format("Error recursive deleting directory {0} | {1}",
+                                                             targetDir, ex.Message));
                 }
             }
         }
@@ -51,12 +52,28 @@ namespace pyRevitLabs.Common {
         }
 
         public static string DownloadFile(string url, string destPath) {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            using (var client = new WebClient()) {
-                client.DownloadFile(url, destPath);
+            if (CheckInternetConnection()) {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                using (var client = new WebClient()) {
+                    client.DownloadFile(url, destPath);
+                }
             }
+            else
+                throw new pyRevitNoInternetConnectionException();
 
             return destPath;
+        }
+
+        public static bool CheckInternetConnection() {
+            try {
+                using (var client = new WebClient())
+                using (client.OpenRead("http://clients3.google.com/generate_204")) {
+                    return true;
+                }
+            }
+            catch {
+                return false;
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ namespace pyRevitLabs.Common {
     public enum ErrorCodes {
         NoErrors,
         DefaultedToAllUsersConfigFile,
+        MoreThanOneItemMatched,
     }
 
     // error handling singleton
@@ -63,4 +64,16 @@ namespace pyRevitLabs.Common {
             }
         }
     }
+
+    public class pyRevitNoInternetConnectionException : pyRevitException {
+        public pyRevitNoInternetConnectionException() { }
+
+        public override string Message {
+            get {
+                return "No internet connection detected.";
+            }
+        }
+
+    }
+
 }

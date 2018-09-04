@@ -427,18 +427,32 @@ namespace pyRevitManager.Views {
             // TODO: Implement extensions install
             else if (arguments["extensions"].IsTrue && arguments["search"].IsTrue) {
                 string searchPattern = TryGetValue(arguments, "<search_pattern>");
-                var extList = pyRevit.LookupRegisteredExtensions(searchPattern);
-                Console.WriteLine("==> UI Extensions");
-                foreach (pyRevitExtension ext in extList)
-                    Console.WriteLine(String.Format("{0}{1}", ext.Name.PadRight(24), ext.Url));
+                try {
+                    var extList = pyRevit.LookupRegisteredExtensions(searchPattern);
+                    Console.WriteLine("==> UI Extensions");
+                    foreach (pyRevitExtension ext in extList)
+                        Console.WriteLine(String.Format("{0}{1}", ext.Name.PadRight(24), ext.Url));
+                }
+                catch (Exception ex) {
+                    logger.Error(ex.ToString());
+                }
             }
 
             if (arguments["extensions"].IsTrue && arguments["info"].IsTrue) {
                 string extName = TryGetValue(arguments, "<extension_name>");
-                if (extName != null) {
-                    var ext = pyRevit.LookupExtension(extName);
-                    if (ext != null)
-                        Console.WriteLine(ext.ToString());
+
+                try {
+                    if (extName != null) {
+                        var ext = pyRevit.LookupExtension(extName);
+                        if (ext != null)
+                            Console.WriteLine(ext.ToString());
+                        else if (Errors.LatestError == ErrorCodes.MoreThanOneItemMatched)
+                            logger.Warn(string.Format("More than one extension matches the search pattern \"{0}\"",
+                                                      extName));
+                    }
+                }
+                catch (Exception ex) {
+                    logger.Error(ex.ToString());
                 }
             }
 
