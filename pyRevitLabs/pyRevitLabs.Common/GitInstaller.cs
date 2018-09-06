@@ -72,11 +72,12 @@ namespace pyRevitLabs.Common {
                                                "Attemping to checkout from remotes...", branchName));
                     // lookup remotes for the branch otherwise
                     foreach (Remote remote in repo.Network.Remotes) {
-                        Branch remoteBranch = repo.Branches[remote.Name + "/" + branchName];
+                        string remoteBranchPath = remote.Name + "/" + branchName;
+                        Branch remoteBranch = repo.Branches[remoteBranchPath];
                         if (remoteBranch != null) {
                             // create a local branch, with remote branch as tracking; update; and checkout
                             Branch localBranch = repo.CreateBranch(branchName, remoteBranch.Tip);
-                            repo.Branches.Update(localBranch, b => b.UpstreamBranch = "refs/heads/" + branchName);
+                            repo.Branches.Update(localBranch, b => b.Remote = remote.Name);
                         }
                     }
                 }
