@@ -58,8 +58,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         // consts for the official pyRevit repo
         public const string pyRevitOriginalRepoPath =
-            //"https://github.com/eirannejad/pyRevit.git";
-            "https://github.com/eirannejad/rsparam.git";
+            "https://github.com/eirannejad/pyRevit.git";
 
         public const string pyRevitExtensionsDefinitionFileUri =
             "https://github.com/eirannejad/pyRevit/raw/master/extensions/extensions.json";
