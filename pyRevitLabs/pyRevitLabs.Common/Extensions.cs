@@ -69,8 +69,7 @@ namespace pyRevitLabs.Common.Extensions {
 
         public static string NormalizeAsPath(this string path) {
             return Path.GetFullPath(new Uri(path).LocalPath)
-                       .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                       .ToUpperInvariant();
+                       .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
 
         public static Version ConvertToVersion(this string version) {
@@ -81,6 +80,19 @@ namespace pyRevitLabs.Common.Extensions {
 
         public static List<string> ConvertFromCommaSeparated(this string commaSeparatedValue) {
             return new List<string>(commaSeparatedValue.Split(','));
+        }
+
+        public static List<string> ConvertFromTomlList(this string commaSeparatedValue) {
+            var cleanedValue = commaSeparatedValue.Replace("[", "").Replace("]", "");
+            var quotedValues = new List<string>(cleanedValue.Split(','));
+            var results = new List<string>();
+            var valueFinder = new Regex(@"'(?<value>.+)'");
+            foreach(var value in quotedValues) {
+                var m = valueFinder.Match(value);
+                if (m.Success)
+                    results.Add(m.Groups["value"].Value);
+            }
+            return results;
         }
 
         public static Guid ExtractGuid(this string inputString) {
@@ -97,6 +109,11 @@ namespace pyRevitLabs.Common.Extensions {
             }
             return zeroGuid;
         }
+
+        public static bool IsValidUrl(this string sourceString) {
+            Uri uriResult;
+            return Uri.TryCreate(sourceString, UriKind.Absolute, out uriResult);
+        }
     }
 
     public static class DateTimeExtensions {
@@ -106,9 +123,15 @@ namespace pyRevitLabs.Common.Extensions {
     }
 
     public static class StringEnumerableExtensions {
-        public static string ConvertToCommaSeparated(this IEnumerable<string> sourceValues) {
-            return String.Join(",", sourceValues);
+        public static string ConvertToCommaSeparatedString(this IEnumerable<string> sourceValues) {
+            return string.Join(",", sourceValues);
+        }
+
+        public static string ConvertToTomlListString(this IEnumerable<string> sourceValues) {
+            var quotedValues = new List<string>();
+            foreach (var value in sourceValues)
+                quotedValues.Add(string.Format("'{0}'", value));
+            return "[" + string.Join(",", quotedValues) + "]";
         }
     }
-
 }

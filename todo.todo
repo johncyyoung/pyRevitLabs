@@ -5,9 +5,9 @@
 ☐ make sure links are final
 ☐ make sure comment options match docopt
 
-☐ pyrevit extensions install <extension_name> <dest_path> 
-☐ pyrevit extensions install <repo_url> <dest_path> [--branch=<branch_name>]
 ☐ pyrevit extensions uninstall <extension_name> <dest_path> [--branch=<branch_name>]
-☐ pyrevit extensions paths [--allusers]
-☐ pyrevit extensions paths (add | remove) <extensions_path> [--allusers]
+☐ pyrevit extensions paths remove <extensions_path>
 - pyrevit allowremotedll (enable | disable)
+
+
+take a look at the system that keeps dir paths in configs (hashsets, path compare, unified system)

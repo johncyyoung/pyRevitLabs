@@ -54,7 +54,7 @@ namespace pyRevitLabs.Common {
     public class pyRevitResourceMissingException : pyRevitException {
         public pyRevitResourceMissingException() { }
 
-        public pyRevitResourceMissingException(string invalidClonePath) { Path = invalidClonePath; }
+        public pyRevitResourceMissingException(string resoucePath) { Path = resoucePath; }
 
         public string Path { get; set; }
 
