@@ -13,13 +13,81 @@ using pyRevitLabs.Common.Extensions;
 
 using NLog;
 
-namespace pyRevitLabs.TargetApps.Revit
-{
+namespace pyRevitLabs.TargetApps.Revit {
     // EXCEPTIONS ====================================================================================================
 
     // DATA TYPES ====================================================================================================
-    public class RevitModelFile
-    {
+    public class RevitModelFile {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+        public RevitModelFile(string filePath) {
+            FilePath = filePath;
+            ProcessBasicFileInfo();
+        }
+
+        private void ProcessBasicFileInfo() {
+            try {
+                var rawData = CommonUtils.GetStructuredStorageStream(FilePath, "BasicFileInfo");
+                var rawString = Encoding.Unicode.GetString(rawData);
+                foreach (string line in rawString.Split(new string[] { "\0", "\r\n" }, StringSplitOptions.RemoveEmptyEntries)) {
+                    logger.Debug(string.Format("Looking for build number in: \"{0}\"", line));
+                    var revitProduct = RevitProduct.LookupRevitProduct(line);
+                    if (revitProduct != null)
+                        RevitProduct = revitProduct;
+                }
+            }
+            catch (Exception ex) {
+                throw new pyRevitException(string.Format("Target is not a valid Revit model. | {0}", ex.Message));
+            }
+        }
+
+        public string FilePath { get; set; }
+
+        public RevitProduct RevitProduct { get; private set; } = null;
+    }
+
+
+    public class RevitProcess {
+        private Process _process;
+
+        public RevitProcess(Process runningRevitProcess) {
+            _process = runningRevitProcess;
+        }
+
+        public static bool IsRevitProcess(Process runningProcess) {
+            if (runningProcess.ProcessName.ToLower() == "revit")
+                return true;
+            return false;
+        }
+
+        public string Module {
+            get {
+                return _process.MainModule.FileName;
+            }
+        }
+
+        public RevitProduct RevitProduct {
+            get {
+                var fileInfo = FileVersionInfo.GetVersionInfo(Module);
+                return RevitProduct.LookupRevitProduct(fileInfo.ProductVersion);
+            }
+        }
+
+        public override string ToString() {
+            return string.Format("PID: {0} {1}", _process.Id, RevitProduct.ToString());
+        }
+
+        public void Kill() {
+            _process.Kill();
+        }
+    }
+
+
+    public class RevitProduct {
+        private string _registeredInstallPath = null;
+
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         // keep this updated from:
         // https://knowledge.autodesk.com/support/revit-products/learn-explore/caas/sfdcarticles/sfdcarticles/How-to-tie-the-Build-number-with-the-Revit-update.html
         private static Dictionary<string, (string, string)> _revitBuildNumberLookupTable = new Dictionary<string, (string, string)>() {
@@ -98,141 +166,94 @@ namespace pyRevitLabs.TargetApps.Revit
             {"20180806_1515", ("19.1.0.112", "2019.1")},
         };
 
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static Regex BuildNumberFinder = new Regex(@".*(?<build>\d{8}_\d{4}).*");
 
-        private static Regex FileVersionFinder = new Regex(@".*(?<build>\d{8}_\d{4}).*");
-
-        public RevitModelFile(string filePath)
-        {
-            FilePath = filePath;
-            ProcessBasicFileInfo();
+        private RevitProduct(string buildNumber) {
+            BuildNumber = buildNumber;
         }
 
-        private void ProcessBasicFileInfo()
-        {
-            try {
-                var rawData = CommonUtils.GetStructuredStorageStream(FilePath, "BasicFileInfo");
-                var rawString = Encoding.Unicode.GetString(rawData);
-                foreach (string line in rawString.Split(new string[] { "\0", "\r\n" }, StringSplitOptions.RemoveEmptyEntries)) {
-                    logger.Debug(string.Format("Looking for build number in: \"{0}\"", line));
-                    Match match = FileVersionFinder.Match(line);
-                    if (match.Success) {
-                        BuildNumber = match.Groups["build"].Value;
-                        logger.Debug(BuildNumber);
-                        if (_revitBuildNumberLookupTable.ContainsKey(BuildNumber)) {
-                            FileVersion = new Version(_revitBuildNumberLookupTable[BuildNumber].Item1);
-                            ProductName = string.Format(ProductName, _revitBuildNumberLookupTable[BuildNumber].Item2);
-                            return;
-                        }
-                    }
+        public static RevitProduct LookupRevitProduct(string buildOrVersionString) {
+            // check if the string has build number e.g. "20110309_2315"
+            Match match = BuildNumberFinder.Match(buildOrVersionString);
+            if (match.Success) {
+                var buildNumber = match.Groups["build"].Value;
+                if (_revitBuildNumberLookupTable.ContainsKey(buildNumber)) {
+                    var version = new Version(_revitBuildNumberLookupTable[buildNumber].Item1);
+                    return new RevitProduct(buildNumber);
                 }
-                ProductName = String.Format(ProductName, "???");
             }
-            catch (Exception ex) {
-                throw new pyRevitException("Target is not a valid Revit model.");
+
+            // check if the string is version e.g. "18.0.0.0"
+            foreach (string buildNumber in _revitBuildNumberLookupTable.Keys) {
+                if (buildOrVersionString == _revitBuildNumberLookupTable[buildNumber].Item1) {
+                    return new RevitProduct(buildNumber);
+                }
             }
+
+            return null;
         }
 
-        public string FilePath { get; set; }
+        public static RevitProduct LookupRevitProduct(Version version) {
+            return LookupRevitProduct(version.ToString());
+        }
+
+        public override string ToString() {
+            return String.Format("{0} Version:{1} Path: {2}", ProductName, Version, InstallLocation, LanguageCode);
+        }
 
         public string BuildNumber { get; private set; }
 
         public string BuildTarget { get; private set; } = "x64";
 
-        public string ProductName { get; private set; } = "Autodesk Revit {0}";
-
-        public Version FileVersion { get; private set; } = new Version("0.0");
-    }
-
-
-    public class RevitProcess
-    {
-        private Process _process;
-
-        public RevitProcess(Process runningRevitProcess)
-        {
-            _process = runningRevitProcess;
-        }
-
-        public static bool IsRevitProcess(Process runningProcess)
-        {
-            if (runningProcess.ProcessName.ToLower() == "revit")
-                return true;
-            return false;
-        }
-
-        public string RevitModule
-        {
+        public Version Version {
             get {
-                return _process.MainModule.FileName;
+                return new Version(_revitBuildNumberLookupTable[BuildNumber].Item1);
             }
         }
 
-        public Version RevitVesion
-        {
+        public Version FullVersion {
             get {
-                var fileInfo = FileVersionInfo.GetVersionInfo(RevitModule);
-                return new Version("20" + fileInfo.FileVersion);
+                return new Version("20" + Version.ToString());
             }
         }
 
-        public string RevitLocation
-        {
+        public string ProductName {
             get {
-                return Path.GetDirectoryName(_process.MainModule.FileName);
+                return string.Format("Autodesk Revit {0}", _revitBuildNumberLookupTable[BuildNumber].Item2);
             }
         }
 
-        public override string ToString()
-        {
-            return String.Format("PID: {0} Version: {1} Path: {2}",
-                                 _process.Id, RevitVesion, RevitModule);
-        }
-
-        public void Kill()
-        {
-            _process.Kill();
-        }
-    }
-
-
-    public class RevitInstall
-    {
-        public Version DisplayVersion;
-        public string InstallLocation;
-        public int LanguageCode;
-
-        public RevitInstall(string version, string installLoc, int langCode)
-        {
-            DisplayVersion = version.ConvertToVersion();
-            InstallLocation = installLoc;
-            LanguageCode = langCode;
-        }
-
-        public override string ToString()
-        {
-            return String.Format("Version: {0}:{2} Path: {1}", Version, InstallLocation, LanguageCode);
-        }
-
-        public Version Version
-        {
+        public string DefaultInstallLocation {
             get {
-                return new Version(
-                    2000 + DisplayVersion.Major,
-                    DisplayVersion.Minor,
-                    DisplayVersion.Build,
-                    DisplayVersion.Revision
-                    );
+                return Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
             }
         }
+
+        public string InstallLocation {
+            get {
+                if (_registeredInstallPath == null ) {
+                    var expectedPath = Path.Combine(DefaultInstallLocation, "Autodesk", string.Format("Revit {0}", FullVersion.Major));
+                    logger.Debug(string.Format("Expected path {0}", expectedPath));
+                    if (Directory.Exists(expectedPath))
+                        return expectedPath;
+                }
+
+                return _registeredInstallPath;
+            }
+
+            set {
+                _registeredInstallPath = value;
+            }
+        }
+
+        public int LanguageCode { get; set; }
+
     }
 
 
     // MODEL =========================================================================================================
-    public class RevitController
-    {
-        public static List<RevitProcess> ListRunningRevits()
-        {
+    public class RevitController {
+        public static List<RevitProcess> ListRunningRevits() {
             var runningRevits = new List<RevitProcess>();
             foreach (Process ps in Process.GetProcesses()) {
                 if (RevitProcess.IsRevitProcess(ps))
@@ -241,38 +262,28 @@ namespace pyRevitLabs.TargetApps.Revit
             return runningRevits;
         }
 
-        public static List<RevitInstall> ListInstalledRevits()
-        {
+        public static List<RevitProduct> ListInstalledRevits() {
             var revitFinder = new Regex(@"^Revit \d\d\d\d");
-            var installedRevits = new List<RevitInstall>();
+            var installedRevits = new List<RevitProduct>();
             var uninstallKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
             foreach (var key in uninstallKey.GetSubKeyNames()) {
                 var subkey = uninstallKey.OpenSubKey(key);
                 var appName = subkey.GetValue("DisplayName") as string;
-                if (appName != null && revitFinder.IsMatch(appName))
-                    installedRevits.Add(new RevitInstall(
-                        subkey.GetValue("DisplayVersion") as string,
-                        subkey.GetValue("InstallLocation") as string,
-                        (int)subkey.GetValue("Language")
-                        ));
+                if (appName != null && revitFinder.IsMatch(appName)) {
+                    var revitProduct = RevitProduct.LookupRevitProduct(subkey.GetValue("DisplayVersion") as string);
+                    if (revitProduct != null) {
+                        revitProduct.InstallLocation = subkey.GetValue("InstallLocation") as string;
+                        revitProduct.LanguageCode = (int)subkey.GetValue("Language");
+                        installedRevits.Add(revitProduct);
+                    }
+                }
             }
             return installedRevits;
         }
 
-        public static void KillAllRunningRevits()
-        {
+        public static void KillAllRunningRevits() {
             foreach (RevitProcess revit in ListRunningRevits())
                 revit.Kill();
-        }
-
-        public static void EnableRemoteDLLLoading(RevitProcess targetRevit = null)
-        {
-
-        }
-
-        public static void DisableRemoteDLLLoading(RevitProcess targetRevit = null)
-        {
-
         }
     }
 }

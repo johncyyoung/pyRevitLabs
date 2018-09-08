@@ -63,7 +63,7 @@ namespace pyRevitManager.Views {
         pyrevit info
         pyrevit revit list [--installed]
         pyrevit revit killall
-        pyrevit revit getversion <model_path>
+        pyrevit revit fileversion <file_path>
         pyrevit clearcache (--all | <revit_version>)
         pyrevit allowremotedll [(enable | disable)]
         pyrevit checkupdates [(enable | disable)]
@@ -581,14 +581,18 @@ namespace pyRevitManager.Views {
             }
 
             // =======================================================================================================
-            // $ pyrevit revit getversion <model_path>
+            // $ pyrevit revit fileversion <model_path>
             // =======================================================================================================
-            else if (arguments["revit"].IsTrue && arguments["getversion"].IsTrue) {
+            else if (arguments["revit"].IsTrue && arguments["fileversion"].IsTrue) {
                 try {
-                    var modelPath = TryGetValue(arguments, "<model_path>");
+                    var modelPath = TryGetValue(arguments, "<file_path>");
                     if (modelPath != null) {
                         var model = new RevitModelFile(modelPath);
-                        Console.WriteLine(string.Format("{1} ({0}({2}))", model.BuildNumber, model.ProductName, model.BuildTarget));
+                        Console.WriteLine(
+                            string.Format("{1} ({0}({2}))",
+                                          model.RevitProduct.BuildNumber,
+                                          model.RevitProduct.ProductName,
+                                          model.RevitProduct.BuildTarget));
                     }
                 }
                 catch (Exception ex) {
