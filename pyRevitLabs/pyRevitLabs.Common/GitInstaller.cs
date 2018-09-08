@@ -48,7 +48,7 @@ namespace pyRevitLabs.Common {
 
             try {
                 // attempt at cloning the repo
-                logger.Debug(String.Format("Cloning {0}:{1} to {2}", repoPath, branchName, destPath));
+                logger.Debug(String.Format("Cloning \"{0}:{1}\" to \"{2}\"", repoPath, branchName, destPath));
                 Repository.Clone(repoPath, destPath, cloneOps);
 
                 // make repository object and return
@@ -94,7 +94,7 @@ namespace pyRevitLabs.Common {
         // rebase current branch and pull from master
         // @handled @logs
         public static UpdateStatus ForcedUpdate(string repoPath) {
-            logger.Debug(string.Format("Force updating repo {0}...", repoPath));
+            logger.Debug(string.Format("Force updating repo \"{0}\"...", repoPath));
             try {
                 var repo = new Repository(repoPath);
                 var options = new PullOptions();
@@ -136,7 +136,7 @@ namespace pyRevitLabs.Common {
                 var repo = new Repository(repoPath);
 
                 // trying to find commit in current branch
-                logger.Debug(string.Format("Searching for commit {0}...", commitHash));
+                logger.Debug(string.Format("Searching for commit \"{0}\"...", commitHash));
                 foreach (Commit cmt in repo.Commits) {
                     if (cmt.Id.ToString().StartsWith(commitHash)) {
                         logger.Debug("Commit found.");
@@ -182,8 +182,8 @@ namespace pyRevitLabs.Common {
 
         // check to see if a directory is a git repo
         // @handled @logs
-        public static bool IsGitRepo(string repoPath) {
-            logger.Debug(string.Format("Verifying repo validity {0}", repoPath));
+        public static bool IsValidRepo(string repoPath) {
+            logger.Debug(string.Format("Verifying repo validity \"{0}\"", repoPath));
             return Repository.IsValid(repoPath);
         }
 
@@ -191,7 +191,7 @@ namespace pyRevitLabs.Common {
         // rebase current branch to a specific commit
         // @handled @logs
         private static void RebaseToCommit(Repository repo, Commit commit) {
-            logger.Debug(string.Format("Rebasing to commit {0}", commit.Id));
+            logger.Debug(string.Format("Rebasing to commit \"{0}\"", commit.Id));
             var tempBranch = repo.CreateBranch("rebasetemp", commit);
             repo.Rebase.Start(repo.Head, repo.Head, tempBranch, commiterId, new RebaseOptions());
             repo.Branches.Remove(tempBranch);

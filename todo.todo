@@ -6,7 +6,6 @@
 ☐ make sure comment options match docopt
 
 ☐ pyrevit extensions uninstall <extension_name> <dest_path> [--branch=<branch_name>]
-☐ pyrevit extensions paths remove <extensions_path>
 - pyrevit allowremotedll (enable | disable)
 
 

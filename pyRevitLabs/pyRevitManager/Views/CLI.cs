@@ -59,11 +59,12 @@ namespace pyRevitManager.Views {
         pyrevit extensions info <extension_name>
         pyrevit extensions help <extension_name>
         pyrevit extensions open <extension_name>
-        pyrevit extensions install <extension_name_or_repo_url> <dest_path> [--branch=<branch_name>]
+        pyrevit extensions install <extension_name> <dest_path> [--branch=<branch_name>]
+        pyrevit extensions install (ui | lib) <extension_name> <repo_url> <dest_path> [--branch=<branch_name>]
         pyrevit extensions uninstall <extension_name> <dest_path> [--branch=<branch_name>]
         pyrevit extensions paths
         pyrevit extensions paths (add | remove) <extensions_path>
-        pyrevit extensions <extension_name> (enable | disable)
+        pyrevit extensions (enable | disable) <extension_name>
         pyrevit open
         pyrevit info
         pyrevit revit list [--installed]
@@ -228,7 +229,7 @@ namespace pyRevitManager.Views {
                         pyRevit.RegisterClone(repoPath);
                     }
                     catch (pyRevitException ex) {
-                        logger.Error(ex.ToString());
+                        LogException(ex, logLevel);
                     }
                 }
 
@@ -242,7 +243,7 @@ namespace pyRevitManager.Views {
                         pyRevit.UnregisterClone(repoPath);
                     }
                     catch (pyRevitException ex) {
-                        logger.Error(ex.ToString());
+                        LogException(ex, logLevel);
                     }
 
                 ProcessErrorCodes();
@@ -264,7 +265,7 @@ namespace pyRevitManager.Views {
                             );
                 }
                 catch (pyRevitException ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -279,7 +280,7 @@ namespace pyRevitManager.Views {
                     pyRevit.SetPrimaryClone(TryGetValue(arguments, "<repo_path>"));
                 }
                 catch (pyRevitException ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -297,7 +298,7 @@ namespace pyRevitManager.Views {
                         );
                 }
                 catch (pyRevitException ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -314,7 +315,7 @@ namespace pyRevitManager.Views {
                         );
                 }
                 catch (pyRevitException ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -332,7 +333,7 @@ namespace pyRevitManager.Views {
                         );
                 }
                 catch (pyRevitException ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -347,7 +348,7 @@ namespace pyRevitManager.Views {
                     pyRevit.Update(repoPath: TryGetValue(arguments, "<repo_url>"));
                 }
                 catch (pyRevitException ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -363,12 +364,12 @@ namespace pyRevitManager.Views {
 
                 try {
                     if (revitVersion != null)
-                        pyRevit.Attach(revitVersion, repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
+                        pyRevit.Attach(int.Parse(revitVersion), repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
                     else if (arguments["--all"].IsTrue)
                         pyRevit.AttachAll(repoPath: repoPath, allUsers: arguments["--allusers"].IsTrue);
                 }
                 catch (Exception ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -383,12 +384,12 @@ namespace pyRevitManager.Views {
 
                 try {
                     if (revitVersion != null)
-                        pyRevit.Detach(revitVersion);
+                        pyRevit.Detach(int.Parse(revitVersion));
                     else if (arguments["--all"].IsTrue)
                         pyRevit.DetachAll();
                 }
                 catch (Exception ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -424,7 +425,7 @@ namespace pyRevitManager.Views {
                     try {
                         if (revitVersion != null)
                             pyRevit.Attach(
-                                revitVersion,
+                                int.Parse(revitVersion),
                                 repoPath: repoPath,
                                 engineVer: engineVersion
                                 );
@@ -435,16 +436,16 @@ namespace pyRevitManager.Views {
                                 );
                         }
                         else if (arguments["--attached"].IsTrue) {
-                            foreach (var revitVer in pyRevit.GetAttachedRevitVersions())
+                            foreach (var revit in pyRevit.GetAttachedRevits())
                                 pyRevit.Attach(
-                                    revitVer.Major.ToString(),
+                                    revit.FullVersion.Major,
                                     repoPath: repoPath,
                                     engineVer: engineVersion
                                     );
                         }
                     }
                     catch (Exception ex) {
-                        logger.Error(ex.ToString());
+                        LogException(ex, logLevel);
                     }
 
                     ProcessErrorCodes();
@@ -464,7 +465,7 @@ namespace pyRevitManager.Views {
                         Console.WriteLine(String.Format("{0}{1}", ext.Name.PadRight(24), ext.Url));
                 }
                 catch (Exception ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -478,7 +479,7 @@ namespace pyRevitManager.Views {
 
                 try {
                     if (extName != null) {
-                        var ext = pyRevit.LookupExtension(extName);
+                        var ext = pyRevit.FindExtension(extName);
                         if (ext != null)
                             Console.WriteLine(ext.ToString());
                         else if (Errors.LatestError == ErrorCodes.MoreThanOneItemMatched)
@@ -487,7 +488,7 @@ namespace pyRevitManager.Views {
                     }
                 }
                 catch (Exception ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -502,7 +503,7 @@ namespace pyRevitManager.Views {
 
                 try {
                     if (extName != null) {
-                        var ext = pyRevit.LookupExtension(extName);
+                        var ext = pyRevit.FindExtension(extName);
                         if (ext != null)
                             Process.Start(ext.Website);
                         else if (Errors.LatestError == ErrorCodes.MoreThanOneItemMatched)
@@ -511,7 +512,7 @@ namespace pyRevitManager.Views {
                     }
                 }
                 catch (Exception ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -519,41 +520,76 @@ namespace pyRevitManager.Views {
 
 
             // =======================================================================================================
-            // $ pyrevit extensions install <extension_name_or_repo_url> <dest_path> [--branch=<branch_name>]
+            // $ pyrevit extensions install <extension_name> <dest_path> [--branch=<branch_name>]
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "extensions", "install")) {
                 string destPath = TryGetValue(arguments, "<dest_path>");
-                string extNameOrUrl = TryGetValue(arguments, "<extension_name_or_repo_url>");
+                string extName = TryGetValue(arguments, "<extension_name>");
                 string branchName = TryGetValue(arguments, "--branch");
 
                 try {
-                    if (extNameOrUrl != null) {
-                        if (extNameOrUrl.IsValidUrl()) {
-                            logger.Debug(string.Format("String \"{0}\" is a valid repo url.", extNameOrUrl));
-                            pyRevit.InstallExtension(extNameOrUrl, destPath, branchName);
-                        }
-                        else {
-                            logger.Debug(string.Format("String \"{0}\" is not a valid repo url.", extNameOrUrl));
-                            var ext = pyRevit.LookupExtension(extNameOrUrl);
-                            if (ext != null) {
-                                logger.Debug(string.Format("Matching extension found \"{0}\"", ext.Name));
-                                pyRevit.InstallExtension(ext, destPath, branchName);
-                            }
-                            else {
-                                if (Errors.LatestError == ErrorCodes.MoreThanOneItemMatched)
-                                    throw new pyRevitException(
-                                        string.Format("More than one extension matches the name \"{0}\"",
-                                                      extNameOrUrl));
-                                else 
-                                    throw new pyRevitException(
-                                        string.Format("Not valid extension name or repo url \"{0}\"",
-                                                      extNameOrUrl));
-                            }
-                        }
+                    var ext = pyRevit.FindExtension(extName);
+                    if (ext != null) {
+                        logger.Debug(string.Format("Matching extension found \"{0}\"", ext.Name));
+                        pyRevit.InstallExtension(ext, destPath, branchName);
+                    }
+                    else {
+                        if (Errors.LatestError == ErrorCodes.MoreThanOneItemMatched)
+                            throw new pyRevitException(
+                                string.Format("More than one extension matches the name \"{0}\"",
+                                                extName));
+                        else 
+                            throw new pyRevitException(
+                                string.Format("Not valid extension name or repo url \"{0}\"",
+                                                extName));
                     }
                 }
                 catch (Exception ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
+                }
+
+                ProcessErrorCodes();
+            }
+
+
+            // =======================================================================================================
+            // $ pyrevit extensions install (ui | lib) <extension_name> <repo_url> <dest_path> [--branch=<branch_name>]
+            // =======================================================================================================
+            else if (VerifyCommand(activeKeys, "extensions", "install", "ui")) {
+                string destPath = TryGetValue(arguments, "<dest_path>");
+                string extName = TryGetValue(arguments, "<extension_name>");
+                string repoUrl = TryGetValue(arguments, "<repo_url>");
+                string branchName = TryGetValue(arguments, "--branch");
+
+                try {
+                    if (repoUrl.IsValidUrl())
+                        pyRevit.InstallExtension(extName, pyRevitExtensionTypes.UIExtension,
+                                                 repoUrl, destPath, branchName);
+                    else
+                        logger.Error(string.Format("Repo url is not valid \"{0}\"", repoUrl));
+                }
+                catch (Exception ex) {
+                    LogException(ex, logLevel);
+                }
+
+                ProcessErrorCodes();
+            }
+
+            else if (VerifyCommand(activeKeys, "extensions", "install", "lib")) {
+                string destPath = TryGetValue(arguments, "<dest_path>");
+                string repoUrl = TryGetValue(arguments, "<repo_url>");
+                string extName = TryGetValue(arguments, "<extension_name>");
+                string branchName = TryGetValue(arguments, "--branch");
+
+                try {
+                    if (repoUrl.IsValidUrl())
+                        pyRevit.InstallExtension(extName, pyRevitExtensionTypes.LibraryExtension,
+                                                 repoUrl, destPath, branchName);
+                    else
+                        logger.Error(string.Format("Repo url is not valid \"{0}\"", repoUrl));
+                }
+                catch (Exception ex) {
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -575,7 +611,6 @@ namespace pyRevitManager.Views {
             // $ pyrevit extensions paths
             // $ pyrevit extensions paths (add | remove) <extensions_path>
             // =======================================================================================================
-            // TODO: Implement extensions paths
             else if (VerifyCommand(activeKeys, "extensions", "paths")) {
                 Console.WriteLine("==> Extension Search Paths:");
                 foreach(var searchPath in pyRevit.GetExtensionSearchPaths())
@@ -591,7 +626,21 @@ namespace pyRevitManager.Views {
                         pyRevit.AddExtensionSearchPath(searchPath);
                     }
                     catch (Exception ex) {
-                        logger.Error(ex.ToString());
+                        LogException(ex, logLevel);
+                    }
+                }
+
+                ProcessErrorCodes();
+            }
+
+            else if (VerifyCommand(activeKeys, "extensions", "paths", "remove")) {
+                var searchPath = TryGetValue(arguments, "<extensions_path>");
+                if (searchPath != null) {
+                    try {
+                        pyRevit.RemoveExtensionSearchPath(searchPath);
+                    }
+                    catch (Exception ex) {
+                        LogException(ex, logLevel);
                     }
                 }
 
@@ -600,14 +649,22 @@ namespace pyRevitManager.Views {
 
 
             // =======================================================================================================
-            // $ pyrevit extensions <extension_name> (enable | disable)
+            // $ pyrevit extensions (enable | disable) <extension_name>
             // =======================================================================================================
-            else if (VerifyCommand(activeKeys, "extensions")) {
+            else if (VerifyCommand(activeKeys, "extensions", "enable")) {
                 if (arguments["<extension_name>"] != null) {
                     string extensionName = TryGetValue(arguments, "<extension_name>");
-                    if (arguments["enable"].IsTrue)
+                    if (extensionName != null)
                         pyRevit.EnableExtension(extensionName);
-                    else if (arguments["disable"].IsTrue)
+                }
+
+                ProcessErrorCodes();
+            }
+
+            else if (VerifyCommand(activeKeys, "extensions", "disable")) {
+                if (arguments["<extension_name>"] != null) {
+                    string extensionName = TryGetValue(arguments, "<extension_name>");
+                    if (extensionName != null)
                         pyRevit.DisableExtension(extensionName);
                 }
 
@@ -627,7 +684,7 @@ namespace pyRevitManager.Views {
                     logger.Error("Primary repo is not set. Run with \"--debug\" for details.");
                 }
                 catch (Exception ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();
@@ -641,7 +698,7 @@ namespace pyRevitManager.Views {
                 try {
                     // reprt primary repo
                     Console.WriteLine("==> Primary Repository:");
-                    Console.WriteLine(pyRevit.IsPrimaryCloneConfigured() ? pyRevit.GetPrimaryClone() : "Not Set");
+                    Console.WriteLine(pyRevit.IsInstalled() ? pyRevit.GetPrimaryClone() : "Not Set");
 
                     // report registered repos
                     Console.WriteLine("\n==> Registered Repositories:");
@@ -651,13 +708,13 @@ namespace pyRevitManager.Views {
 
                     // report attached revits
                     Console.WriteLine("\n==> Attached to Revit versions:");
-                    foreach (Version revitVersion in pyRevit.GetAttachedRevitVersions()) {
-                        var attachedClone = pyRevit.GetAttachedClone(revitVersion);
-                        Console.WriteLine(string.Format("{0} <==> {1}", revitVersion, attachedClone));
+                    foreach (var revit in pyRevit.GetAttachedRevits()) {
+                        var attachedClone = pyRevit.GetAttachedClone(revit.FullVersion.Major);
+                        Console.WriteLine(string.Format("{0} <==> {1}", revit.Version, attachedClone));
                     }
                 }
                 catch (Exception ex) {
-                    logger.Error(ex.ToString());
+                    LogException(ex, logLevel);
                 }
 
                 ProcessErrorCodes();

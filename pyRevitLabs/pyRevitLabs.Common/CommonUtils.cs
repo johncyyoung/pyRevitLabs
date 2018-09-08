@@ -23,7 +23,7 @@ namespace pyRevitLabs.Common
         public static void DeleteDirectory(string targetDir)
         {
             if (Directory.Exists(targetDir)) {
-                logger.Debug(string.Format("Recursive deleting directory {0}", targetDir));
+                logger.Debug(string.Format("Recursive deleting directory \"{0}\"", targetDir));
                 string[] files = Directory.GetFiles(targetDir);
                 string[] dirs = Directory.GetDirectories(targetDir);
 
@@ -40,7 +40,7 @@ namespace pyRevitLabs.Common
                     Directory.Delete(targetDir, false);
                 }
                 catch (Exception ex) {
-                    throw new pyRevitException(string.Format("Error recursive deleting directory {0} | {1}",
+                    throw new pyRevitException(string.Format("Error recursive deleting directory \"{0}\" | {1}",
                                                              targetDir, ex.Message));
                 }
             }

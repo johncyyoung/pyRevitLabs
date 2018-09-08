@@ -39,6 +39,7 @@ namespace pyRevitLabs.Common.Extensions {
     }
 
     public static class StringExtensions {
+        private static Regex DriveLetterFinder = new Regex(@"^(?<drive>[A-Za-z]):");
         private static Regex GuidFinder = new Regex(@".*(?<guid>[0-9A-Fa-f]{8}[-]" +
                                                         "[0-9A-Fa-f]{4}[-]" +
                                                         "[0-9A-Fa-f]{4}[-]" +
@@ -68,8 +69,17 @@ namespace pyRevitLabs.Common.Extensions {
         }
 
         public static string NormalizeAsPath(this string path) {
-            return Path.GetFullPath(new Uri(path).LocalPath)
-                       .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var normedPath = 
+                Path.GetFullPath(
+                    new Uri(path).LocalPath).TrimEnd(Path.DirectorySeparatorChar,
+                                                     Path.AltDirectorySeparatorChar);
+            var match = DriveLetterFinder.Match(normedPath);
+            if (match.Success) {
+                var driveLetter = match.Groups["drive"].Value + ":";
+                normedPath = normedPath.Replace(driveLetter, driveLetter.ToUpper());
+            }
+
+            return normedPath;
         }
 
         public static Version ConvertToVersion(this string version) {
