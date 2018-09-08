@@ -35,6 +35,11 @@ namespace pyRevitManager.Views {
         pyrevit (-h | --help)
         pyrevit (-V | --version)
         pyrevit help
+        pyrevit blog
+        pyrevit docs
+        pyrevit source
+        pyrevit youtube
+        pyrevit support
         pyrevit install [--core] [--branch=<branch_name>] [<dest_path>]
         pyrevit install <repo_url> <dest_path> [--core] [--branch=<branch_name>]
         pyrevit register <repo_path>
@@ -158,9 +163,43 @@ namespace pyRevitManager.Views {
 
             // now call methods based on inputs
             // =======================================================================================================
+            // $ pyrevit blog
+            // $ pyrevit docs
+            // $ pyrevit source
+            // $ pyrevit youtube
+            // $ pyrevit support
+            // =======================================================================================================
+            if (arguments["blog"].IsTrue) {
+                Process.Start(pyRevitConsts.pyRevitBlogsUrl);
+
+                ProcessErrorCodes();
+            }
+            else if (arguments["docs"].IsTrue) {
+                Process.Start(pyRevitConsts.pyRevitDocsUrl);
+
+                ProcessErrorCodes();
+            }
+            else if (arguments["source"].IsTrue) {
+                Process.Start(pyRevitConsts.pyRevitSourceRepoUrl);
+
+                ProcessErrorCodes();
+            }
+            else if (arguments["youtube"].IsTrue) {
+                Process.Start(pyRevitConsts.pyRevitYoutubeUrl);
+
+                ProcessErrorCodes();
+            }
+            else if (arguments["support"].IsTrue) {
+                Process.Start(pyRevitConsts.pyRevitSupportRepoUrl);
+
+                ProcessErrorCodes();
+            }
+
+
+            // =======================================================================================================
             // $ pyrevit help
             // =======================================================================================================
-            if (arguments["help"].IsTrue) {
+            else if (arguments["help"].IsTrue) {
                 Process.Start(helpUrl);
 
                 ProcessErrorCodes();
@@ -379,7 +418,7 @@ namespace pyRevitManager.Views {
 
                 // switch to latest if requested
                 else if (arguments["dynamosafe"].IsTrue)
-                    engineVersion = pyRevit.pyRevitDynamoCompatibleEnginerVer;
+                    engineVersion = pyRevitConsts.pyRevitDynamoCompatibleEnginerVer;
 
                 // check to see if engine version is specified
                 else {
