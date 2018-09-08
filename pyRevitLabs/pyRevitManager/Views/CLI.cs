@@ -68,7 +68,7 @@ namespace pyRevitManager.Views {
         pyrevit info
         pyrevit revit list [--installed]
         pyrevit revit killall
-        pyrevit revit fileversion <file_path>
+        pyrevit revit fileinfo <file_path>
         pyrevit clearcache (--all | <revit_version>)
         pyrevit allowremotedll [(enable | disable)]
         pyrevit checkupdates [(enable | disable)]
@@ -620,18 +620,23 @@ namespace pyRevitManager.Views {
             }
 
             // =======================================================================================================
-            // $ pyrevit revit fileversion <model_path>
+            // $ pyrevit revit fileinfo <model_path>
             // =======================================================================================================
-            else if (arguments["revit"].IsTrue && arguments["fileversion"].IsTrue) {
+            else if (arguments["revit"].IsTrue && arguments["fileinfo"].IsTrue) {
                 try {
                     var modelPath = TryGetValue(arguments, "<file_path>");
                     if (modelPath != null) {
                         var model = new RevitModelFile(modelPath);
                         Console.WriteLine(
-                            string.Format("{1} ({0}({2}))",
-                                          model.RevitProduct.BuildNumber,
+                            string.Format("Created in: {0} ({1}({2}))",
                                           model.RevitProduct.ProductName,
+                                          model.RevitProduct.BuildNumber,
                                           model.RevitProduct.BuildTarget));
+                        Console.WriteLine(string.Format("Workshared: {0}", model.IsWorkshared ? "Yes" : "No"));
+                        if (model.IsWorkshared)
+                            Console.WriteLine(string.Format("Central Model Path: {0}", model.CentralModelPath));
+                        Console.WriteLine(string.Format("Last Saved Path: {0}", model.LastSavedPath));
+                        Console.WriteLine(string.Format("Document Id: {0}", model.UniqueId));
                     }
                 }
                 catch (Exception ex) {

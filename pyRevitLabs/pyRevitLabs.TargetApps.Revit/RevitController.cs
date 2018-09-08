@@ -20,6 +20,11 @@ namespace pyRevitLabs.TargetApps.Revit {
     public class RevitModelFile {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+        private static Regex IsWorksharedFinder = new Regex(@".*Worksharing: (?<workshared>.+?)( U|$)");
+        private static Regex LastSavedPathFinder = new Regex(@".*Last Save Path: (?<path>.+?)( O|$)");
+        private static Regex CentralPathFinder = new Regex(@".*Central Model Path: (?<path>.+?)( R|$)");
+
+
         public RevitModelFile(string filePath) {
             FilePath = filePath;
             ProcessBasicFileInfo();
@@ -27,13 +32,64 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         private void ProcessBasicFileInfo() {
             try {
+                // extract basic info and prepare string
+                // throws exception if stream doesn't exist
                 var rawData = CommonUtils.GetStructuredStorageStream(FilePath, "BasicFileInfo");
                 var rawString = Encoding.Unicode.GetString(rawData);
-                foreach (string line in rawString.Split(new string[] { "\0", "\r\n" }, StringSplitOptions.RemoveEmptyEntries)) {
-                    logger.Debug(string.Format("Looking for build number in: \"{0}\"", line));
+
+                bool workSharedFound = false;
+                bool lastPathFound = false;
+                bool centralPathFound = false;
+                bool guidFound = false;
+                foreach (string line in rawString.Split(new string[] { "\0", "\r\n" },
+                                                        StringSplitOptions.RemoveEmptyEntries)) {
+                    // find build number
+                    logger.Debug(string.Format("Parsing info from BasicInfoLine: \"{0}\"", line));
                     var revitProduct = RevitProduct.LookupRevitProduct(line);
                     if (revitProduct != null)
                         RevitProduct = revitProduct;
+
+                    // find workshared
+                    if (!workSharedFound) {
+                        var match = IsWorksharedFinder.Match(line);
+                        if (match.Success) {
+                            var workshared = match.Groups["workshared"].Value;
+                            logger.Debug(string.Format("IsWorkshared: {0}", workshared));
+                            if (!workshared.Contains("Not"))
+                                IsWorkshared = true;
+                            workSharedFound = true;
+                        }
+                    }
+
+                    // find last saved path
+                    if (!lastPathFound) {
+                        var match = LastSavedPathFinder.Match(line);
+                        if (match.Success) {
+                            var path = match.Groups["path"].Value;
+                            logger.Debug(string.Format("Last Saved Path: {0}", path));
+                            LastSavedPath = path;
+                            lastPathFound = true;
+                        }
+                    }
+
+                    // find central model path
+                    if (!centralPathFound) {
+                        var match = CentralPathFinder.Match(line);
+                        if (match.Success) {
+                            var path = match.Groups["path"].Value;
+                            logger.Debug(string.Format("Central Model Path: {0}", match.Groups["path"].Value));
+                            CentralModelPath = path;
+                            centralPathFound = true;
+                        }
+                    }
+
+                    // find document guid
+                    if (!guidFound && line.Contains("Unique Document GUID: ")) {
+                        var guid = line.ExtractGuid();
+                        logger.Debug(string.Format("Extracted GUID: {0}", guid));
+                        UniqueId = guid;
+                        guidFound = true;
+                    }
                 }
             }
             catch (Exception ex) {
@@ -41,7 +97,15 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
         }
 
-        public string FilePath { get; set; }
+        public string FilePath { get; private set; }
+
+        public bool IsWorkshared { get; private set; } = false;
+
+        public string LastSavedPath { get; private set; } = null;
+
+        public string CentralModelPath { get; private set; } = null;
+
+        public Guid UniqueId { get; private set; } = new Guid();
 
         public RevitProduct RevitProduct { get; private set; } = null;
     }
@@ -231,7 +295,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public string InstallLocation {
             get {
-                if (_registeredInstallPath == null ) {
+                if (_registeredInstallPath == null) {
                     var expectedPath = Path.Combine(DefaultInstallLocation, "Autodesk", string.Format("Revit {0}", FullVersion.Major));
                     logger.Debug(string.Format("Expected path {0}", expectedPath));
                     if (Directory.Exists(expectedPath))

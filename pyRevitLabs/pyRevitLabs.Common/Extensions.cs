@@ -39,6 +39,12 @@ namespace pyRevitLabs.Common.Extensions {
     }
 
     public static class StringExtensions {
+        private static Regex GuidFinder = new Regex(@".*(?<guid>[0-9A-Fa-f]{8}[-]" +
+                                                        "[0-9A-Fa-f]{4}[-]" +
+                                                        "[0-9A-Fa-f]{4}[-]" +
+                                                        "[0-9A-Fa-f]{4}[-]" + 
+                                                        "[0-9A-Fa-f]{12}).*");
+
         public static string GetDisplayPath(this string sourceString) {
             var separator = Path.AltDirectorySeparatorChar.ToString();
             return sourceString.Replace("||", separator)
@@ -75,6 +81,21 @@ namespace pyRevitLabs.Common.Extensions {
 
         public static List<string> ConvertFromCommaSeparated(this string commaSeparatedValue) {
             return new List<string>(commaSeparatedValue.Split(','));
+        }
+
+        public static Guid ExtractGuid(this string inputString) {
+            var zeroGuid = new Guid();
+            var m = GuidFinder.Match(inputString);
+            if (m.Success) {
+                try {
+                    var guid = new Guid(m.Groups["guid"].Value);
+                    if (guid != zeroGuid)
+                        return guid;
+                } catch {
+                    return zeroGuid;
+                }
+            }
+            return zeroGuid;
         }
     }
 
