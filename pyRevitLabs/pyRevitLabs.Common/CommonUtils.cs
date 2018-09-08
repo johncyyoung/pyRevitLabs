@@ -3,18 +3,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 using NLog;
+using OpenMcdf;
 
-namespace pyRevitLabs.Common {
-    public static class CommonUtils {
+namespace pyRevitLabs.Common
+{
+    public static class CommonUtils
+    {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+        [DllImport("ole32.dll")] private static extern int StgIsStorageFile([MarshalAs(UnmanagedType.LPWStr)] string pwcsName);
 
         // helper for deleting directories recursively
         // @handled @logs
-        public static void DeleteDirectory(string targetDir) {
+        public static void DeleteDirectory(string targetDir)
+        {
             if (Directory.Exists(targetDir)) {
                 logger.Debug(string.Format("Recursive deleting directory {0}", targetDir));
                 string[] files = Directory.GetFiles(targetDir);
@@ -39,11 +46,13 @@ namespace pyRevitLabs.Common {
             }
         }
 
-        public static void ConfirmPath(string path) {
+        public static void ConfirmPath(string path)
+        {
             Directory.CreateDirectory(path);
         }
 
-        public static void ConfirmFile(string filepath) {
+        public static void ConfirmFile(string filepath)
+        {
             ConfirmPath(Path.GetDirectoryName(filepath));
             if (!File.Exists(filepath)) {
                 var file = File.CreateText(filepath);
@@ -51,7 +60,8 @@ namespace pyRevitLabs.Common {
             }
         }
 
-        public static string DownloadFile(string url, string destPath) {
+        public static string DownloadFile(string url, string destPath)
+        {
             if (CheckInternetConnection()) {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 using (var client = new WebClient()) {
@@ -64,7 +74,8 @@ namespace pyRevitLabs.Common {
             return destPath;
         }
 
-        public static bool CheckInternetConnection() {
+        public static bool CheckInternetConnection()
+        {
             try {
                 using (var client = new WebClient())
                 using (client.OpenRead("http://clients3.google.com/generate_204")) {
@@ -73,6 +84,22 @@ namespace pyRevitLabs.Common {
             }
             catch {
                 return false;
+            }
+        }
+
+        public static byte[] GetStructuredStorageStream(string filePath, string streamName)
+        {
+            int res = StgIsStorageFile(filePath);
+
+            if (res == 0) {
+                CompoundFile cf = new CompoundFile(filePath);
+                CFStream foundStream = cf.RootStorage.GetStream(streamName);
+                byte[] streamData = foundStream.GetData();
+                cf.Close();
+                return streamData;
+            }
+            else {
+                throw new NotSupportedException("File is not a structured storage file");
             }
         }
     }

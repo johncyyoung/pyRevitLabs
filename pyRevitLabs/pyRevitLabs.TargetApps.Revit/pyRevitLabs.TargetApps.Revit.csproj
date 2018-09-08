@@ -56,7 +56,7 @@
     <Compile Include="Kinoter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="pyRevit.cs" />
-    <Compile Include="RevitConnector.cs" />
+    <Compile Include="RevitController.cs" />
     <Compile Include="RevitServerConfigManager.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +71,9 @@
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp">
       <Version>0.25.2</Version>
+    </PackageReference>
+    <PackageReference Include="MadMilkman.Ini">
+      <Version>1.0.6</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>2.0.3</Version>

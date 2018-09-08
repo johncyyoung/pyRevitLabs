@@ -380,7 +380,7 @@ namespace pyRevitLabs.TargetApps.Revit {
             // make sure all revit instances are closed
             if (Directory.Exists(pyRevitAppDataPath)) {
                 // TODO: implement kill by revit version?
-                RevitConnector.KillAllRunningRevits();
+                RevitController.KillAllRunningRevits();
                 CommonUtils.DeleteDirectory(Path.Combine(pyRevitAppDataPath, revitVersion));
             }
             else
@@ -427,7 +427,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         // attach clone to all installed revit versions
         // @handled @logs
         public static void AttachAll(string repoPath = null, int engineVer = 000, bool allUsers = false) {
-            foreach (var revit in RevitConnector.ListInstalledRevits())
+            foreach (var revit in RevitController.ListInstalledRevits())
                 Attach(revit.Version.Major.ToString(), repoPath: repoPath, engineVer: engineVer, allUsers: allUsers);
         }
 
@@ -465,7 +465,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         public static List<Version> GetAttachedRevitVersions() {
             var attachedRevits = new List<Version>();
 
-            foreach (var revit in RevitConnector.ListInstalledRevits()) {
+            foreach (var revit in RevitController.ListInstalledRevits()) {
                 if (Addons.GetManifest(revit.Version, pyRevitAddinName, allUsers: false) != null
                     || Addons.GetManifest(revit.Version, pyRevitAddinName, allUsers: true) != null)
                     attachedRevits.Add(revit.Version);

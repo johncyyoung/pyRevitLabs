@@ -61,8 +61,9 @@ namespace pyRevitManager.Views {
         pyrevit extensions <extension_name> (enable | disable)
         pyrevit open
         pyrevit info
-        pyrevit listrevits [--installed]
-        pyrevit killrevits
+        pyrevit revit list [--installed]
+        pyrevit revit killall
+        pyrevit revit getversion <model_path>
         pyrevit clearcache (--all | <revit_version>)
         pyrevit allowremotedll [(enable | disable)]
         pyrevit checkupdates [(enable | disable)]
@@ -111,9 +112,11 @@ namespace pyRevitManager.Views {
                 logLevel = pyRevitManagerLogLevel.Info;
             }
 
+            bool debugMode = false;
             if (argsList.Contains("--debug")) {
                 argsList.Remove("--debug");
                 logLevel = pyRevitManagerLogLevel.Debug;
+                debugMode = true;
             }
 
             // setup logger
@@ -178,7 +181,7 @@ namespace pyRevitManager.Views {
                         );
                 }
                 catch (Exception ex) {
-                    LogException(ex);
+                    LogException(ex, debugMode);
                 }
 
                 ProcessErrorCodes();
@@ -558,23 +561,41 @@ namespace pyRevitManager.Views {
 
 
             // =======================================================================================================
-            // $ pyrevit listrevits [--installed]
+            // $ pyrevit revit list [--installed]
             // =======================================================================================================
-            else if (arguments["listrevits"].IsTrue) {
+            else if (arguments["revit"].IsTrue && arguments["list"].IsTrue) {
                 if (arguments["--installed"].IsTrue)
-                    foreach (var revit in RevitConnector.ListInstalledRevits())
+                    foreach (var revit in RevitController.ListInstalledRevits())
                         Console.WriteLine(revit);
                 else
-                    foreach (var revit in RevitConnector.ListRunningRevits())
+                    foreach (var revit in RevitController.ListRunningRevits())
                         Console.WriteLine(revit);
             }
 
 
             // =======================================================================================================
-            // $ pyrevit listrevits
+            // $ pyrevit revit killall
             // =======================================================================================================
-            else if (arguments["killrevits"].IsTrue) {
-                RevitConnector.KillAllRunningRevits();
+            else if (arguments["revit"].IsTrue && arguments["killall"].IsTrue) {
+                RevitController.KillAllRunningRevits();
+            }
+
+            // =======================================================================================================
+            // $ pyrevit revit getversion <model_path>
+            // =======================================================================================================
+            else if (arguments["revit"].IsTrue && arguments["getversion"].IsTrue) {
+                try {
+                    var modelPath = TryGetValue(arguments, "<model_path>");
+                    if (modelPath != null) {
+                        var model = new RevitModelFile(modelPath);
+                        Console.WriteLine(string.Format("{1} ({0}({2}))", model.BuildNumber, model.ProductName, model.BuildTarget));
+                    }
+                }
+                catch (Exception ex) {
+                    LogException(ex, debugMode);
+                }
+
+                ProcessErrorCodes();
             }
 
 
@@ -612,7 +633,7 @@ namespace pyRevitManager.Views {
                             );
                     }
                     catch (Exception ex) {
-                        logger.Error(ex.Message);
+                        LogException(ex, debugMode);
                     }
                 else
                     pyRevit.SetCheckUpdates(arguments["enable"].IsTrue);
@@ -707,7 +728,7 @@ namespace pyRevitManager.Views {
                     Console.WriteLine(String.Format("Log Server Url: {0}", pyRevit.GetUsageLogServerUrl()));
                 }
                 catch (Exception ex) {
-                    logger.Error(ex.Message);
+                    LogException(ex, debugMode);
                 }
             }
 
@@ -801,8 +822,11 @@ namespace pyRevitManager.Views {
         }
 
         // process generated error codes and show prompts if necessary
-        private static void LogException(Exception ex) {
-            logger.Error(String.Format("{0} ({1})\n{2}", ex.Message, ex.GetType().ToString(), ex.StackTrace));
+        private static void LogException(Exception ex, bool debugMode) {
+            if (debugMode)
+                logger.Error(string.Format("{0} ({1})\n{2}", ex.Message, ex.GetType().ToString(), ex.StackTrace));
+            else
+                logger.Error(ex.Message);
         }
     }
 
