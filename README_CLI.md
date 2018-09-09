@@ -1,22 +1,28 @@
-# pyRevit Command Line Interface Help
+# pyRevit Command Line Tool Help
 
-## Installing pyRevit
+`pyrevit.exe` is the command line tool, developed specifically to install and configure pyRevit in your production environment. Each section below show cases a specific set of functionality of the command line tool.ß
 
+## Managing pyRevit clones
+
+### Installing pyRevit
+
+Options:
 
 ``` bash
 pyrevit install [--core] [--branch=<branch_name>] [<dest_path>]
 pyrevit install <repo_url> <dest_path> [--core] [--branch=<branch_name>]
 ```
 
+Examples:
+
 ``` bash
+# Install pyRevit at the default location (`%appdata%/pyRevit`)
 pyrevit install
-```
 
-``` bash
+# Install pyRevit at specific location
 pyrevit install "C:\pyRevit"
-```
 
-``` bash
+# Install a specific branch of pyRevit
 pyrevit install "C:\pyRevit" --branch=develop
 ```
 
