@@ -1,12 +1,5 @@
 ☐ fix cmd.exe pyrevit output
 	for now I have set the wpf app to a Console application to fix this issue.
 ☐ create test suite
-☐ make help page
-☐ make sure links are final
-☐ make sure comment options match docopt
-
-☐ pyrevit extensions uninstall <extension_name> <dest_path> [--branch=<branch_name>]
-- pyrevit allowremotedll (enable | disable)
-
-
-take a look at the system that keeps dir paths in configs (hashsets, path compare, unified system)
+☐ pyrevit allowremotedll (enable | disable)
+☐ exensions need to have .json file inside

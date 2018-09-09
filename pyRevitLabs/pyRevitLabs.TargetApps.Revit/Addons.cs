@@ -65,7 +65,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         public static void CreateManifestFile(int revitYear, string addinFileName,
                                               string addinName, string assemblyPath, string addinId, string addinClassName, string vendorId,
                                               bool allusers = false) {
-            string manifest = String.Format(ManifestTemplate, addinName, assemblyPath, addinId, addinClassName, vendorId);
+            string manifest = string.Format(ManifestTemplate, addinName, assemblyPath, addinId, addinClassName, vendorId);
             logger.Debug(string.Format("Creating addin manifest...\n{0}", manifest));
             var addinFile = GetRevitAddonsFilePath(revitYear, addinFileName, allusers: allusers);
             logger.Debug(string.Format("Creating manifest file \"{0}\"", addinFile));
@@ -77,12 +77,16 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public static void RemoveManifestFile(int revitYear, string addinName, bool currentAndAllUsers = true) {
             var revitManifest = GetManifest(revitYear, addinName, allUsers: false);
-            if (revitManifest != null)
+            if (revitManifest != null) {
+                logger.Debug(string.Format("Removing manifest file \"{0}\"", revitManifest.FilePath));
                 File.Delete(revitManifest.FilePath);
+            }
             if (currentAndAllUsers) {
                 revitManifest = GetManifest(revitYear, addinName, allUsers: true);
-                if (revitManifest != null)
+                if (revitManifest != null) {
+                    logger.Debug(string.Format("Removing all users manifest file \"{0}\"", revitManifest.FilePath));
                     File.Delete(revitManifest.FilePath);
+                }
             }
         }
 
@@ -92,13 +96,14 @@ namespace pyRevitLabs.TargetApps.Revit {
                 foreach (string file in Directory.GetFiles(addinPath)) {
                     if (file.ToLower().EndsWith(".addin")) {
                         try {
+                            logger.Debug(string.Format("Reading Revit \"{0}\" manifest file \"{1}\"",
+                                                       revitYear, file));
                             var revitManifest = new RevitAddonManifest(file);
                             if (revitManifest.Name.ToLower() == addinName.ToLower())
                                 return revitManifest;
                         }
                         catch (Exception ex) {
-                            throw new pyRevitException(
-                                string.Format("Error finding Revit \"{0}\" manifest file for \"{1}\" | {2}",
+                            logger.Debug(string.Format("Error reading Revit \"{0}\" manifest file for \"{1}\" | {2}",
                                     revitYear,
                                     addinName,
                                     ex.Message)

@@ -175,9 +175,13 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetDir)lib\win32\x64\git2-6311e88.dll" "$(TargetDir)git2-6311e88.dll"
+
 rd /S /Q "$(TargetDir)lib"
+
 del /Q "$(TargetDir)*.pdb"
+
 REM del /Q "$(TargetDir)*.config"
+
 REM del /Q "$(TargetDir)*.xml"
 </PostBuildEvent>
   </PropertyGroup>

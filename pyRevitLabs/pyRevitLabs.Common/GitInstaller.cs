@@ -24,10 +24,11 @@ namespace pyRevitLabs.Common {
     }
 
     public enum UpdateStatus {
-        UpToDate,
-        FastForward,
-        NonFastForward,
+        Error,
         Conflicts,
+        NonFastForward,
+        FastForward,
+        UpToDate,
     }
 
     public static class GitInstaller {
@@ -115,13 +116,20 @@ namespace pyRevitLabs.Common {
                                         options);
 
                 // process the results and let user know
-                if (res.Status == MergeStatus.FastForward)
+                if (res.Status == MergeStatus.FastForward) {
+                    logger.Debug(string.Format("Fast-Forwarded repo \"{0}\"", repoPath));
                     return UpdateStatus.FastForward;
-                else if (res.Status == MergeStatus.NonFastForward)
+                }
+                else if (res.Status == MergeStatus.NonFastForward) {
+                    logger.Debug(string.Format("Non-Fast-Forwarded repo \"{0}\"", repoPath));
                     return UpdateStatus.NonFastForward;
-                else if (res.Status == MergeStatus.Conflicts)
+                }
+                else if (res.Status == MergeStatus.Conflicts) {
+                    logger.Debug(string.Format("Conflicts on updating clone \"{0}\"", repoPath));
                     return UpdateStatus.Conflicts;
+                }
 
+                logger.Debug(string.Format("Repo \"{0}\" is already up to date.", repoPath));
                 return UpdateStatus.UpToDate;
             }
             catch (Exception ex) {

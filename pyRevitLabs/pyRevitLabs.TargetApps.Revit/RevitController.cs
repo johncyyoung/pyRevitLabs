@@ -326,6 +326,24 @@ namespace pyRevitLabs.TargetApps.Revit {
             return runningRevits;
         }
 
+        public static List<RevitProcess> ListRunningRevits(Version revitVersion) {
+            var runningRevits = new List<RevitProcess>();
+            foreach (RevitProcess revit in ListRunningRevits()) {
+                if (revit.RevitProduct.Version == revitVersion)
+                    runningRevits.Add(revit);
+            }
+            return runningRevits;
+        }
+
+        public static List<RevitProcess> ListRunningRevits(int revitYear) {
+            var runningRevits = new List<RevitProcess>();
+            foreach (RevitProcess revit in ListRunningRevits()) {
+                if (revit.RevitProduct.FullVersion.Major == revitYear)
+                    runningRevits.Add(revit);
+            }
+            return runningRevits;
+        }
+
         public static List<RevitProduct> ListInstalledRevits() {
             var revitFinder = new Regex(@"^Revit \d\d\d\d");
             var installedRevits = new List<RevitProduct>();
@@ -343,6 +361,16 @@ namespace pyRevitLabs.TargetApps.Revit {
                 }
             }
             return installedRevits;
+        }
+
+        public static void KillRunningRevits(Version revitVersion) {
+            foreach (RevitProcess revit in ListRunningRevits(revitVersion))
+                revit.Kill();
+        }
+
+        public static void KillRunningRevits(int revitYear) {
+            foreach (RevitProcess revit in ListRunningRevits(revitYear))
+                revit.Kill();
         }
 
         public static void KillAllRunningRevits() {

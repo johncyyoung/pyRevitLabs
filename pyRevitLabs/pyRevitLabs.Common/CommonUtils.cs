@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -100,6 +101,18 @@ namespace pyRevitLabs.Common
             }
             else {
                 throw new NotSupportedException("File is not a structured storage file");
+            }
+        }
+
+        // open url
+        public static void OpenUrl(string url, string errMsg = null) {
+            if (CheckInternetConnection())
+                Process.Start(url);
+            else {
+                if (errMsg != null)
+                    logger.Error(errMsg);
+                else
+                    logger.Error(string.Format("Error opening url \"{0}\". No internet connection detected.", url));
             }
         }
     }
