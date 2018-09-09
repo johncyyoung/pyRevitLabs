@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DOCUMENT Type="Advanced Installer" CreateVersion="15.2" version="15.2" Modules="simple" RootPath="." Language="en" Id="{1EA8C788-EF81-496E-9716-ABCD117C40CC}">
+  <COMPONENT cid="caphyon.advinst.msicomp.ProjectOptionsComponent">
+    <ROW Name="HiddenItems" Value="AppXProductDetailsComponent;AppXDependenciesComponent;AppXAppDetailsComponent;AppXVisualAssetsComponent;AppXCapabilitiesComponent;AppXAppDeclarationsComponent;AppXUriRulesComponent;DigCertStoreComponent;MsiAssemblyComponent;MsiClassComponent;MsiServInstComponent;MsiExtComponent;TilesComponent;MsiOrgComponent;MsiThemeComponent;BackgroundImagesComponent;UpdaterComponent;SerValComponent;MsiInstExSeqComponent;DictionaryComponent;MsiAppSearchComponent;MsiOdbcDataSrcComponent;CPLAppletComponent;ActSyncAppComponent;PreReqComponent;WebApplicationsComponent;MsiJavaComponent;MsiDriverPackagesComponent;UserAccountsComponent;ScheduledTasksComponent;SqlConnectionComponent;AutorunComponent;FirewallExceptionComponent;GameUxComponent;MsiDirectEditorComponent;SharePointSlnComponent;SilverlightSlnComponent;MultipleInstancesComponent;SccmComponent;TilesComponent"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
+    <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
+    <ROW Property="AI_PREDEF_LCONDS_PROPS" Value="AI_DETECTED_DOTNET_CORE_VERSION;AI_DETECTED_DOTNET_VERSION"/>
+    <ROW Property="AI_REQUIRED_DOTNET_CORE_DISPLAY" MultiBuildValue="DefaultBuild:2.0" ValueLocId="-"/>
+    <ROW Property="AI_REQUIRED_DOTNET_CORE_VERSION" MultiBuildValue="DefaultBuild:2.0" ValueLocId="-"/>
+    <ROW Property="AI_REQUIRED_DOTNET_DISPLAY" MultiBuildValue="DefaultBuild:4.7.1" ValueLocId="-"/>
+    <ROW Property="AI_REQUIRED_DOTNET_VERSION" MultiBuildValue="DefaultBuild:4.7.1" ValueLocId="-"/>
+    <ROW Property="ALLUSERS" Value="1" MultiBuildValue="DefaultBuild:2"/>
+    <ROW Property="ARPCONTACT" Value="Ehsan Iran-Nejad"/>
+    <ROW Property="ARPPRODUCTICON" Value="pyRevit.exe" Type="8"/>
+    <ROW Property="MSIFASTINSTALL" MultiBuildValue="DefaultBuild:4"/>
+    <ROW Property="Manufacturer" Value="Ehsan Iran-Nejad"/>
+    <ROW Property="ProductCode" Value="1033:{070ED20E-5543-4332-ADC2-8620C014E786} " Type="16"/>
+    <ROW Property="ProductLanguage" Value="1033"/>
+    <ROW Property="ProductName" Value="pyRevit CLI"/>
+    <ROW Property="ProductVersion" Value="0.1.0.0" Type="32"/>
+    <ROW Property="REBOOT" MultiBuildValue="DefaultBuild:ReallySuppress"/>
+    <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
+    <ROW Property="UpgradeCode" Value="{8181E458-B82E-4A4D-BAAC-784756C4B506}"/>
+    <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
+    <ROW Property="WindowsType9XDisplay" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT" MultiBuildValue="DefaultBuild:Windows 9x/ME/NT/2000/XP/Vista/Windows 7/Windows 8 x86/Windows 8.1 x86/Windows 10 x86" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT40" MultiBuildValue="DefaultBuild:Windows NT 4.0" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT40Display" MultiBuildValue="DefaultBuild:Windows NT 4.0" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT50" MultiBuildValue="DefaultBuild:Windows 2000" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT50Display" MultiBuildValue="DefaultBuild:Windows 2000" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT5X" MultiBuildValue="DefaultBuild:Windows XP/2003 RTM, Windows XP/2003 SP1, Windows XP SP2 x86" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNT5XDisplay" MultiBuildValue="DefaultBuild:Windows XP/2003 RTM, Windows XP/2003 SP1, Windows XP SP2 x86" ValueLocId="-"/>
+    <ROW Property="WindowsTypeNTDisplay" MultiBuildValue="DefaultBuild:32-bit Windows versions" ValueLocId="-"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
+    <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
+    <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
+    <ROW Component="DocoptNet.dll" ComponentId="{39797EC7-B128-4637-BE40-6CB15CE979E7}" Directory_="APPDIR" Attributes="0" KeyPath="DocoptNet.dll"/>
+    <ROW Component="LibGit2Sharp.dll" ComponentId="{5ACF3A03-19C7-44F8-A859-F13476E9FE0A}" Directory_="APPDIR" Attributes="0" KeyPath="LibGit2Sharp.dll"/>
+    <ROW Component="LibGit2Sharp.dll.config" ComponentId="{72D549EE-9852-4618-91AF-B42BAE0FD19C}" Directory_="APPDIR" Attributes="0" KeyPath="LibGit2Sharp.dll.config" Type="0"/>
+    <ROW Component="MadMilkman.Ini.dll" ComponentId="{A4169C3E-A136-4A27-8BAC-50A42323EABE}" Directory_="APPDIR" Attributes="0" KeyPath="MadMilkman.Ini.dll"/>
+    <ROW Component="NLog.dll" ComponentId="{4862DC9A-9521-432A-95A5-C0C83F5B45EA}" Directory_="APPDIR" Attributes="0" KeyPath="NLog.dll"/>
+    <ROW Component="Newtonsoft.Json.dll" ComponentId="{67071C24-98A0-4585-950C-1ABB884D5FC7}" Directory_="APPDIR" Attributes="0" KeyPath="Newtonsoft.Json.dll"/>
+    <ROW Component="OpenMcdf.dll" ComponentId="{2B598F22-0406-494C-85B5-7384AC933A81}" Directory_="APPDIR" Attributes="0" KeyPath="OpenMcdf.dll"/>
+    <ROW Component="ProductInformation" ComponentId="{23703FE9-535E-4128-81CE-D1375CCC4B97}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
+    <ROW Component="System.Data.Common.dll" ComponentId="{AC161439-34C2-428E-8EBC-75EBAC12967D}" Directory_="APPDIR" Attributes="0" KeyPath="System.Data.Common.dll"/>
+    <ROW Component="System.Diagnostics.StackTrace.dll" ComponentId="{131A588F-36B5-4D2A-BB64-9449DF5C45ED}" Directory_="APPDIR" Attributes="0" KeyPath="System.Diagnostics.StackTrace.dll"/>
+    <ROW Component="System.Diagnostics.Tracing.dll" ComponentId="{3C50E49A-B849-409A-9589-007A046CA4B0}" Directory_="APPDIR" Attributes="0" KeyPath="System.Diagnostics.Tracing.dll"/>
+    <ROW Component="System.Globalization.Extensions.dll" ComponentId="{F5A57235-EF4E-4343-BBC2-DA648EF8FB38}" Directory_="APPDIR" Attributes="0" KeyPath="System.Globalization.Extensions.dll"/>
+    <ROW Component="System.IO.Compression.dll" ComponentId="{B2906CC5-AC05-4E73-9171-40F94E1112D4}" Directory_="APPDIR" Attributes="0" KeyPath="System.IO.Compression.dll"/>
+    <ROW Component="System.Net.Http.dll" ComponentId="{0E4EC983-143B-4F6F-B593-F01F65FC37F9}" Directory_="APPDIR" Attributes="0" KeyPath="System.Net.Http.dll"/>
+    <ROW Component="System.Net.Sockets.dll" ComponentId="{8FF8B7DD-7CE1-4A6B-BFB8-D61D9896C5C6}" Directory_="APPDIR" Attributes="0" KeyPath="System.Net.Sockets.dll"/>
+    <ROW Component="System.Runtime.Serialization.Primitives.dll" ComponentId="{11B1977B-5AEC-4A3C-A858-F53737690907}" Directory_="APPDIR" Attributes="0" KeyPath="System.Runtime.Serialization.Primitives.dll"/>
+    <ROW Component="System.Security.Cryptography.Algorithms.dll" ComponentId="{C5037D2C-8516-40BC-B280-F05CC3D8CD28}" Directory_="APPDIR" Attributes="0" KeyPath="System.Security.Cryptography.Algorithms.dll"/>
+    <ROW Component="System.Security.SecureString.dll" ComponentId="{EC303467-BDA2-44D9-A33E-5276A807D264}" Directory_="APPDIR" Attributes="0" KeyPath="System.Security.SecureString.dll"/>
+    <ROW Component="System.Threading.Overlapped.dll" ComponentId="{6921123F-3CE6-417A-B8E8-E9DA26E33142}" Directory_="APPDIR" Attributes="0" KeyPath="System.Threading.Overlapped.dll"/>
+    <ROW Component="System.Xml.XPath.XDocument.dll" ComponentId="{9F1A59DC-FF74-4DAD-9120-068DB827EC0B}" Directory_="APPDIR" Attributes="0" KeyPath="System.Xml.XPath.XDocument.dll"/>
+    <ROW Component="git26311e88.dll" ComponentId="{309E5C75-C1E3-489E-BD74-221A59E24A14}" Directory_="APPDIR" Attributes="256" KeyPath="git26311e88.dll"/>
+    <ROW Component="pyRevitLabs.Common.dll" ComponentId="{9E72450F-4EC8-4396-938B-1AD2B68F2AAC}" Directory_="APPDIR" Attributes="0" KeyPath="pyRevitLabs.Common.dll"/>
+    <ROW Component="pyRevitLabs.CommonCLI.dll" ComponentId="{76A577D9-7ED6-42BC-BA99-1E448889BBCD}" Directory_="APPDIR" Attributes="0" KeyPath="pyRevitLabs.CommonCLI.dll"/>
+    <ROW Component="pyRevitLabs.Language.dll" ComponentId="{66FA35B8-D4FE-4BEB-9D60-BFA26A568FB0}" Directory_="APPDIR" Attributes="0" KeyPath="pyRevitLabs.Language.dll"/>
+    <ROW Component="pyRevitLabs.TargetApps.Revit.dll" ComponentId="{A0377064-D160-4210-9E4E-EAC236FAB782}" Directory_="APPDIR" Attributes="0" KeyPath="pyRevitLabs.TargetApps.Revit.dll"/>
+    <ROW Component="pyrevit.exe" ComponentId="{DB07A71C-6860-45E3-BDB7-7111BA184029}" Directory_="APPDIR" Attributes="0" KeyPath="pyrevit.exe"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="DocoptNet.dll LibGit2Sharp.dll LibGit2Sharp.dll.config MadMilkman.Ini.dll NLog.dll Newtonsoft.Json.dll OpenMcdf.dll ProductInformation System.Data.Common.dll System.Diagnostics.StackTrace.dll System.Diagnostics.Tracing.dll System.Globalization.Extensions.dll System.IO.Compression.dll System.Net.Http.dll System.Net.Sockets.dll System.Runtime.Serialization.Primitives.dll System.Security.Cryptography.Algorithms.dll System.Security.SecureString.dll System.Threading.Overlapped.dll System.Xml.XPath.XDocument.dll git26311e88.dll pyRevitLabs.Common.dll pyRevitLabs.CommonCLI.dll pyRevitLabs.Language.dll pyRevitLabs.TargetApps.Revit.dll pyrevit.exe"/>
+    <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
+    <ROW File="DocoptNet.dll" Component_="DocoptNet.dll" FileName="DOCOPT~1.DLL|DocoptNet.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\DocoptNet.dll" SelfReg="false" NextFile="git26311e88.dll"/>
+    <ROW File="LibGit2Sharp.dll" Component_="LibGit2Sharp.dll" FileName="LIBGIT~1.DLL|LibGit2Sharp.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\LibGit2Sharp.dll" SelfReg="false" NextFile="LibGit2Sharp.dll.config"/>
+    <ROW File="LibGit2Sharp.dll.config" Component_="LibGit2Sharp.dll.config" FileName="LIBGIT~1.CON|LibGit2Sharp.dll.config" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\LibGit2Sharp.dll.config" SelfReg="false" NextFile="MadMilkman.Ini.dll"/>
+    <ROW File="MadMilkman.Ini.dll" Component_="MadMilkman.Ini.dll" FileName="MADMIL~1.DLL|MadMilkman.Ini.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\MadMilkman.Ini.dll" SelfReg="false" NextFile="Newtonsoft.Json.dll"/>
+    <ROW File="NLog.dll" Component_="NLog.dll" FileName="NLog.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\NLog.dll" SelfReg="false" NextFile="OpenMcdf.dll"/>
+    <ROW File="Newtonsoft.Json.dll" Component_="Newtonsoft.Json.dll" FileName="NEWTON~1.DLL|Newtonsoft.Json.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\Newtonsoft.Json.dll" SelfReg="false" NextFile="NLog.dll"/>
+    <ROW File="OpenMcdf.dll" Component_="OpenMcdf.dll" FileName="OpenMcdf.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\OpenMcdf.dll" SelfReg="false" NextFile="pyrevit.exe"/>
+    <ROW File="System.Data.Common.dll" Component_="System.Data.Common.dll" FileName="SYSTEM~1.DLL|System.Data.Common.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Data.Common.dll" SelfReg="false" NextFile="System.Diagnostics.StackTrace.dll"/>
+    <ROW File="System.Diagnostics.StackTrace.dll" Component_="System.Diagnostics.StackTrace.dll" FileName="SYSTEM~2.DLL|System.Diagnostics.StackTrace.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Diagnostics.StackTrace.dll" SelfReg="false" NextFile="System.Diagnostics.Tracing.dll"/>
+    <ROW File="System.Diagnostics.Tracing.dll" Component_="System.Diagnostics.Tracing.dll" FileName="SYSTEM~3.DLL|System.Diagnostics.Tracing.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Diagnostics.Tracing.dll" SelfReg="false" NextFile="System.Globalization.Extensions.dll"/>
+    <ROW File="System.Globalization.Extensions.dll" Component_="System.Globalization.Extensions.dll" FileName="SYSTEM~4.DLL|System.Globalization.Extensions.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Globalization.Extensions.dll" SelfReg="false" NextFile="System.IO.Compression.dll"/>
+    <ROW File="System.IO.Compression.dll" Component_="System.IO.Compression.dll" FileName="SYSTEM~5.DLL|System.IO.Compression.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.IO.Compression.dll" SelfReg="false" NextFile="System.Net.Http.dll"/>
+    <ROW File="System.Net.Http.dll" Component_="System.Net.Http.dll" FileName="SYSTEM~6.DLL|System.Net.Http.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Net.Http.dll" SelfReg="false" NextFile="System.Net.Sockets.dll"/>
+    <ROW File="System.Net.Sockets.dll" Component_="System.Net.Sockets.dll" FileName="SYSTEM~7.DLL|System.Net.Sockets.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Net.Sockets.dll" SelfReg="false" NextFile="System.Runtime.Serialization.Primitives.dll"/>
+    <ROW File="System.Runtime.Serialization.Primitives.dll" Component_="System.Runtime.Serialization.Primitives.dll" FileName="SYSTEM~8.DLL|System.Runtime.Serialization.Primitives.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Runtime.Serialization.Primitives.dll" SelfReg="false" NextFile="System.Security.Cryptography.Algorithms.dll"/>
+    <ROW File="System.Security.Cryptography.Algorithms.dll" Component_="System.Security.Cryptography.Algorithms.dll" FileName="SYSTEM~9.DLL|System.Security.Cryptography.Algorithms.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Security.Cryptography.Algorithms.dll" SelfReg="false" NextFile="System.Security.SecureString.dll"/>
+    <ROW File="System.Security.SecureString.dll" Component_="System.Security.SecureString.dll" FileName="SYSTE~10.DLL|System.Security.SecureString.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Security.SecureString.dll" SelfReg="false" NextFile="System.Threading.Overlapped.dll"/>
+    <ROW File="System.Threading.Overlapped.dll" Component_="System.Threading.Overlapped.dll" FileName="SYSTE~11.DLL|System.Threading.Overlapped.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Threading.Overlapped.dll" SelfReg="false" NextFile="System.Xml.XPath.XDocument.dll"/>
+    <ROW File="System.Xml.XPath.XDocument.dll" Component_="System.Xml.XPath.XDocument.dll" FileName="SYSTE~12.DLL|System.Xml.XPath.XDocument.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\System.Xml.XPath.XDocument.dll" SelfReg="false"/>
+    <ROW File="git26311e88.dll" Component_="git26311e88.dll" FileName="GIT2-6~1.DLL|git2-6311e88.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\git2-6311e88.dll" SelfReg="false" NextFile="LibGit2Sharp.dll"/>
+    <ROW File="pyRevitLabs.Common.dll" Component_="pyRevitLabs.Common.dll" FileName="PYREVI~1.DLL|pyRevitLabs.Common.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\pyRevitLabs.Common.dll" SelfReg="false" NextFile="pyRevitLabs.Common.dll.config"/>
+    <ROW File="pyRevitLabs.Common.dll.config" Component_="LibGit2Sharp.dll.config" FileName="PYREVI~2.CON|pyRevitLabs.Common.dll.config" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\pyRevitLabs.Common.dll.config" SelfReg="false" NextFile="pyRevitLabs.CommonCLI.dll"/>
+    <ROW File="pyRevitLabs.CommonCLI.dll" Component_="pyRevitLabs.CommonCLI.dll" FileName="PYREVI~2.DLL|pyRevitLabs.CommonCLI.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\pyRevitLabs.CommonCLI.dll" SelfReg="false" NextFile="pyRevitLabs.Language.dll"/>
+    <ROW File="pyRevitLabs.Language.dll" Component_="pyRevitLabs.Language.dll" FileName="PYREVI~3.DLL|pyRevitLabs.Language.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\pyRevitLabs.Language.dll" SelfReg="false" NextFile="pyRevitLabs.TargetApps.Revit.dll"/>
+    <ROW File="pyRevitLabs.TargetApps.Revit.dll" Component_="pyRevitLabs.TargetApps.Revit.dll" FileName="PYREVI~4.DLL|pyRevitLabs.TargetApps.Revit.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\pyRevitLabs.TargetApps.Revit.dll" SelfReg="false" NextFile="pyRevitLabs.TargetApps.Revit.dll.config"/>
+    <ROW File="pyRevitLabs.TargetApps.Revit.dll.config" Component_="LibGit2Sharp.dll.config" FileName="PYREVI~3.CON|pyRevitLabs.TargetApps.Revit.dll.config" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\pyRevitLabs.TargetApps.Revit.dll.config" SelfReg="false" NextFile="System.Data.Common.dll"/>
+    <ROW File="pyrevit.exe" Component_="pyrevit.exe" FileName="pyrevit.exe" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\pyrevit.exe" SelfReg="false" NextFile="pyrevit.exe.config" DigSign="true"/>
+    <ROW File="pyrevit.exe.config" Component_="LibGit2Sharp.dll.config" FileName="PYREVI~1.CON|pyrevit.exe.config" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\pyrevit.exe.config" SelfReg="false" NextFile="pyRevitLabs.Common.dll"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
+    <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.BootstrapperUISequenceComponent">
+    <ROW Action="AI_DetectSoftware" Sequence="101"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFileName="[|ProductName]_[|ProductVersion]" Languages="en" InstallationType="4" UseLargeSchema="true" MsiPackageType="x64"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
+    <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
+    <ROW Path="&lt;AI_DICTS&gt;ui_en.ail"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.FragmentComponent">
+    <ROW Fragment="CommonUI.aip" Path="&lt;AI_FRAGS&gt;CommonUI.aip"/>
+    <ROW Fragment="MaintenanceTypeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceTypeDlg.aip"/>
+    <ROW Fragment="MaintenanceWelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceWelcomeDlg.aip"/>
+    <ROW Fragment="SequenceDialogs.aip" Path="&lt;AI_THEMES&gt;classic\fragments\SequenceDialogs.aip"/>
+    <ROW Fragment="Sequences.aip" Path="&lt;AI_FRAGS&gt;Sequences.aip"/>
+    <ROW Fragment="StaticUIStrings.aip" Path="&lt;AI_FRAGS&gt;StaticUIStrings.aip"/>
+    <ROW Fragment="UI.aip" Path="&lt;AI_THEMES&gt;classic\fragments\UI.aip"/>
+    <ROW Fragment="Validation.aip" Path="&lt;AI_FRAGS&gt;Validation.aip"/>
+    <ROW Fragment="VerifyRemoveDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRemoveDlg.aip"/>
+    <ROW Fragment="VerifyRepairDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRepairDlg.aip"/>
+    <ROW Fragment="WelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\WelcomeDlg.aip"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiBinaryComponent">
+    <ROW Name="SoftwareDetector.dll" SourcePath="&lt;AI_CUSTACTS&gt;SoftwareDetector.dll"/>
+    <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiControlEventComponent">
+    <ROW Dialog_="WelcomeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_INSTALL" Ordering="1"/>
+    <ROW Dialog_="MaintenanceWelcomeDlg" Control_="Next" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="99"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_MAINT" Ordering="198"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="202"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_INSTALL" Ordering="197"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="WelcomeDlg" Condition="AI_INSTALL" Ordering="201"/>
+    <ROW Dialog_="CustomizeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_MAINT" Ordering="101"/>
+    <ROW Dialog_="CustomizeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="1"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="ChangeButton" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="501"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceWelcomeDlg" Condition="AI_MAINT" Ordering="1"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="RemoveButton" Event="NewDialog" Argument="VerifyRemoveDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="601"/>
+    <ROW Dialog_="VerifyRemoveDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="1"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="RepairButton" Event="NewDialog" Argument="VerifyRepairDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="601"/>
+    <ROW Dialog_="VerifyRepairDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="1"/>
+    <ROW Dialog_="VerifyRepairDlg" Control_="Repair" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="399" Options="1"/>
+    <ROW Dialog_="VerifyRemoveDlg" Control_="Remove" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="299" Options="1"/>
+    <ROW Dialog_="PatchWelcomeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_PATCH" Ordering="201"/>
+    <ROW Dialog_="ResumeDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_RESUME" Ordering="299"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_PATCH" Ordering="199"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="PatchWelcomeDlg" Condition="AI_PATCH" Ordering="203"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
+    <ROW Action="AI_DOWNGRADE" Type="19" Target="4010"/>
+    <ROW Action="AI_DetectSoftware" Type="257" Source="SoftwareDetector.dll" Target="OnDetectSoftware"/>
+    <ROW Action="AI_DpiContentScale" Type="1" Source="aicustact.dll" Target="DpiContentScale"/>
+    <ROW Action="AI_EnableDebugLog" Type="321" Source="aicustact.dll" Target="EnableDebugLog"/>
+    <ROW Action="AI_InstallModeCheck" Type="1" Source="aicustact.dll" Target="UpdateInstallMode" WithoutSeq="true"/>
+    <ROW Action="AI_PREPARE_UPGRADE" Type="65" Source="aicustact.dll" Target="PrepareUpgrade"/>
+    <ROW Action="AI_RESTORE_LOCATION" Type="65" Source="aicustact.dll" Target="RestoreLocation"/>
+    <ROW Action="AI_ResolveKnownFolders" Type="1" Source="aicustact.dll" Target="AI_ResolveKnownFolders"/>
+    <ROW Action="AI_SETMIXINSTLOCATION" Type="1" Source="aicustact.dll" Target="MixedAllUsersInstallLocation"/>
+    <ROW Action="AI_SHOW_LOG" Type="65" Source="aicustact.dll" Target="LaunchLogFile" WithoutSeq="true"/>
+    <ROW Action="AI_STORE_LOCATION" Type="51" Source="ARPINSTALLLOCATION" Target="[APPDIR]"/>
+    <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]" MultiBuildTarget="DefaultBuild:[AI_UserProgramFiles][Manufacturer]\[ProductName]"/>
+    <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
+    <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiEnvComponent">
+    <ROW Environment="PATH" Name="=-*PATH" Value="[~];[APPDIR]" Component_="ProductInformation"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
+    <ROW Name="pyRevit.exe" SourcePath="..\pyRevitLabs\pyRevitManager\pyRevit.ico" Index="0"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
+    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="748"/>
+    <ROW Action="AI_STORE_LOCATION" Condition="(Not Installed) OR REINSTALL" Sequence="1501"/>
+    <ROW Action="AI_PREPARE_UPGRADE" Condition="AI_UPGRADE=&quot;No&quot; AND (Not Installed)" Sequence="1399"/>
+    <ROW Action="AI_ResolveKnownFolders" Sequence="52"/>
+    <ROW Action="AI_EnableDebugLog" Sequence="51"/>
+    <ROW Action="AI_SETMIXINSTLOCATION" Sequence="747"/>
+    <ROW Action="AI_DetectSoftware" Sequence="101"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiInstallUISequenceComponent">
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="748"/>
+    <ROW Action="AI_ResolveKnownFolders" Sequence="53"/>
+    <ROW Action="AI_DpiContentScale" Sequence="52"/>
+    <ROW Action="AI_EnableDebugLog" Sequence="51"/>
+    <ROW Action="AI_SETMIXINSTLOCATION" Sequence="747"/>
+    <ROW Action="AI_DetectSoftware" Sequence="101"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiLaunchConditionsComponent">
+    <ROW Condition="( Version9X OR VersionNT64 )" Description="[ProductName] cannot be installed on [WindowsTypeNTDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="(VersionNT &lt;&gt; 400)" Description="[ProductName] cannot be installed on [WindowsTypeNT40Display]." DescriptionLocId="AI.LaunchCondition.NoNT40" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="(VersionNT &lt;&gt; 500)" Description="[ProductName] cannot be installed on [WindowsTypeNT50Display]." DescriptionLocId="AI.LaunchCondition.NoNT50" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="(VersionNT64 OR ((VersionNT &lt;&gt; 501) OR (ServicePackLevel = 3))) AND ((VersionNT &lt;&gt; 502) OR (ServicePackLevel = 2))" Description="[ProductName] cannot be installed on [WindowsTypeNT5XDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT5X" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="AI_DETECTED_DOTNET_CORE_VERSION &gt;= AI_REQUIRED_DOTNET_CORE_VERSION" Description="[ProductName] cannot be installed on systems with .NET Core version lower than [AI_REQUIRED_DOTNET_CORE_DISPLAY]." DescriptionLocId="AI.LaunchCondition.DotNETCore" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="AI_DETECTED_DOTNET_VERSION &gt;= AI_REQUIRED_DOTNET_VERSION" Description="[ProductName] cannot be installed on systems with .NET Framework version lower than [AI_REQUIRED_DOTNET_DISPLAY]." DescriptionLocId="AI.LaunchCondition.DotNET" IsPredefined="true" Builds="DefaultBuild"/>
+    <ROW Condition="VersionNT" Description="[ProductName] cannot be installed on [WindowsType9XDisplay]." DescriptionLocId="AI.LaunchCondition.No9X" IsPredefined="true" Builds="DefaultBuild"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiRegsComponent">
+    <ROW Registry="Path" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Path" Value="[APPDIR]" Component_="ProductInformation"/>
+    <ROW Registry="Version" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Version" Value="[ProductVersion]" Component_="ProductInformation"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiThemeComponent">
+    <ATTRIBUTE name="UsedTheme" value="classic"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiUpgradeComponent">
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="0.0.1" VersionMax="[|ProductVersion]" Attributes="257" ActionProperty="OLDPRODUCTS"/>
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="[|ProductVersion]" Attributes="2" ActionProperty="AI_NEWERPRODUCTFOUND"/>
+  </COMPONENT>
+</DOCUMENT>
