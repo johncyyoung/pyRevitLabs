@@ -94,10 +94,13 @@ namespace pyRevitLabs.Common
 
             if (res == 0) {
                 CompoundFile cf = new CompoundFile(filePath);
-                CFStream foundStream = cf.RootStorage.GetStream(streamName);
-                byte[] streamData = foundStream.GetData();
-                cf.Close();
-                return streamData;
+                CFStream foundStream = cf.RootStorage.TryGetStream(streamName);
+                if (foundStream != null) {
+                    byte[] streamData = foundStream.GetData();
+                    cf.Close();
+                    return streamData;
+                }
+                return null;
             }
             else {
                 throw new NotSupportedException("File is not a structured storage file");

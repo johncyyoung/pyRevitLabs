@@ -12,92 +12,157 @@ using pyRevitLabs.Common;
 using pyRevitLabs.Common.Extensions;
 
 using NLog;
+using System.Xml;
 
 namespace pyRevitLabs.TargetApps.Revit {
     // EXCEPTIONS ====================================================================================================
 
     // DATA TYPES ====================================================================================================
+    public enum RevitModelFileOpenWorksetConfig {
+        All = 0,
+        Unknown = 1,
+        Editable = 2,
+        LastViewed = 3,
+        Specify = 4
+    }
+
+
     public class RevitModelFile {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private static Regex IsWorksharedFinder = new Regex(@".*Worksharing: (?<workshared>.+?)( U|$)");
         private static Regex LastSavedPathFinder = new Regex(@".*Last Save Path: (?<path>.+?)( O|$)");
         private static Regex CentralPathFinder = new Regex(@".*Central Model Path: (?<path>.+?)( R|$)");
+        private static Regex OpenWorksetFinder = new Regex(@".*Open Workset Default: (?<type>\d+)( P|$)");
+        private static Regex DocumentIncrementFinder = new Regex(@".*Unique Document Increments: (?<type>\d+)( M|$)");
 
 
         public RevitModelFile(string filePath) {
             FilePath = filePath.NormalizeAsPath();
-            ProcessBasicFileInfo();
+
+            // extract basic info and prepare string
+            // throws exception if stream doesn't exist
+            var rawBasicInfoData = CommonUtils.GetStructuredStorageStream(FilePath, "BasicFileInfo");
+            if (rawBasicInfoData != null)
+                ProcessBasicFileInfo(Encoding.Unicode.GetString(rawBasicInfoData));
+            else
+                throw new pyRevitException(string.Format("Target is not a valid Revit model \"{0}\"", filePath));
+
+            // extract partatom (Revit Family Files) and prepare string
+            // throws exception if stream doesn't exist
+            var rawPartAtomData = CommonUtils.GetStructuredStorageStream(FilePath, "PartAtom");
+            if (rawPartAtomData != null) {
+                IsFamily = true;
+                ProcessPartAtom(Encoding.ASCII.GetString(rawPartAtomData));
+            }
         }
 
-        private void ProcessBasicFileInfo() {
-            try {
-                // extract basic info and prepare string
-                // throws exception if stream doesn't exist
-                var rawData = CommonUtils.GetStructuredStorageStream(FilePath, "BasicFileInfo");
-                var rawString = Encoding.Unicode.GetString(rawData);
+        private void ProcessBasicFileInfo(string rawBasicInfo) {
+            bool workSharedFound = false;
+            bool lastPathFound = false;
+            bool centralPathFound = false;
+            bool openWorksetFound = false;
+            bool documentIncrementFound = false;
+            bool guidFound = false;
+            foreach (string line in rawBasicInfo.Split(new string[] { "\0", "\r\n" },
+                                                    StringSplitOptions.RemoveEmptyEntries)) {
+                // find build number
+                logger.Debug(string.Format("Parsing info from BasicFileInfo: \"{0}\"", line));
+                var revitProduct = RevitProduct.LookupRevitProduct(line);
+                if (revitProduct != null)
+                    RevitProduct = revitProduct;
 
-                bool workSharedFound = false;
-                bool lastPathFound = false;
-                bool centralPathFound = false;
-                bool guidFound = false;
-                foreach (string line in rawString.Split(new string[] { "\0", "\r\n" },
-                                                        StringSplitOptions.RemoveEmptyEntries)) {
-                    // find build number
-                    logger.Debug(string.Format("Parsing info from BasicFileInfo: \"{0}\"", line));
-                    var revitProduct = RevitProduct.LookupRevitProduct(line);
-                    if (revitProduct != null)
-                        RevitProduct = revitProduct;
-
-                    // find workshared
-                    if (!workSharedFound) {
-                        var match = IsWorksharedFinder.Match(line);
-                        if (match.Success) {
-                            var workshared = match.Groups["workshared"].Value;
-                            logger.Debug(string.Format("IsWorkshared: {0}", workshared));
-                            if (!workshared.Contains("Not"))
-                                IsWorkshared = true;
-                            workSharedFound = true;
-                        }
-                    }
-
-                    // find last saved path
-                    if (!lastPathFound) {
-                        var match = LastSavedPathFinder.Match(line);
-                        if (match.Success) {
-                            var path = match.Groups["path"].Value;
-                            logger.Debug(string.Format("Last Saved Path: {0}", path));
-                            LastSavedPath = path;
-                            lastPathFound = true;
-                        }
-                    }
-
-                    // find central model path
-                    if (!centralPathFound) {
-                        var match = CentralPathFinder.Match(line);
-                        if (match.Success) {
-                            var path = match.Groups["path"].Value;
-                            logger.Debug(string.Format("Central Model Path: {0}", match.Groups["path"].Value));
-                            CentralModelPath = path;
-                            centralPathFound = true;
-                        }
-                    }
-
-                    // find document guid
-                    if (!guidFound && line.Contains("Unique Document GUID: ")) {
-                        var guid = line.ExtractGuid();
-                        logger.Debug(string.Format("Extracted GUID: {0}", guid));
-                        UniqueId = guid;
-                        guidFound = true;
+                // find workshared
+                if (!workSharedFound) {
+                    var match = IsWorksharedFinder.Match(line);
+                    if (match.Success) {
+                        var workshared = match.Groups["workshared"].Value;
+                        logger.Debug(string.Format("IsWorkshared: {0}", workshared));
+                        if (!workshared.Contains("Not"))
+                            IsWorkshared = true;
+                        workSharedFound = true;
                     }
                 }
+
+                // find last saved path
+                if (!lastPathFound) {
+                    var match = LastSavedPathFinder.Match(line);
+                    if (match.Success) {
+                        var path = match.Groups["path"].Value;
+                        logger.Debug(string.Format("Last Saved Path: {0}", path));
+                        LastSavedPath = path;
+                        lastPathFound = true;
+                    }
+                }
+
+                // find central model path
+                if (!centralPathFound) {
+                    var match = CentralPathFinder.Match(line);
+                    if (match.Success) {
+                        var path = match.Groups["path"].Value;
+                        logger.Debug(string.Format("Central Model Path: {0}", path));
+                        CentralModelPath = path;
+                        centralPathFound = true;
+                    }
+                }
+
+                // find central model path
+                if (!openWorksetFound) {
+                    var match = OpenWorksetFinder.Match(line);
+                    if (match.Success) {
+                        var owconfig = match.Groups["type"].Value;
+                        logger.Debug(string.Format("Open Workset Default: {0}", owconfig));
+                        OpenWorksetConfig = (RevitModelFileOpenWorksetConfig)Enum.ToObject(typeof(RevitModelFileOpenWorksetConfig), int.Parse(owconfig));
+                        openWorksetFound = true;
+                    }
+                }
+
+                // find central model path
+                if (!documentIncrementFound) {
+                    var match = DocumentIncrementFinder.Match(line);
+                    if (match.Success) {
+                        var docincrement = match.Groups["type"].Value;
+                        logger.Debug(string.Format("Unique Document Increments: {0}", docincrement));
+                        DocumentIncrement = int.Parse(docincrement);
+                        documentIncrementFound = true;
+                    }
+                }
+
+                // find document guid
+                if (!guidFound && line.Contains("Unique Document GUID: ")) {
+                    var guid = line.ExtractGuid();
+                    logger.Debug(string.Format("Extracted GUID: {0}", guid));
+                    UniqueId = guid;
+                    guidFound = true;
+                }
+            }
+        }
+
+        private void ProcessPartAtom(string rawPartAtom) {
+            logger.Debug(string.Format("Parsing PartAtom Data:\n{0}", rawPartAtom));
+            var doc = new XmlDocument();
+            try {
+                doc.LoadXml(rawPartAtom);
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
+                nsmgr.AddNamespace("rfa", @"http://www.w3.org/2005/Atom");
+                nsmgr.AddNamespace("A", @"urn:schemas-autodesk-com:partatom");
+
+                // extract family category
+                var catElements = doc.SelectNodes("//rfa:entry/rfa:category/rfa:term", nsmgr);
+                CategoryName = catElements.Count > 0 ? catElements[catElements.Count - 1].InnerText : "";
+
+                // extract host
+                var hostElement = doc.SelectSingleNode("//rfa:entry/A:features/A:feature/A:group/rfa:Host", nsmgr);
+                HostCategoryName = hostElement != null ? hostElement.InnerText : "";
             }
             catch (Exception ex) {
-                throw new pyRevitException(string.Format("Target is not a valid Revit model. | {0}", ex.Message));
+                logger.Debug(string.Format("Error parsing PartAtom XML. | {0}", ex.Message));
             }
         }
 
         public string FilePath { get; private set; }
+
+        public bool IsFamily { get; private set; }
 
         public bool IsWorkshared { get; private set; } = false;
 
@@ -105,9 +170,17 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public string CentralModelPath { get; private set; } = null;
 
+        public RevitModelFileOpenWorksetConfig OpenWorksetConfig { get; private set; } = 0;
+
+        public int DocumentIncrement { get; private set; } = 0;
+
         public Guid UniqueId { get; private set; } = new Guid();
 
         public RevitProduct RevitProduct { get; private set; } = null;
+
+        public string CategoryName { get; private set; }
+
+        public string HostCategoryName { get; private set; }
     }
 
 

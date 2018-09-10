@@ -605,18 +605,8 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "revit", "fileinfo")) {
                 var targetPath = TryGetValue(arguments, "<file_path>");
-                if (targetPath != null) {
-                    var model = new RevitModelFile(targetPath);
-                    Console.WriteLine(string.Format("Created in: {0} ({1}({2}))",
-                                                    model.RevitProduct.ProductName,
-                                                    model.RevitProduct.BuildNumber,
-                                                    model.RevitProduct.BuildTarget));
-                    Console.WriteLine(string.Format("Workshared: {0}", model.IsWorkshared ? "Yes" : "No"));
-                    if (model.IsWorkshared)
-                        Console.WriteLine(string.Format("Central Model Path: {0}", model.CentralModelPath));
-                    Console.WriteLine(string.Format("Last Saved Path: {0}", model.LastSavedPath));
-                    Console.WriteLine(string.Format("Document Id: {0}", model.UniqueId));
-                }
+                if (targetPath != null)
+                    PrintModelInfo(new RevitModelFile(targetPath));
             }
 
             // =======================================================================================================
@@ -656,7 +646,7 @@ namespace pyRevitManager.Views {
                             var data = new List<string>() { string.Format("\"{0}\"", model.FilePath),
                                                             string.Format("\"{0}\"", model.RevitProduct != null ? model.RevitProduct.ProductName : ""),
                                                             string.Format("\"{0}\"", model.RevitProduct != null ? model.RevitProduct.BuildNumber : ""),
-                                                            string.Format("\"{0}\"", model.IsWorkshared ? "Yes" : "No"),
+                                                            string.Format("\"{0}\"", model.IsWorkshared ? "True" : "False"),
                                                             string.Format("\"{0}\"", model.CentralModelPath),
                                                             string.Format("\"{0}\"", model.LastSavedPath),
                                                             string.Format("\"{0}\"", model.UniqueId.ToString()),
@@ -677,15 +667,7 @@ namespace pyRevitManager.Views {
                         // report info on all files
                         foreach (var model in models) {
                             Console.WriteLine(model.FilePath);
-                            Console.WriteLine(string.Format("Created in: {0} ({1}({2}))",
-                                                            model.RevitProduct.ProductName,
-                                                            model.RevitProduct.BuildNumber,
-                                                            model.RevitProduct.BuildTarget));
-                            Console.WriteLine(string.Format("Workshared: {0}", model.IsWorkshared ? "Yes" : "No"));
-                            if (model.IsWorkshared)
-                                Console.WriteLine(string.Format("Central Model Path: {0}", model.CentralModelPath));
-                            Console.WriteLine(string.Format("Last Saved Path: {0}", model.LastSavedPath));
-                            Console.WriteLine(string.Format("Document Id: {0}", model.UniqueId));
+                            PrintModelInfo(new RevitModelFile(targetPath));
                             Console.WriteLine();
                         }
 
@@ -957,6 +939,26 @@ namespace pyRevitManager.Views {
             else
                 logger.Error(string.Format("{0}\nRun with \"--debug\" option to see debug messages.", ex.Message));
         }
-    }
 
+        // print info on a revit model
+        private static void PrintModelInfo(RevitModelFile model) {
+            Console.WriteLine(string.Format("Created in: {0} ({1}({2}))",
+                                model.RevitProduct.ProductName,
+                                model.RevitProduct.BuildNumber,
+                                model.RevitProduct.BuildTarget));
+            Console.WriteLine(string.Format("Workshared: {0}", model.IsWorkshared ? "Yes" : "No"));
+            if (model.IsWorkshared)
+                Console.WriteLine(string.Format("Central Model Path: {0}", model.CentralModelPath));
+            Console.WriteLine(string.Format("Last Saved Path: {0}", model.LastSavedPath));
+            Console.WriteLine(string.Format("Document Id: {0}", model.UniqueId));
+            Console.WriteLine(string.Format("Open Workset Settings: {0}", model.OpenWorksetConfig));
+            Console.WriteLine(string.Format("Document Increment: {0}", model.DocumentIncrement));
+
+            if (model.IsFamily) {
+                Console.WriteLine("Model is a Revit Family!");
+                Console.WriteLine(string.Format("Category Name: {0}", model.CategoryName));
+                Console.WriteLine(string.Format("Host Category Name: {0}", model.HostCategoryName));
+            }
+        }
+    }
 }
