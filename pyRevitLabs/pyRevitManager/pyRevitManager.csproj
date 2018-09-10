@@ -178,7 +178,7 @@
 
 rd /S /Q "$(TargetDir)lib"
 
-del /Q "$(TargetDir)*.pdb"
+REM del /Q "$(TargetDir)*.pdb"
 
 REM del /Q "$(TargetDir)*.config"
 

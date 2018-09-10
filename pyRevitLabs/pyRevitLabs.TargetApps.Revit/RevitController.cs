@@ -44,7 +44,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 foreach (string line in rawString.Split(new string[] { "\0", "\r\n" },
                                                         StringSplitOptions.RemoveEmptyEntries)) {
                     // find build number
-                    logger.Debug(string.Format("Parsing info from BasicInfoLine: \"{0}\"", line));
+                    logger.Debug(string.Format("Parsing info from BasicFileInfo: \"{0}\"", line));
                     var revitProduct = RevitProduct.LookupRevitProduct(line);
                     if (revitProduct != null)
                         RevitProduct = revitProduct;
@@ -148,7 +148,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
 
     public class RevitProduct {
-        private string _registeredInstallPath = null;
+        private string _registeredInstallPath = "";
 
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -240,11 +240,7 @@ namespace pyRevitLabs.TargetApps.Revit {
             // check if the string has build number e.g. "20110309_2315"
             Match match = BuildNumberFinder.Match(buildOrVersionString);
             if (match.Success) {
-                var buildNumber = match.Groups["build"].Value;
-                if (_revitBuildNumberLookupTable.ContainsKey(buildNumber)) {
-                    var version = new Version(_revitBuildNumberLookupTable[buildNumber].Item1);
-                    return new RevitProduct(buildNumber);
-                }
+                return new RevitProduct(match.Groups["build"].Value);
             }
 
             // check if the string is version e.g. "18.0.0.0"
@@ -271,19 +267,28 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public Version Version {
             get {
-                return new Version(_revitBuildNumberLookupTable[BuildNumber].Item1);
+                if (_revitBuildNumberLookupTable.ContainsKey(BuildNumber))
+                    return new Version(_revitBuildNumberLookupTable[BuildNumber].Item1);
+                else
+                    return null;
             }
         }
 
         public Version FullVersion {
             get {
-                return new Version("20" + Version.ToString());
+                if (Version != null)
+                    return new Version("20" + Version.ToString());
+                else
+                    return null;
             }
         }
 
         public string ProductName {
             get {
-                return string.Format("Autodesk Revit {0}", _revitBuildNumberLookupTable[BuildNumber].Item2);
+                if (_revitBuildNumberLookupTable.ContainsKey(BuildNumber))
+                    return string.Format("Autodesk Revit {0}", _revitBuildNumberLookupTable[BuildNumber].Item2);
+                else
+                    return "";
             }
         }
 
@@ -295,7 +300,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public string InstallLocation {
             get {
-                if (_registeredInstallPath == null) {
+                if (_registeredInstallPath == null && FullVersion != null) {
                     var expectedPath = Path.Combine(DefaultInstallLocation, "Autodesk", string.Format("Revit {0}", FullVersion.Major));
                     logger.Debug(string.Format("Expected path {0}", expectedPath));
                     if (Directory.Exists(expectedPath))

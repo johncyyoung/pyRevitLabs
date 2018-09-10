@@ -92,8 +92,8 @@ namespace pyRevitManager.Views {
     Options:
         -h --help                   Show this screen.
         -V --version                Show version.
+        --verbose                   Print info messages.
         --debug                     Print docopt options and logger debug messages.
-        --quiet                     Do not print any logger messages.
         --core                      Install original pyRevit core only (no defualt tools).
         --all                       All applicable items.
         --attached                  All Revits that are configured to load pyRevit.
@@ -114,16 +114,19 @@ namespace pyRevitManager.Views {
             config.AddRuleForAllLevels(consoleTarget);
             LogManager.Configuration = config;
             // disable debug by default
-            foreach (var rule in LogManager.Configuration.LoggingRules)
+            foreach (var rule in LogManager.Configuration.LoggingRules) {
+                rule.DisableLoggingForLevel(LogLevel.Info);
                 rule.DisableLoggingForLevel(LogLevel.Debug);
+            }
 
             // process arguments for logging level
             var argsList = new List<string>(args);
 
-            if (argsList.Contains("--quiet")) {
-                argsList.Remove("--quiet");
-                logLevel = pyRevitManagerLogLevel.Quiet;
-                LogManager.DisableLogging();
+            if (argsList.Contains("--verbose")) {
+                argsList.Remove("--verbose");
+                logLevel = pyRevitManagerLogLevel.InfoMessages;
+                foreach (var rule in LogManager.Configuration.LoggingRules)
+                    rule.EnableLoggingForLevel(LogLevel.Info);
             }
 
             if (argsList.Contains("--debug")) {
@@ -625,41 +628,53 @@ namespace pyRevitManager.Views {
 
                 // collect all revit models
                 var models = new List<RevitModelFile>();
+                var errorList = new List<(string, string)>();
                 if (targetPath != null) {
-                    logger.Debug(string.Format("Searching for revit files under \"{0}\"", targetPath));
+                    logger.Info(string.Format("Searching for revit files under \"{0}\"", targetPath));
                     FileAttributes attr = File.GetAttributes(targetPath);
                     if ((attr & FileAttributes.Directory) == FileAttributes.Directory) {
                         var files = Directory.EnumerateFiles(targetPath, "*.rvt", SearchOption.AllDirectories);
-                        logger.Debug(string.Format(" {0} revit files found under \"{1}\"", files.Count(), targetPath));
+                        logger.Info(string.Format(" {0} revit files found under \"{1}\"", files.Count(), targetPath));
                         foreach (var file in files) {
                             try {
-                                logger.Debug(string.Format("Revit file found \"{0}\"", file));
+                                logger.Info(string.Format("Revit file found \"{0}\"", file));
                                 var model = new RevitModelFile(file);
                                 models.Add(model);
                             }
-                            catch { }
+                            catch (Exception ex) {
+                                errorList.Add((file, ex.Message));
+                            }
                         }
                     }
 
                     // now print or output the results
                     if (outputCSV != null) {
+                        logger.Info(string.Format("Building CSV data to \"{0}\"", outputCSV));
                         var csv = new StringBuilder();
-                        csv.Append("filepath,productname,buildnumber,isworkshared,centralmodelpath,lastsavedpath,uniqueid\n");
+                        csv.Append("filepath,productname,buildnumber,isworkshared,centralmodelpath,lastsavedpath,uniqueid,error\n");
                         foreach (var model in models) {
                             var data = new List<string>() { model.FilePath,
-                                                        model.RevitProduct.ProductName,
-                                                        model.RevitProduct.BuildNumber,
-                                                        model.IsWorkshared ? "Yes" : "No",
-                                                        model.CentralModelPath,
-                                                        model.LastSavedPath,
-                                                        model.UniqueId.ToString()
-                                                    };
+                                                            model.RevitProduct != null ? model.RevitProduct.ProductName : "",
+                                                            model.RevitProduct != null ? model.RevitProduct.BuildNumber : "",
+                                                            model.IsWorkshared ? "Yes" : "No",
+                                                            model.CentralModelPath,
+                                                            model.LastSavedPath,
+                                                            model.UniqueId.ToString(),
+                                                            ""
+                                                           };
                             csv.Append(string.Join(",", data) + "\n");
                         }
 
+                        // write list of files with errors
+                        logger.Debug(string.Format("Adding errors to \"{0}\"", outputCSV));
+                        foreach (var errinfo in errorList)
+                            csv.Append(string.Format("{0},,,,,,,{1}\n", errinfo.Item1, errinfo.Item2));
+
+                        logger.Info(string.Format("Writing results to \"{0}\"", outputCSV));
                         File.WriteAllText(outputCSV, csv.ToString());
                     }
                     else {
+                        // report info on all files
                         foreach (var model in models) {
                             Console.WriteLine(model.FilePath);
                             Console.WriteLine(string.Format("Created in: {0} ({1}({2}))",
@@ -673,6 +688,11 @@ namespace pyRevitManager.Views {
                             Console.WriteLine(string.Format("Document Id: {0}", model.UniqueId));
                             Console.WriteLine();
                         }
+
+                        // write list of files with errors
+                        Console.WriteLine("An error occured while processing these files:");
+                        foreach (var errinfo in errorList)
+                            Console.WriteLine(string.Format("\"{0}\": {1}\n", errinfo.Item1, errinfo.Item2));
                     }
                 }
             }
