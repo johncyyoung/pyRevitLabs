@@ -653,13 +653,13 @@ namespace pyRevitManager.Views {
                         var csv = new StringBuilder();
                         csv.Append("filepath,productname,buildnumber,isworkshared,centralmodelpath,lastsavedpath,uniqueid,error\n");
                         foreach (var model in models) {
-                            var data = new List<string>() { model.FilePath,
-                                                            model.RevitProduct != null ? model.RevitProduct.ProductName : "",
-                                                            model.RevitProduct != null ? model.RevitProduct.BuildNumber : "",
-                                                            model.IsWorkshared ? "Yes" : "No",
-                                                            model.CentralModelPath,
-                                                            model.LastSavedPath,
-                                                            model.UniqueId.ToString(),
+                            var data = new List<string>() { string.Format("\"{0}\"", model.FilePath),
+                                                            string.Format("\"{0}\"", model.RevitProduct != null ? model.RevitProduct.ProductName : ""),
+                                                            string.Format("\"{0}\"", model.RevitProduct != null ? model.RevitProduct.BuildNumber : ""),
+                                                            string.Format("\"{0}\"", model.IsWorkshared ? "Yes" : "No"),
+                                                            string.Format("\"{0}\"", model.CentralModelPath),
+                                                            string.Format("\"{0}\"", model.LastSavedPath),
+                                                            string.Format("\"{0}\"", model.UniqueId.ToString()),
                                                             ""
                                                            };
                             csv.Append(string.Join(",", data) + "\n");
@@ -668,7 +668,7 @@ namespace pyRevitManager.Views {
                         // write list of files with errors
                         logger.Debug(string.Format("Adding errors to \"{0}\"", outputCSV));
                         foreach (var errinfo in errorList)
-                            csv.Append(string.Format("{0},,,,,,,{1}\n", errinfo.Item1, errinfo.Item2));
+                            csv.Append(string.Format("\"{0}\",,,,,,,\"{1}\"\n", errinfo.Item1, errinfo.Item2));
 
                         logger.Info(string.Format("Writing results to \"{0}\"", outputCSV));
                         File.WriteAllText(outputCSV, csv.ToString());
