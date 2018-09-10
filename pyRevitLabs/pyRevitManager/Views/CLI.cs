@@ -71,6 +71,7 @@ namespace pyRevitManager.Views {
         pyrevit revit list [--installed]
         pyrevit revit killall [<revit_year>]
         pyrevit revit fileinfo <file_path>
+        pyrevit revit listfiles <src_path> [--csv=<output_file>]
         pyrevit clearcache (--all | <revit_year>)
         pyrevit allowremotedll [(enable | disable)]
         pyrevit checkupdates [(enable | disable)]
@@ -600,19 +601,79 @@ namespace pyRevitManager.Views {
             // $ pyrevit revit fileinfo <file_path>
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "revit", "fileinfo")) {
-                var modelPath = TryGetValue(arguments, "<file_path>");
-                if (modelPath != null) {
-                    var model = new RevitModelFile(modelPath);
-                    Console.WriteLine(
-                        string.Format("Created in: {0} ({1}({2}))",
-                                        model.RevitProduct.ProductName,
-                                        model.RevitProduct.BuildNumber,
-                                        model.RevitProduct.BuildTarget));
+                var targetPath = TryGetValue(arguments, "<file_path>");
+                if (targetPath != null) {
+                    var model = new RevitModelFile(targetPath);
+                    Console.WriteLine(string.Format("Created in: {0} ({1}({2}))",
+                                                    model.RevitProduct.ProductName,
+                                                    model.RevitProduct.BuildNumber,
+                                                    model.RevitProduct.BuildTarget));
                     Console.WriteLine(string.Format("Workshared: {0}", model.IsWorkshared ? "Yes" : "No"));
                     if (model.IsWorkshared)
                         Console.WriteLine(string.Format("Central Model Path: {0}", model.CentralModelPath));
                     Console.WriteLine(string.Format("Last Saved Path: {0}", model.LastSavedPath));
                     Console.WriteLine(string.Format("Document Id: {0}", model.UniqueId));
+                }
+            }
+
+            // =======================================================================================================
+            // $ pyrevit revit listfiles <src_path> [--csv=<output_file>]
+            // =======================================================================================================
+            else if (VerifyCommand(activeKeys, "revit", "listfiles")) {
+                var targetPath = TryGetValue(arguments, "<src_path>");
+                var outputCSV = TryGetValue(arguments, "--csv");
+
+                // collect all revit models
+                var models = new List<RevitModelFile>();
+                if (targetPath != null) {
+                    logger.Debug(string.Format("Searching for revit files under \"{0}\"", targetPath));
+                    FileAttributes attr = File.GetAttributes(targetPath);
+                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory) {
+                        var files = Directory.EnumerateFiles(targetPath, "*.rvt", SearchOption.AllDirectories);
+                        logger.Debug(string.Format(" {0} revit files found under \"{1}\"", files.Count(), targetPath));
+                        foreach (var file in files) {
+                            try {
+                                logger.Debug(string.Format("Revit file found \"{0}\"", file));
+                                var model = new RevitModelFile(file);
+                                models.Add(model);
+                            }
+                            catch { }
+                        }
+                    }
+
+                    // now print or output the results
+                    if (outputCSV != null) {
+                        var csv = new StringBuilder();
+                        csv.Append("filepath,productname,buildnumber,isworkshared,centralmodelpath,lastsavedpath,uniqueid\n");
+                        foreach (var model in models) {
+                            var data = new List<string>() { model.FilePath,
+                                                        model.RevitProduct.ProductName,
+                                                        model.RevitProduct.BuildNumber,
+                                                        model.IsWorkshared ? "Yes" : "No",
+                                                        model.CentralModelPath,
+                                                        model.LastSavedPath,
+                                                        model.UniqueId.ToString()
+                                                    };
+                            csv.Append(string.Join(",", data) + "\n");
+                        }
+
+                        File.WriteAllText(outputCSV, csv.ToString());
+                    }
+                    else {
+                        foreach (var model in models) {
+                            Console.WriteLine(model.FilePath);
+                            Console.WriteLine(string.Format("Created in: {0} ({1}({2}))",
+                                                            model.RevitProduct.ProductName,
+                                                            model.RevitProduct.BuildNumber,
+                                                            model.RevitProduct.BuildTarget));
+                            Console.WriteLine(string.Format("Workshared: {0}", model.IsWorkshared ? "Yes" : "No"));
+                            if (model.IsWorkshared)
+                                Console.WriteLine(string.Format("Central Model Path: {0}", model.CentralModelPath));
+                            Console.WriteLine(string.Format("Last Saved Path: {0}", model.LastSavedPath));
+                            Console.WriteLine(string.Format("Document Id: {0}", model.UniqueId));
+                            Console.WriteLine();
+                        }
+                    }
                 }
             }
 

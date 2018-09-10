@@ -26,7 +26,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
 
         public RevitModelFile(string filePath) {
-            FilePath = filePath;
+            FilePath = filePath.NormalizeAsPath();
             ProcessBasicFileInfo();
         }
 
