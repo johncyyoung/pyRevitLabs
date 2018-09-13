@@ -54,7 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigManager.cs" />
+    <Compile Include="GlobalConfigs.cs" />
     <Compile Include="Errors.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GitInstaller.cs" />

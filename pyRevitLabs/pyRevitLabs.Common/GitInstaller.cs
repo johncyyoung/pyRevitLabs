@@ -195,6 +195,25 @@ namespace pyRevitLabs.Common {
             return Repository.IsValid(repoPath);
         }
 
+        // get the checkedout branch from repopath
+        // @handled @logs
+        public static string GetCheckedoutBranch(string repoPath) {
+            if (IsValidRepo(repoPath))
+                return new Repository(repoPath).Head.FriendlyName;
+            logger.Debug(string.Format("Can not determine head branch for \"{0}\"", repoPath));
+            return null;
+        }
+
+        // get the checkedout branch from repopath
+        // @handled @logs
+        public static string GetHeadCommit(string repoPath) {
+            if (IsValidRepo(repoPath))
+                return new Repository(repoPath).Head.Tip.Id.ToString();
+            logger.Debug(string.Format("Can not determine head commit hash for \"{0}\"", repoPath));
+            return null;
+        }
+
+    
         // private methods
         // rebase current branch to a specific commit
         // @handled @logs
@@ -204,5 +223,6 @@ namespace pyRevitLabs.Common {
             repo.Rebase.Start(repo.Head, repo.Head, tempBranch, commiterId, new RebaseOptions());
             repo.Branches.Remove(tempBranch);
         }
+
     }
 }

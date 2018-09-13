@@ -26,8 +26,6 @@ pyrevit install "C:\pyRevit"
 pyrevit install "C:\pyRevit" --branch=develop
 ```
 
-
-
 ``` bash
 pyrevit (-h | --help)
 pyrevit (-V | --version)

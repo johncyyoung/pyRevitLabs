@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using NLog;
+using OpenMcdf;
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.AccessControl;
 
-using NLog;
-using OpenMcdf;
-
-namespace pyRevitLabs.Common
-{
+namespace pyRevitLabs.Common {
     public static class CommonUtils
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -90,6 +85,8 @@ namespace pyRevitLabs.Common
 
         public static byte[] GetStructuredStorageStream(string filePath, string streamName)
         {
+            logger.Debug(string.Format("Attempting to read \"{0}\" stream from structured storage file at \"{1}\"",
+                                       streamName, filePath));
             int res = StgIsStorageFile(filePath);
 
             if (res == 0) {
@@ -112,11 +109,43 @@ namespace pyRevitLabs.Common
             if (CheckInternetConnection())
                 Process.Start(url);
             else {
-                if (errMsg != null)
-                    logger.Error(errMsg);
-                else
-                    logger.Error(string.Format("Error opening url \"{0}\". No internet connection detected.", url));
+                if (errMsg == null)
+                    errMsg = string.Format("Error opening url \"{0}\"", url);
+
+                logger.Error(string.Format("{0}. No internet connection detected.", errMsg));
             }
+        }
+
+        public static void SetFileSecurity(string filePath, string userNameWithDoman) {
+            //get file info
+            FileInfo fi = new FileInfo(filePath);
+
+            //get security access
+            FileSecurity fs = fi.GetAccessControl();
+
+            //remove any inherited access
+            fs.SetAccessRuleProtection(true, false);
+
+            //get any special user access
+            AuthorizationRuleCollection rules = 
+                fs.GetAccessRules(true, true, typeof(System.Security.Principal.NTAccount));
+
+            //remove any special access
+            foreach (FileSystemAccessRule rule in rules)
+                fs.RemoveAccessRule(rule);
+
+            //add current user with full control.
+            fs.AddAccessRule(
+                new FileSystemAccessRule(userNameWithDoman, FileSystemRights.FullControl, AccessControlType.Allow)
+                );
+
+            //add all other users delete only permissions.
+            //fs.AddAccessRule(
+            //    new FileSystemAccessRule("Authenticated Users", FileSystemRights.Delete, AccessControlType.Allow)
+            //    );
+
+            //flush security access.
+            File.SetAccessControl(filePath, fs);
         }
     }
 }

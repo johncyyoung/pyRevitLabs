@@ -57,7 +57,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public static string GetRevitAddonsFilePath(int revitYear, string addinFileName, bool allusers = false) {
-            var rootFolder = 
+            var rootFolder =
                 allusers ? Environment.SpecialFolder.CommonApplicationData : Environment.SpecialFolder.ApplicationData;
             return Path.Combine(GetRevitAddonsFolder(revitYear, allUsers: allusers), addinFileName + ".addin");
         }
@@ -76,7 +76,8 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public static void RemoveManifestFile(int revitYear, string addinName, bool currentAndAllUsers = true) {
-            var revitManifest = GetManifest(revitYear, addinName, allUsers: false);
+            RevitAddonManifest revitManifest = GetManifest(revitYear, addinName, allUsers: false);
+
             if (revitManifest != null) {
                 logger.Debug(string.Format("Removing manifest file \"{0}\"", revitManifest.FilePath));
                 File.Delete(revitManifest.FilePath);
@@ -114,8 +115,10 @@ namespace pyRevitLabs.TargetApps.Revit {
 
                 return null;
             }
-            else
-                throw new pyRevitResourceMissingException(addinPath);
+            else {
+                logger.Debug(string.Format("Addons path \"{0}\" does not exist", addinPath));
+            }
+            return null;
         }
     }
 }

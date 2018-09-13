@@ -1,0 +1,56 @@
+☐ fix cmd.exe pyrevit output
+	for now I have set the wpf app to a Console application to fix this issue.
+☐ create test suite
+☐ pyrevit allowremotedll (enable | disable)
+☐ exensions need to have .json file inside
+☐ no-git intallation/update system using downloaded zip files
+
+☐ attach [--engine=<engine_version>]
+☐ pyrevit extensions create (ui | lib) <extension_name> <dest_path> <repo_url>
+☐ pyrevit extensions tap
+☐ pyrevit extensions (tap | untap) <tap_name>
+
+
+new format
+reserved clone names? e.g. branch
+
+--quiet? it's already mostly quiet
+
+    Usage:
+        pyrevit env
+
+        pyrevit clones (info | open) [--clone=<clone_name>]
+
+        pyrevit extend <extension_name> <dest_path> [--branch=<branch_name>]
+        pyrevit extend (ui | lib) <extension_name> <repo_url> <dest_path> [--branch=<branch_name>]
+        pyrevit extensions
+        pyrevit extensions search <search_pattern>
+        pyrevit extensions (info | help | open) <extension_name>
+        pyrevit extensions delete <extension_name>
+        pyrevit extensions paths
+        pyrevit extensions paths forget --all
+        pyrevit extensions paths (add | forget) <extensions_path>
+        pyrevit extensions (enable | disable) <extension_name>
+        pyrevit extensions sources
+        pyrevit extensions sources (add | forget) <tap_url>
+
+        pyrevit init (ui | lib) <extension_name>
+        pyrevit init (tab | panel | pull | split | push | smart | command) <bundle_name>
+        pyrevit init templates
+        pyrevit init templates forget --all
+        pyrevit init templates (add | forget) <init_templates_path>
+        pyrevit init <template_name>
+
+        pyrevit update [--allclones | --clone=<clone_name>] [(--allexts | --extension=<extension_name>)]
+        pyrevit updates
+
+        pyrevit revits addons
+        pyrevit revits addons install <addon_name> <dest_path> [--allusers]
+        pyrevit revits addons uninstall <addon_name>
+
+        pyrevit config <template_config_path>
+        
+
+    Options:
+        --debug    Print docopt options and debug messages.
+        --quiet    Stay quiet. Do not print anything to console.
