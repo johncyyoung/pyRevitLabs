@@ -228,6 +228,19 @@ namespace pyRevitLabs.TargetApps.Revit {
         // keep this updated from:
         // https://knowledge.autodesk.com/support/revit-products/learn-explore/caas/sfdcarticles/sfdcarticles/How-to-tie-the-Build-number-with-the-Revit-update.html
         private static Dictionary<string, (string, string)> _revitBuildNumberLookupTable = new Dictionary<string, (string, string)>() {
+
+            // https://forums.autodesk.com/t5/revit-architecture-forum/sp3-build-20080101-2345/td-p/2152807
+            {"20080101_2345", ( "08.0.0", "2008 Architecture Service Pack 3" )},
+
+            // http://forums.augi.com/showthread.php?138574-Revit-Architecture-Door-Centerline-not-selectable-during-dimensioning
+            {"20100326_1700", ( "10.0.0", "2011 Architecture" )},
+
+            // http://revitclinic.typepad.com/my_weblog/2010/06/revit-2011-build-number-update-display.html
+            {"20100615_2115", ( "10.1.0", "2011 Architecture Web Update 1 Service Pack" )},
+
+            // http://revitoped.blogspot.com/2010/09/revit-web-update-2-posted-subscription.html
+            {"20100903_2115", ( "10.2.0", "2011 Architecture Web Update 2 Service Pack" )},
+
             {"20110309_2315", ( "12.0.0", "2012 First Customer Ship" )},
             {"20110622_0930", ( "12.0.1", "2012 Update Release 1" )},
             {"20110916_2132", ( "12.0.2", "2012 Update Release 2" )},
@@ -269,7 +282,11 @@ namespace pyRevitLabs.TargetApps.Revit {
             {"20160512_0715", ( "15.2.14", "2015 Release 2 Update Release 14  (Subscription only release)" )},
             {"20150220_1215", ( "16.0.428.0", "2016 First Customer Ship" )},
             {"20150506_1715", ( "16.0.462.0", "2016 Service Pack 1" )},
-            {"20150714_1515", ( "16.0.490.0", "2016 Service Pack 2" )},
+            
+            // https://knowledge.autodesk.com/support/revit-products/troubleshooting/caas/sfdcarticles/sfdcarticles/Revit-2016-Release-2-Error-1642.html
+            {"20150701_1515", ( "16.0.485.0", "2016 Unreleased Update")},
+
+            { "20150714_1515", ( "16.0.490.0", "2016 Service Pack 2" )},
             {"20151007_0715", ( "16.0.1063", "2016 Release 2 (R2)" )},
             {"20151209_0715", ( "16.0.1092.0", "2016 Update 1 for R2" )},
             {"20160126_1600", ( "16.0.1108.0", "2016 Update 2 for R2" )},
