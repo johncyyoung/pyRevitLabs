@@ -213,7 +213,6 @@ namespace pyRevitLabs.Common {
             return null;
         }
 
-    
         // private methods
         // rebase current branch to a specific commit
         // @handled @logs

@@ -147,5 +147,9 @@ namespace pyRevitLabs.Common {
             //flush security access.
             File.SetAccessControl(filePath, fs);
         }
+
+        public static void OpenInExplorer(string resourcePath) {
+            Process.Start("explorer.exe", resourcePath);
+        }
     }
 }
