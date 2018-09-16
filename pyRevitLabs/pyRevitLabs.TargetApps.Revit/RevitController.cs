@@ -211,7 +211,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public override string ToString() {
-            return string.Format("PID: {0} {1}", _process.Id, RevitProduct.ToString());
+            return string.Format("PID: {0} | {1}", _process.Id, RevitProduct.ToString());
         }
 
         public void Kill() {
@@ -221,7 +221,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
 
     public class RevitProduct {
-        private string _registeredInstallPath = "";
+        private string _registeredInstallPath = null;
 
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -331,7 +331,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public override string ToString() {
-            return String.Format("{0} Version:{1} Path: {2}", ProductName, Version, InstallLocation, LanguageCode);
+            return String.Format("{0} | Version: {1} | Language: {3} | Path: \"{2}\"", ProductName, Version, InstallLocation, LanguageCode);
         }
 
         public string BuildNumber { get; private set; }
@@ -349,8 +349,15 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public Version FullVersion {
             get {
-                if (Version != null)
-                    return new Version("20" + Version.ToString());
+                if (Version != null) {
+                    if (Version.Revision >=0 )
+                        return new Version(2000 + Version.Major, Version.Minor, Version.Build, Version.Revision);
+                    else if (Version.Build >= 0)
+                        return new Version(2000 + Version.Major, Version.Minor, Version.Build);
+                    else
+                        return new Version(2000 + Version.Major, Version.Minor);
+                }
+
                 else
                     return null;
             }
@@ -373,8 +380,13 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public string InstallLocation {
             get {
-                if (_registeredInstallPath == null && FullVersion != null) {
-                    var expectedPath = Path.Combine(DefaultInstallLocation, "Autodesk", string.Format("Revit {0}", FullVersion.Major));
+                if (_registeredInstallPath == null) {
+                    string revitInstallDirName = null;
+                    if (FullVersion != null)
+                        revitInstallDirName = string.Format("Revit {0}", FullVersion.Major);
+                    else if (Version != null)
+                        revitInstallDirName = string.Format("Revit {0}", 2000 + Version.Major);
+                    var expectedPath = Path.Combine(DefaultInstallLocation, "Autodesk", revitInstallDirName);
                     logger.Debug(string.Format("Expected path {0}", expectedPath));
                     if (Directory.Exists(expectedPath))
                         return expectedPath;

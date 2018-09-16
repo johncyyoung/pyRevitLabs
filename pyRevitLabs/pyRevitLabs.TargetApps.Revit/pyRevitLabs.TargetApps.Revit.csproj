@@ -55,7 +55,12 @@
     <Compile Include="Addons.cs" />
     <Compile Include="Kinoter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="pyRevit.cs" />
+    <Compile Include="PyRevit\pyRevitEnums.cs" />
+    <Compile Include="PyRevit\pyRevitExceptions.cs" />
+    <Compile Include="PyRevit\PyRevit.cs" />
+    <Compile Include="PyRevit\PyRevitClone.cs" />
+    <Compile Include="PyRevit\PyRevitConsts.cs" />
+    <Compile Include="PyRevit\PyRevitExtension.cs" />
     <Compile Include="RevitController.cs" />
     <Compile Include="RevitServerConfigManager.cs" />
   </ItemGroup>
