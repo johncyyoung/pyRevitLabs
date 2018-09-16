@@ -388,7 +388,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                         revitInstallDirName = string.Format("Revit {0}", 2000 + Version.Major);
                     var expectedPath = Path.Combine(DefaultInstallLocation, "Autodesk", revitInstallDirName);
                     logger.Debug(string.Format("Expected path {0}", expectedPath));
-                    if (Directory.Exists(expectedPath))
+                    if (CommonUtils.VerifyPath(expectedPath))
                         return expectedPath;
                 }
 

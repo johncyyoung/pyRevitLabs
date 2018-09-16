@@ -93,7 +93,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public static RevitAddonManifest GetManifest(int revitYear, string addinName, bool allUsers) {
             string addinPath = GetRevitAddonsFolder(revitYear, allUsers: allUsers);
-            if (Directory.Exists(addinPath)) {
+            if (CommonUtils.VerifyPath(addinPath)) {
                 foreach (string file in Directory.GetFiles(addinPath)) {
                     if (file.ToLower().EndsWith(".addin")) {
                         try {

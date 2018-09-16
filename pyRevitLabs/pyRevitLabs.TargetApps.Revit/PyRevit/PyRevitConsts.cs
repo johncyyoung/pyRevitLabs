@@ -9,67 +9,75 @@ using pyRevitLabs.Common;
 namespace pyRevitLabs.TargetApps.Revit {
     public static class PyRevitConsts {
         // consts for the official pyRevit repo
-        public static string pyRevitOriginalRepoPath = GlobalConfigs.UnderTest ?
-            @"https://github.com/eirannejad/rsparam.git" :
+        public const string OriginalRepoPath = 
             @"https://github.com/eirannejad/pyRevit.git";
 
-        public const string pyRevitExtensionsDefinitionFileUri =
+        public const string OriginalZipPath =
+            @"https://github.com/eirannejad/pyRevit/archive/{0}.zip";
+
+        public const string ExtensionsDefinitionFileUri =
             @"https://github.com/eirannejad/pyRevit/raw/master/extensions/extensions.json";
 
         // urls
-        public const string pyRevitBlogsUrl = @"https://eirannejad.github.io/pyRevit/";
-        public const string pyRevitDocsUrl = @"https://pyrevit.readthedocs.io/en/latest/";
-        public const string pyRevitSourceRepoUrl = @"https://github.com/eirannejad/pyRevit";
-        public const string pyRevitYoutubeUrl = @"https://www.youtube.com/pyrevit";
-        public const string pyRevitSupportRepoUrl = @"https://www.patreon.com/pyrevit";
+        public const string BlogsUrl = @"https://eirannejad.github.io/pyRevit/";
+        public const string DocsUrl = @"https://pyrevit.readthedocs.io/en/latest/";
+        public const string SourceRepoUrl = @"https://github.com/eirannejad/pyRevit";
+        public const string YoutubeUrl = @"https://www.youtube.com/pyrevit";
+        public const string SupportRepoUrl = @"https://www.patreon.com/pyrevit";
 
         // repo info
-        public const string pyRevitInstallName = "pyRevit";
-        public const string pyRevitOriginalRepoMainBranch = "master";
-        public const string pyRevitExtensionRepoMainBranch = "master";
+        public const string InstallName = "pyRevit";
+        public const string OriginalRepoMainBranch = "master";
+        public const string ExtensionRepoMainBranch = "master";
 
         // consts for creating pyRevit addon manifest file
-        public const string pyRevitAddinFileName = "pyRevit";
-        public const string pyRevitAddinName = "PyRevitLoader";
-        public const string pyRevitAddinId = "B39107C3-A1D7-47F4-A5A1-532DDF6EDB5D";
-        public const string pyRevitAddinClassName = "PyRevitLoader.PyRevitLoaderApplication";
-        public const string pyRevitVendorId = "eirannejad";
-        public const string pyRevitDllName = "pyRevitLoader.dll";
+        public const string AddinFileName = "pyRevit";
+        public const string AddinName = "PyRevitLoader";
+        public const string AddinId = "B39107C3-A1D7-47F4-A5A1-532DDF6EDB5D";
+        public const string AddinClassName = "PyRevitLoader.PyRevitLoaderApplication";
+        public const string VendorId = "eirannejad";
+        public const string DllName = "pyRevitLoader.dll";
 
         // consts for recording pyrevit.exe config in the pyRevit configuration file
-        public const string pyRevitAppdataDirName = "pyRevit";
-        public const string pyRevitAppdataLogsDirName = "Logs";
-        public const string pyRevitConfigFileName = "pyRevit_config.ini";
+        public const string AppdataDirName = "pyRevit";
+        public const string AppdataLogsDirName = "Logs";
         // core configs
-        public const string pyRevitCoreConfigSection = "core";
-        public const string pyRevitCheckUpdatesKey = "checkupdates";
-        public const string pyRevitAutoUpdateKey = "autoupdate";
-        public const string pyRevitVerboseKey = "verbose";
-        public const string pyRevitDebugKey = "debug";
-        public const string pyRevitFileLoggingKey = "filelogging";
-        public const string pyRevitStartupLogTimeoutKey = "startuplogtimeout";
-        public const string pyRevitUserExtensionsKey = "userextensions";
-        public const string pyRevitCompileCSharpKey = "compilecsharp";
-        public const string pyRevitCompileVBKey = "compilevb";
-        public const string pyRevitLoadBetaKey = "loadbeta";
-        public const string pyRevitRocketModeKey = "rocketmode";
-        public const string pyRevitBinaryCacheKey = "bincache";
-        public const string pyRevitMinDriveSpaceKey = "minhostdrivefreespace";
-        public const string pyRevitRequiredHostBuildKey = "requiredhostbuild";
-        public const string pyRevitOutputStyleSheet = "outputstylesheet";
-        public const int pyRevitDynamoCompatibleEnginerVer = 273;
-        // usage logging configs
-        public const string pyRevitUsageLoggingSection = "usagelogging";
-        public const string pyRevitUsageLoggingStatusKey = "active";
-        public const string pyRevitUsageLogFilePathKey = "logfilepath";
-        public const string pyRevitUsageLogServerUrlKey = "logserverurl";
+        public const string ConfigsFileRegexPattern = @".*[pyrevit|config].*\.ini";
+        public const string ConfigsCoreSection = "core";
+        public const string ConfigsCheckUpdatesKey = "checkupdates";
+        public const string ConfigsAutoUpdateKey = "autoupdate";
+        public const string ConfigsVerboseKey = "verbose";
+        public const string ConfigsDebugKey = "debug";
+        public const string ConfigsFileLoggingKey = "filelogging";
+        public const string ConfigsStartupLogTimeoutKey = "startuplogtimeout";
+        public const string ConfigsUserExtensionsKey = "userextensions";
+        public const string ConfigsCompileCSharpKey = "compilecsharp";
+        public const string ConfigsCompileVBKey = "compilevb";
+        public const string ConfigsLoadBetaKey = "loadbeta";
+        public const string ConfigsRocketModeKey = "rocketmode";
+        public const string ConfigsBinaryCacheKey = "bincache";
+        public const string ConfigsMinDriveSpaceKey = "minhostdrivefreespace";
+        public const string ConfigsRequiredHostBuildKey = "requiredhostbuild";
+        public const string ConfigsOutputStyleSheet = "outputstylesheet";
+        public const int ConfigsDynamoCompatibleEnginerVer = 273;
+        public const string ConfigsUsageLoggingSection = "usagelogging";
+        public const string ConfigsUsageLoggingStatusKey = "active";
+        public const string ConfigsUsageLogFilePathKey = "logfilepath";
+        public const string ConfigsUsageLogServerUrlKey = "logserverurl";
         // pyrevit.exe specific configs
-        public const string pyRevitManagerConfigSectionName = "environment";
-        public const string pyRevitManagerInstalledClonesKey = "clones";
+        public const string EnvConfigsSectionName = "environment";
+        public const string EnvConfigsInstalledClonesKey = "clones";
+        public const string EnvConfigsExtensionLookupSourcesKey = "sources";
+        public const string EnvConfigsTemplateSourcesKey = "templates";
+        public const string EnvConfigsExtensionDBFileName = "PyRevitExtensionsDB.json";
         // extensions
-        public const string pyRevitExtensionDisabledKey = "disabled";
-        public const string UIExtensionDirPostfix = ".extension";
-        public const string LibraryExtensionDirPostfix = ".lib";
+        public const string ExtensionJsonDisabledKey = "disabled";
+        public const string ExtensionUIPostfix = ".extension";
+        public const string ExtensionLibraryPostfix = ".lib";
 
+
+        public static string GetZipPackageUrl(string branchName) {
+            return string.Format(OriginalZipPath, branchName);
+        }
     }
 }

@@ -29,18 +29,18 @@ namespace pyRevitLabs.TargetApps.Revit {
         public static string MakeConfigName(string extName, PyRevitExtensionTypes extType) {
             return extType ==
                 PyRevitExtensionTypes.UIExtension ?
-                    extName + PyRevitConsts.UIExtensionDirPostfix : extName + PyRevitConsts.LibraryExtensionDirPostfix;
+                    extName + PyRevitConsts.ExtensionUIPostfix : extName + PyRevitConsts.ExtensionLibraryPostfix;
         }
 
         public static bool IsExtensionDirectory(string path) {
-            return path.EndsWith(PyRevitConsts.UIExtensionDirPostfix)
-                    || path.EndsWith(PyRevitConsts.LibraryExtensionDirPostfix);
+            return path.EndsWith(PyRevitConsts.ExtensionUIPostfix)
+                    || path.EndsWith(PyRevitConsts.ExtensionLibraryPostfix);
         }
 
         private string GetNameFromInstall() {
             return Path.GetFileName(InstallPath)
-                       .Replace(PyRevitConsts.UIExtensionDirPostfix, "")
-                       .Replace(PyRevitConsts.LibraryExtensionDirPostfix, "");
+                       .Replace(PyRevitConsts.ExtensionUIPostfix, "")
+                       .Replace(PyRevitConsts.ExtensionLibraryPostfix, "");
         }
 
         public bool BuiltIn { get { return bool.Parse(_jsonObj.builtin); } }

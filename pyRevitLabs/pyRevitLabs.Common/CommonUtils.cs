@@ -14,11 +14,15 @@ namespace pyRevitLabs.Common {
 
         [DllImport("ole32.dll")] private static extern int StgIsStorageFile([MarshalAs(UnmanagedType.LPWStr)] string pwcsName);
 
+        public static bool VerifyPath(string path) {
+            return new DirectoryInfo(path) != null;
+        }
+
         // helper for deleting directories recursively
         // @handled @logs
         public static void DeleteDirectory(string targetDir)
         {
-            if (Directory.Exists(targetDir)) {
+            if (CommonUtils.VerifyPath(targetDir)) {
                 logger.Debug(string.Format("Recursive deleting directory \"{0}\"", targetDir));
                 string[] files = Directory.GetFiles(targetDir);
                 string[] dirs = Directory.GetDirectories(targetDir);

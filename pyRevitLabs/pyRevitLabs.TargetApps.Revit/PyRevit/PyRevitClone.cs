@@ -73,25 +73,24 @@ namespace pyRevitLabs.TargetApps.Revit {
         // check if path is valid repo
         // @handled @logs
         public static bool VerifyRepoValidity(string repoPath) {
-            if (GlobalConfigs.UnderTest)
-                return true;
-
-            if (Directory.Exists(repoPath)) {
-                if (GitInstaller.IsValidRepo(repoPath)) {
+            var normRepoPath = repoPath.NormalizeAsPath();
+            logger.Debug(string.Format("Checking pyRevit repo validity \"{0}\"", normRepoPath));
+            if (CommonUtils.VerifyPath(normRepoPath)) {
+                if (GitInstaller.IsValidRepo(normRepoPath)) {
                     // determine repo validity based on directory availability
-                    var pyrevitDir = Path.Combine(repoPath, "pyrevitlib", "pyrevit").NormalizeAsPath();
-                    if (!Directory.Exists(pyrevitDir)) {
-                        throw new pyRevitInvalidpyRevitGitCloneException(repoPath);
+                    var pyrevitDir = Path.Combine(normRepoPath, "pyrevitlib", "pyrevit").NormalizeAsPath();
+                    if (!CommonUtils.VerifyPath(pyrevitDir)) {
+                        throw new pyRevitInvalidpyRevitGitCloneException(normRepoPath);
                     }
 
-                    logger.Debug(string.Format("Valid pyRevit directory \"{0}\"", repoPath));
+                    logger.Debug(string.Format("Valid pyRevit directory \"{0}\"", normRepoPath));
                     return true;
                 }
 
-                throw new pyRevitInvalidGitCloneException(repoPath);
+                throw new pyRevitInvalidGitCloneException(normRepoPath);
             }
 
-            throw new pyRevitResourceMissingException(repoPath);
+            throw new pyRevitResourceMissingException(normRepoPath);
         }
 
         // safely check if path is valid repo
