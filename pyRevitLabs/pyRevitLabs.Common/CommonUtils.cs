@@ -15,7 +15,7 @@ namespace pyRevitLabs.Common {
         [DllImport("ole32.dll")] private static extern int StgIsStorageFile([MarshalAs(UnmanagedType.LPWStr)] string pwcsName);
 
         public static bool VerifyPath(string path) {
-            return new DirectoryInfo(path) != null;
+            return Directory.Exists(path);
         }
 
         // helper for deleting directories recursively
