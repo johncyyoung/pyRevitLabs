@@ -3,3 +3,4 @@
 ☐ create test suite
 ☐ pyrevit allowremotedll (enable | disable)
 ☐ exensions need to have .json file inside
+☐ no-git intallation/update system using downloaded zip files

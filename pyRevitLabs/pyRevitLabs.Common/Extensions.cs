@@ -88,12 +88,12 @@ namespace pyRevitLabs.Common.Extensions {
             return new Version(version);
         }
 
-        public static List<string> ConvertFromCommaSeparated(this string commaSeparatedValue) {
+        public static List<string> ConvertFromCommaSeparatedString(this string commaSeparatedValue) {
             return new List<string>(commaSeparatedValue.Split(','));
         }
 
-        public static List<string> ConvertFromTomlList(this string commaSeparatedValue) {
-            var cleanedValue = commaSeparatedValue.Replace("[", "").Replace("]", "");
+        public static List<string> ConvertFromTomlListString(this string tomlListString) {
+            var cleanedValue = tomlListString.Replace("[", "").Replace("]", "");
             var quotedValues = new List<string>(cleanedValue.Split(','));
             var results = new List<string>();
             var valueFinder = new Regex(@"'(?<value>.+)'");
@@ -101,6 +101,19 @@ namespace pyRevitLabs.Common.Extensions {
                 var m = valueFinder.Match(value);
                 if (m.Success)
                     results.Add(m.Groups["value"].Value);
+            }
+            return results;
+        }
+
+        public static Dictionary<string, string> ConvertFromTomlDictString(this string tomlDictString) {
+            var cleanedValue = tomlDictString.Replace("{", "").Replace("}", "");
+            var quotedKeyValuePairs = new List<string>(cleanedValue.Split(','));
+            var results = new Dictionary<string, string>();
+            var valueFinder = new Regex(@"'(?<key>.+)'\s*:\s*'(?<value>.+)'");
+            foreach (var keyValueString in quotedKeyValuePairs) {
+                var m = valueFinder.Match(keyValueString);
+                if (m.Success)
+                    results[m.Groups["key"].Value] = m.Groups["value"].Value;
             }
             return results;
         }
@@ -142,6 +155,18 @@ namespace pyRevitLabs.Common.Extensions {
             foreach (var value in sourceValues)
                 quotedValues.Add(string.Format("'{0}'", value));
             return "[" + string.Join(",", quotedValues) + "]";
+        }
+    }
+
+    public static class StringDictionaryExtensions {
+        public static string ConvertToTomlDictString(this IDictionary<string, string> sourceValues) {
+            var quotedValues = new List<string>();
+            foreach (var keyValuePair in sourceValues) {
+                string quotedKey = string.Format("'{0}'", keyValuePair.Key);
+                string quotedValue = string.Format("'{0}'", keyValuePair.Value);
+                quotedValues.Add(string.Format("{0}:{1}", quotedKey, quotedValue));
+            }
+            return "{" + string.Join(",", quotedValues) + "}";
         }
     }
 }
