@@ -69,8 +69,16 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public PyRevitExtensionTypes Type {
             get {
-                return _jsonObj.type == "extension" ?
-                    PyRevitExtensionTypes.UIExtension : PyRevitExtensionTypes.LibraryExtension;
+                if (_jsonObj != null) {
+                    return _jsonObj.type == "extension" ?
+                        PyRevitExtensionTypes.UIExtension : PyRevitExtensionTypes.LibraryExtension;
+                }
+                else if (InstallPath != null) {
+                    return InstallPath.Contains(PyRevitConsts.ExtensionUIPostfix) ?
+                        PyRevitExtensionTypes.UIExtension : PyRevitExtensionTypes.LibraryExtension;
+                }
+
+                return PyRevitExtensionTypes.Unknown;
             }
         }
 
@@ -79,17 +87,5 @@ namespace pyRevitLabs.TargetApps.Revit {
                 return MakeConfigName(Name, Type);
             }
         }
-
-        // force update extension
-        // @handled @logs
-        public void Update() {
-            logger.Debug(string.Format("Updating extension \"{0}\"", Name));
-            logger.Debug(string.Format("Updating extension repo at \"{0}\"", InstallPath));
-            var res = GitInstaller.ForcedUpdate(InstallPath);
-            if (res <= UpdateStatus.Conflicts)
-                throw new pyRevitException(string.Format("Error updating extension \"{0}\" installed at \"{1}\"",
-                                                         Name, InstallPath));
-        }
-
     }
 }

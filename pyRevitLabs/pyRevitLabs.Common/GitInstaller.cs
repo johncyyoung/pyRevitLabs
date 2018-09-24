@@ -149,7 +149,7 @@ namespace pyRevitLabs.Common {
                     if (cmt.Id.ToString().StartsWith(commitHash)) {
                         logger.Debug("Commit found.");
                         RebaseToCommit(repo, cmt);
-                        break;
+                        return;
                     }
                 }
             }

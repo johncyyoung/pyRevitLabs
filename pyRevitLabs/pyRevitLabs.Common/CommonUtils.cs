@@ -20,10 +20,11 @@ namespace pyRevitLabs.Common {
 
         // helper for deleting directories recursively
         // @handled @logs
-        public static void DeleteDirectory(string targetDir)
+        public static void DeleteDirectory(string targetDir, bool verbose = true)
         {
             if (CommonUtils.VerifyPath(targetDir)) {
-                logger.Debug(string.Format("Recursive deleting directory \"{0}\"", targetDir));
+                if (verbose)
+                    logger.Debug(string.Format("Recursive deleting directory \"{0}\"", targetDir));
                 string[] files = Directory.GetFiles(targetDir);
                 string[] dirs = Directory.GetDirectories(targetDir);
 
@@ -34,7 +35,7 @@ namespace pyRevitLabs.Common {
                     }
 
                     foreach (string dir in dirs) {
-                        DeleteDirectory(dir);
+                        DeleteDirectory(dir, verbose: false);
                     }
 
                     Directory.Delete(targetDir, false);
@@ -43,6 +44,28 @@ namespace pyRevitLabs.Common {
                     throw new pyRevitException(string.Format("Error recursive deleting directory \"{0}\" | {1}",
                                                              targetDir, ex.Message));
                 }
+            }
+        }
+
+        // helper for copying a directory recursively
+        // @handled @logs
+        public static void CopyDirectory(string sourceDir, string destDir) {
+            logger.Debug(string.Format("Copying \"{0}\" to \"{1}\"", sourceDir, destDir));
+            try {
+                // create all of the directories
+                foreach (string dirPath in Directory.GetDirectories(sourceDir, "*",
+                    SearchOption.AllDirectories))
+                    Directory.CreateDirectory(dirPath.Replace(sourceDir, destDir));
+
+                // copy all the files & Replaces any files with the same name
+                foreach (string newPath in Directory.GetFiles(sourceDir, "*.*",
+                    SearchOption.AllDirectories))
+                    File.Copy(newPath, newPath.Replace(sourceDir, destDir), true);
+            }
+            catch (Exception ex) {
+                throw new pyRevitException(
+                    string.Format("Error copying \"{0}\" to \"{1}\" | {2}", sourceDir, destDir, ex.Message)
+                    );
             }
         }
 

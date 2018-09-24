@@ -23,10 +23,10 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
     }
 
-    public class pyRevitInvalidpyRevitGitCloneException : pyRevitInvalidGitCloneException {
-        public pyRevitInvalidpyRevitGitCloneException() { }
+    public class pyRevitInvalidpyRevitCloneException : pyRevitInvalidGitCloneException {
+        public pyRevitInvalidpyRevitCloneException() { }
 
-        public pyRevitInvalidpyRevitGitCloneException(string invalidClonePath) : base(invalidClonePath) { }
+        public pyRevitInvalidpyRevitCloneException(string invalidClonePath) : base(invalidClonePath) { }
 
         public override string Message {
             get {

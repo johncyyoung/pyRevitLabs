@@ -14,6 +14,7 @@ namespace pyRevitLabs.TargetApps.Revit {
 
     // pyrevit extension types
     public enum PyRevitExtensionTypes {
+        Unknown,
         UIExtension,
         LibraryExtension,
     }

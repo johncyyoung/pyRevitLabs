@@ -9,9 +9,10 @@ using pyRevitLabs.Common;
 namespace pyRevitLabs.TargetApps.Revit {
     public static class PyRevitConsts {
         // consts for the official pyRevit repo
-        public const string OriginalRepoPath = 
+        public const string OriginalRepoPath =
             @"https://github.com/eirannejad/pyRevit.git";
 
+        public const string OriginalZipInternalBranchPath = @"{0}-{1}";
         public const string OriginalZipPath =
             @"https://github.com/eirannejad/pyRevit/archive/{0}.zip";
 
@@ -26,9 +27,14 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string SupportRepoUrl = @"https://www.patreon.com/pyrevit";
 
         // repo info
-        public const string InstallName = "pyRevit";
-        public const string OriginalRepoMainBranch = "master";
-        public const string ExtensionRepoMainBranch = "master";
+        public const string DefaultCloneInstallName = "pyRevit";
+        public const string DefaultCopyInstallName = "pyRevitCopy";
+        public const string OriginalRepoDefaultBranch = "master";
+        public const string ExtensionRepoDefaultBranch = "master";
+        public const string PyRevitfileFilename = "PyRevitfile";
+
+        // archive clones
+        public const string DeployFromArchiveConfigsFilename = ".pyrevitargs";
 
         // consts for creating pyRevit addon manifest file
         public const string AddinFileName = "pyRevit";
@@ -42,6 +48,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string AppdataDirName = "pyRevit";
         public const string AppdataLogsDirName = "Logs";
         // core configs
+        public const string DefaultConfigsFileName = @"pyRevit_config.ini";
         public const string ConfigsFileRegexPattern = @".*[pyrevit|config].*\.ini";
         public const string ConfigsCoreSection = "core";
         public const string ConfigsCheckUpdatesKey = "checkupdates";
@@ -78,6 +85,10 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public static string GetZipPackageUrl(string branchName) {
             return string.Format(OriginalZipPath, branchName);
+        }
+
+        public static string GetZipPackageInternalBranchPath(string branchName) {
+            return string.Format(OriginalZipInternalBranchPath, DefaultCloneInstallName, branchName);
         }
     }
 }
