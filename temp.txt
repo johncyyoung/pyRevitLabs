@@ -1,0 +1,6 @@
+☐ fix cmd.exe pyrevit output
+	for now I have set the wpf app to a Console application to fix this issue.
+☐ create test suite
+☐ pyrevit allowremotedll (enable | disable)
+☐ exensions need to have .json file inside
+☐ no-git intallation/update system using downloaded zip files
