@@ -1,11 +1,12 @@
-﻿using NLog;
-using OpenMcdf;
+﻿using OpenMcdf;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
+
+using NLog;
 
 namespace pyRevitLabs.Common {
     public static class CommonUtils

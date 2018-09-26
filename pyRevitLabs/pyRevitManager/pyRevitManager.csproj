@@ -169,13 +169,13 @@
       <Version>1.2.9</Version>
     </PackageReference>
     <PackageReference Include="docopt.net">
-      <Version>0.6.1.9</Version>
+      <Version>0.6.1.10</Version>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>2.0.3</Version>
     </PackageReference>
     <PackageReference Include="NLog">
-      <Version>4.5.9</Version>
+      <Version>4.5.10</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
