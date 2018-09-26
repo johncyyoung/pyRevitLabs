@@ -461,12 +461,14 @@ namespace pyRevitLabs.TargetApps.Revit {
                                   int engineVer = 000,
                                   bool allUsers = false) {
             // make the addin manifest file
+            var engine = clone.GetEngine(engineVer);
+
             logger.Debug(string.Format("Attaching Clone \"{0}\" @ \"{1}\" to Revit {0}",
                                         clone.Name, clone.ClonePath, revitYear));
             Addons.CreateManifestFile(revitYear,
                                       PyRevitConsts.AddinFileName,
                                       PyRevitConsts.AddinName,
-                                      clone.GetEnginePath(engineVer),
+                                      engine.LoaderPath,
                                       PyRevitConsts.AddinId,
                                       PyRevitConsts.AddinClassName,
                                       PyRevitConsts.VendorId,
