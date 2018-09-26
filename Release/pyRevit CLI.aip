@@ -26,7 +26,7 @@
     <ROW Property="ProductCode" Value="1033:{070ED20E-5543-4332-ADC2-8620C014E786} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="pyRevit CLI"/>
-    <ROW Property="ProductVersion" Value="0.1.0.0" Type="32"/>
+    <ROW Property="ProductVersion" Value="0.1.1.0" Type="32"/>
     <ROW Property="REBOOT" MultiBuildValue="DefaultBuild:ReallySuppress"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND;AI_SETUPEXEPATH;SETUPEXEDIR"/>
     <ROW Property="UpgradeCode" Value="{8181E458-B82E-4A4D-BAAC-784756C4B506}"/>
@@ -97,10 +97,9 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
     <ROW File="Colorful.Console.dll" Component_="Colorful.Console.dll" FileName="COLORF~1.DLL|Colorful.Console.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\Colorful.Console.dll" SelfReg="false" NextFile="Nett.pdb"/>
     <ROW File="DocoptNet.dll" Component_="DocoptNet.dll" FileName="DOCOPT~1.DLL|DocoptNet.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\DocoptNet.dll" SelfReg="false" NextFile="System.Runtime.Serialization.Primitives.dll"/>
-    <ROW File="DocoptNet.pdb" Component_="DocoptNet.dll" FileName="DOCOPT~1.PDB|DocoptNet.pdb" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\DocoptNet.pdb" SelfReg="false" NextFile="NETFramework4.7.1webinstaller.aip"/>
     <ROW File="LibGit2Sharp.dll" Component_="LibGit2Sharp.dll" FileName="LIBGIT~1.DLL|LibGit2Sharp.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\LibGit2Sharp.dll" SelfReg="false" NextFile="MadMilkman.Ini.dll"/>
     <ROW File="LibGit2Sharp.dll.config" Component_="LibGit2Sharp.dll.config" FileName="LIBGIT~1.CON|LibGit2Sharp.dll.config" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\LibGit2Sharp.dll.config" SelfReg="false" NextFile="System.Xml.XPath.XDocument.dll"/>
-    <ROW File="LibGit2Sharp.pdb" Component_="LibGit2Sharp.dll" FileName="LIBGIT~1.PDB|LibGit2Sharp.pdb" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\LibGit2Sharp.pdb" SelfReg="false" NextFile="DocoptNet.pdb"/>
+    <ROW File="LibGit2Sharp.pdb" Component_="LibGit2Sharp.dll" FileName="LIBGIT~1.PDB|LibGit2Sharp.pdb" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\LibGit2Sharp.pdb" SelfReg="false" NextFile="NETFramework4.7.1webinstaller.aip"/>
     <ROW File="MadMilkman.Ini.dll" Component_="MadMilkman.Ini.dll" FileName="MADMIL~1.DLL|MadMilkman.Ini.dll" Attributes="0" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release\MadMilkman.Ini.dll" SelfReg="false" NextFile="OpenMcdf.dll"/>
     <ROW File="NETCoreRuntime2.0.7x64.aip" Component_="NETCoreRuntime2.0.7x64.aip" FileName="NETCOR~1.AIP|.NET Core Runtime 2.0.7 x64.aip" Attributes="2" SourcePath=".NET Core Runtime 2.0.7 x64\.NET Core Runtime 2.0.7 x64.aip" SelfReg="false"/>
     <ROW File="NETFramework4.7.1webinstaller.aip" Component_="NETFramework4.7.1webinstaller.aip" FileName="NETFRA~1.AIP|.NET Framework 4.7.1 (web installer).aip" Attributes="2" SourcePath=".NET Framework 4.7.1 (web installer)\.NET Framework 4.7.1 (web installer).aip" SelfReg="false" NextFile="NETCoreRuntime2.0.7x64.aip"/>
@@ -143,7 +142,7 @@
     <ROW Action="AI_DetectSoftware" Sequence="101"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
-    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFileName="[|ProductName]_[|ProductVersion]" Languages="en" InstallationType="4" CabsLocation="1" PackageType="1" FilesInsideExe="true" ExtractionFolder="[AppDataFolder][|Manufacturer]\[|ProductName] [|ProductVersion]\install" ExtUI="true" UseLargeSchema="true" MsiPackageType="x64"/>
+    <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFileName="[|ProductName]_[|ProductVersion]_signed" Languages="en" InstallationType="4" CabsLocation="1" PackageType="1" FilesInsideExe="true" ExtractionFolder="[AppDataFolder][|Manufacturer]\[|ProductName] [|ProductVersion]\install" ExtUI="true" UseLargeSchema="true" MsiPackageType="x64"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
     <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
@@ -260,8 +259,6 @@
     <ROW Name="pyRevit.exe" SourcePath="..\pyRevitLabs\pyRevitManager\pyRevit.ico" Index="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
-    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
-    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="748"/>
     <ROW Action="AI_STORE_LOCATION" Condition="(Not Installed) OR REINSTALL" Sequence="1502"/>
     <ROW Action="AI_PREPARE_UPGRADE" Condition="AI_UPGRADE=&quot;No&quot; AND (Not Installed)" Sequence="1399"/>
     <ROW Action="AI_ResolveKnownFolders" Sequence="52"/>
@@ -284,9 +281,10 @@
     <ROW Action="AI_GetArpIconPath" Sequence="1401"/>
     <ROW Action="AI_RemoveExternalUIStub" Condition="(REMOVE=&quot;ALL&quot;) AND ((VersionNT &gt; 500) OR((VersionNT = 500) AND (ServicePackLevel &gt;= 4)))" Sequence="1501"/>
     <ROW Action="AI_AppSearchEx" Sequence="101"/>
+    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="201"/>
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstallUISequenceComponent">
-    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="748"/>
     <ROW Action="AI_ResolveKnownFolders" Sequence="53"/>
     <ROW Action="AI_DpiContentScale" Sequence="52"/>
     <ROW Action="AI_EnableDebugLog" Sequence="51"/>
@@ -295,6 +293,7 @@
     <ROW Action="AI_BACKUP_AI_SETUPEXEPATH" Sequence="99"/>
     <ROW Action="AI_RESTORE_AI_SETUPEXEPATH" Condition="AI_SETUPEXEPATH_ORIGINAL" Sequence="102"/>
     <ROW Action="AI_AppSearchEx" Sequence="101"/>
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiLaunchConditionsComponent">
     <ROW Condition="( Version9X OR VersionNT64 )" Description="[ProductName] cannot be installed on [WindowsTypeNTDisplay]." DescriptionLocId="AI.LaunchCondition.NoNT" IsPredefined="true" Builds="DefaultBuild"/>
@@ -351,8 +350,8 @@
     <ATTRIBUTE name="PrereqsOrder" value="F0010743E2808FF669B5E11421 A29CF2DAF30403F8D44F6E2FF8D1654"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.PreReqSearchComponent">
-    <ROW SearchKey="A29CF2DAF30403F8D44F6E2FF8D1654Release" Prereq="A29CF2DAF30403F8D44F6E2FF8D1654" SearchType="9" SearchString="HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\Release" RefContent="G461309" Order="1" Property="PreReqSearch_D5734F904894AAF3007352_A29CF2DAF30403F8D44F6E2FF8D1654"/>
-    <ROW SearchKey="F0010743E2808FF669B5E11421Micro" Prereq="F0010743E2808FF669B5E11421" SearchType="12" SearchString="HKLM\SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App" VerMin="2.0.7" Order="1" Property="PreReqSearch_B0F9A029CA4177BAFD09E9_F0010743E2808FF669B5E11421"/>
+    <ROW SearchKey="A29CF2DAF30403F8D44F6E2FF8D1654Release" Prereq="A29CF2DAF30403F8D44F6E2FF8D1654" SearchType="9" SearchString="HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\Release" RefContent="G461309" Order="1" Property="PreReqSearch_D5734F904894AAF3007352"/>
+    <ROW SearchKey="F0010743E2808FF669B5E11421Micro" Prereq="F0010743E2808FF669B5E11421" SearchType="12" SearchString="HKLM\SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App" VerMin="2.0.7" Order="1" Property="PreReqSearch_B0F9A029CA4177BAFD09E9"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.SynchronizedFolderComponent">
     <ROW Directory_="APPDIR" SourcePath="..\pyRevitLabs\pyRevitManager\bin\Release" Feature="MainFeature" ExcludePattern="*~|#*#|%*%|._|CVS|.cvsignore|SCCS|vssver.scc|mssccprj.scc|vssver2.scc|.svn|.DS_Store" ExcludeFlags="6"/>

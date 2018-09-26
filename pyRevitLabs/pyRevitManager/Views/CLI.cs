@@ -52,7 +52,7 @@ namespace pyRevitManager.Views {
         pyrevit clones commit <clone_name> [<commit_hash>]
         pyrevit clones update (--all | <clone_name>)
         pyrevit clones deployments <clone_name>
-        pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --all) [--allusers]
+        pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --all | --attached) [--allusers]
         pyrevit attached
         pyrevit detach (--all | <revit_year>)
         pyrevit extend <extension_name> <dest_path> [--branch=<branch_name>]
@@ -428,7 +428,7 @@ namespace pyRevitManager.Views {
             }
 
             // =======================================================================================================
-            // $ pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --all) [--allusers]
+            // $ pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --all | --attached) [--allusers]
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "attach")
                     || VerifyCommand(activeKeys, "attach", "latest")
@@ -447,6 +447,13 @@ namespace pyRevitManager.Views {
 
                     if (arguments["--all"].IsTrue) {
                         foreach (var revit in RevitController.ListInstalledRevits())
+                            PyRevit.Attach(revit.FullVersion.Major,
+                                           clone,
+                                           engineVer: engineVer,
+                                           allUsers: arguments["--allusers"].IsTrue);
+                    }
+                    else if (arguments["--attached"].IsTrue) {
+                        foreach (var revit in PyRevit.GetAttachedRevits())
                             PyRevit.Attach(revit.FullVersion.Major,
                                            clone,
                                            engineVer: engineVer,
