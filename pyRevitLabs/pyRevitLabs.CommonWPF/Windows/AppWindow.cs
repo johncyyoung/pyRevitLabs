@@ -1,7 +1,10 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.ComponentModel;
 
 // packages
 using MahApps.Metro;
@@ -18,13 +21,13 @@ namespace pyRevitLabs.CommonWPF.Windows {
 
         private void InitializeComponent() {
             // setting up user name and app version buttons
-            var winButtons = new WindowCommands() {
-                Items = {
-                    new Button() { Content = CurrentUser },
-                    new Button() { Content = AppVersion },
-                }
-            };
-            RightWindowCommands = winButtons;
+            var versionButton = new Button() { Content = AppVersion };
+            versionButton.Click += Copy_Button_Title;
+
+            var userButton = new Button() { Content = CurrentUser };
+            userButton.Click += Copy_Button_Title;
+
+            RightWindowCommands = new WindowCommands() { Items = { userButton, versionButton} };
 
             TitleCharacterCasing = CharacterCasing.Normal;
             SaveWindowPosition = true;
@@ -40,10 +43,31 @@ namespace pyRevitLabs.CommonWPF.Windows {
         }
 
         // app version
-        public string AppVersion { get { return Assembly.GetExecutingAssembly().GetName().Version.ToString(); } }
+        public virtual string AppVersion { get { return Assembly.GetExecutingAssembly().GetName().Version.ToString(); } }
 
         // current user id
         public string CurrentUser { get { return System.Security.Principal.WindowsIdentity.GetCurrent().Name; } }
+
+        // helper for loading icons into window
+        public ImageSource LoadIcon(Uri path) {
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = path;
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            return bitmap;
+        }
+
+        // window button standard hander: copies to clipboard
+        private void Copy_Button_Title(object sender, RoutedEventArgs e) {
+            var button = e.Source as Button;
+            Clipboard.SetText(button.Content.ToString());
+            var notif = new ToolTip() { Content = "Copied to Clipboard" };
+            notif.StaysOpen = false;
+            notif.IsOpen = true;
+        }
 
     }
 }
