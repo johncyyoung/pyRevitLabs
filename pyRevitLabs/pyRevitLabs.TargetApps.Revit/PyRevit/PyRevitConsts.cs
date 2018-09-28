@@ -43,6 +43,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string AddinClassName = "PyRevitLoader.PyRevitLoaderApplication";
         public const string VendorId = "eirannejad";
         public const string DllName = "pyRevitLoader.dll";
+        public const int ConfigsDynamoCompatibleEnginerVer = 273;
 
         // consts for recording pyrevit.exe config in the pyRevit configuration file
         public const string AppdataDirName = "pyRevit";
@@ -66,7 +67,6 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string ConfigsMinDriveSpaceKey = "minhostdrivefreespace";
         public const string ConfigsRequiredHostBuildKey = "requiredhostbuild";
         public const string ConfigsOutputStyleSheet = "outputstylesheet";
-        public const int ConfigsDynamoCompatibleEnginerVer = 273;
         public const string ConfigsUsageLoggingSection = "usagelogging";
         public const string ConfigsUsageLoggingStatusKey = "active";
         public const string ConfigsUsageLogFilePathKey = "logfilepath";

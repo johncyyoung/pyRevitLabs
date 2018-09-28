@@ -290,7 +290,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 throw new pyRevitException("There are no deployments configured.");
 
             bool deploymentFound = false;
-            foreach (var dep in PyRevitClone.GetDeployments(archivePath)) {
+            foreach (var dep in PyRevitClone.GetConfiguredDeployments(archivePath)) {
                 // compare lowercase deployment names
                 if (dep.Name.ToLower() == deploymentName.ToLower()) {
                     logger.Debug(string.Format("Found deployment \"{0}\"", deploymentName));
@@ -479,7 +479,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         // @handled @logs
         public static void AttachToAll(PyRevitClone clone, int engineVer = 000, bool allUsers = false) {
             foreach (var revit in RevitController.ListInstalledRevits())
-                Attach(revit.FullVersion.Major, clone, engineVer: engineVer, allUsers: allUsers);
+                Attach(revit.ProductYear, clone, engineVer: engineVer, allUsers: allUsers);
         }
 
         // detach from revit version
@@ -489,11 +489,18 @@ namespace pyRevitLabs.TargetApps.Revit {
             Addons.RemoveManifestFile(revitYear, PyRevitConsts.AddinName);
         }
 
+        // detach pyrevit attachment
+        // @handled @logs
+        public static void Detach(PyRevitAttachment attachment) {
+            logger.Debug(string.Format("Detaching from Revit {0}", attachment.Product.ProductYear));
+            Detach(attachment.Product.ProductYear);
+        }
+
         // detach from all attached revits
         // @handled @logs
         public static void DetachAll() {
-            foreach (var revit in GetAttachedRevits()) {
-                Detach(revit.FullVersion.Major);
+            foreach (var attachment in GetAttachments()) {
+                Detach(attachment);
             }
         }
 
@@ -520,19 +527,34 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         // get all attached revit versions
         // @handled @logs
-        public static List<RevitProduct> GetAttachedRevits() {
-            var attachedRevits = new List<RevitProduct>();
+        public static List<PyRevitAttachment> GetAttachments() {
+            var attachments = new List<PyRevitAttachment>();
 
             foreach (var revit in RevitController.ListInstalledRevits()) {
                 logger.Debug(string.Format("Checking attachment to Revit \"{0}\"", revit.Version));
-                if (Addons.GetManifest(revit.FullVersion.Major, PyRevitConsts.AddinName, allUsers: false) != null
-                    || Addons.GetManifest(revit.FullVersion.Major, PyRevitConsts.AddinName, allUsers: true) != null) {
+                if (Addons.GetManifest(revit.ProductYear, PyRevitConsts.AddinName, allUsers: false) != null) {
+                    var clone = GetAttachedClone(revit.ProductYear);
+                    var attachment = new PyRevitAttachment(revit, clone, PyRevitAttachmentType.CurrentUser);
+                    attachments.Add(attachment);
+                }
+                else if(Addons.GetManifest(revit.ProductYear, PyRevitConsts.AddinName, allUsers: true) != null) {
                     logger.Debug(string.Format("pyRevit is attached to Revit \"{0}\"", revit.Version));
-                    attachedRevits.Add(revit);
+                    var clone = GetAttachedClone(revit.ProductYear);
+                    var attachment = new PyRevitAttachment(revit, clone, PyRevitAttachmentType.AllUsers);
+                    attachments.Add(attachment);
                 }
             }
 
-            return attachedRevits;
+            return attachments;
+        }
+
+        // get attachment for a revit version
+        // @handled @logs
+        public static PyRevitAttachment GetAttached(int revitYear) {
+            foreach (var attachment in GetAttachments())
+                if (attachment.Product.ProductYear == revitYear)
+                    return attachment;
+            return null;
         }
 
         // managing clones ===========================================================================================

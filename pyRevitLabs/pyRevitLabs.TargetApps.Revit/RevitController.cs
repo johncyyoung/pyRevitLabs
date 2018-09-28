@@ -380,6 +380,15 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
         }
 
+        public int ProductYear {
+            get {
+                if (FullVersion != null)
+                    return FullVersion.Major;
+                else
+                    return 0;
+            }
+        }
+
         public string ProductName {
             get {
                 if (_revitBuildNumberLookupTable.ContainsKey(BuildNumber))
