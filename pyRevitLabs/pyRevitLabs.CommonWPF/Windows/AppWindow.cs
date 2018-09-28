@@ -21,13 +21,19 @@ namespace pyRevitLabs.CommonWPF.Windows {
 
         private void InitializeComponent() {
             // setting up user name and app version buttons
-            var versionButton = new Button() { Content = AppVersion };
-            versionButton.Click += Copy_Button_Title;
+            var windowButtons = new WindowCommands();
 
             var userButton = new Button() { Content = CurrentUser };
             userButton.Click += Copy_Button_Title;
+            windowButtons.Items.Add(userButton);
 
-            RightWindowCommands = new WindowCommands() { Items = { userButton, versionButton} };
+            if (AppVersion != null && AppVersion != string.Empty) {
+                var versionButton = new Button() { Content = AppVersion };
+                versionButton.Click += Copy_Button_Title;
+                windowButtons.Items.Add(versionButton);
+            }
+
+            RightWindowCommands = windowButtons;
 
             TitleCharacterCasing = CharacterCasing.Normal;
             SaveWindowPosition = true;
