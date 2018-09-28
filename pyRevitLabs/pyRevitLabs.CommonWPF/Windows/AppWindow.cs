@@ -23,12 +23,12 @@ namespace pyRevitLabs.CommonWPF.Windows {
             // setting up user name and app version buttons
             var windowButtons = new WindowCommands();
 
-            var userButton = new Button() { Content = CurrentUser };
+            var userButton = new Button() { Content = CurrentUser, ToolTip = "Active User. Click to copy to clipboard.", Focusable = false };
             userButton.Click += Copy_Button_Title;
             windowButtons.Items.Add(userButton);
 
             if (AppVersion != null && AppVersion != string.Empty) {
-                var versionButton = new Button() { Content = AppVersion };
+                var versionButton = new Button() { Content = AppVersion, ToolTip = "Version. Click to copy to clipboard.", Focusable = false };
                 versionButton.Click += Copy_Button_Title;
                 windowButtons.Items.Add(versionButton);
             }
