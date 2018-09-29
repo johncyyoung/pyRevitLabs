@@ -120,7 +120,7 @@ namespace pyRevitLabs.TargetApps.Revit {
             LibGit2Sharp.Repository repo = null;
             if (deploymentName != null) {
                 // TODO: Add core checkout option. Figure out how to checkout certain folders in libgit2sharp
-                throw new NotImplementedException("Core checkout option not implemented yet.");
+                throw new NotImplementedException("Deployment with git clones not implemented yet.");
             }
             else {
                 repo = GitInstaller.Clone(repoSourcePath, repoBranch, destPath);
@@ -163,6 +163,10 @@ namespace pyRevitLabs.TargetApps.Revit {
                                              string destPath = null) {
             string repoBranch = branchName != null ? branchName : PyRevitConsts.OriginalRepoDefaultBranch;
             string archiveFileUrl = archivePath != null ? archivePath : PyRevitConsts.GetZipPackageUrl(repoBranch);
+            // verify archive is zip
+            if (!archiveFileUrl.ToLower().EndsWith(".zip"))
+                throw new pyRevitException("Clone source must be a ZIP archive.");
+
             logger.Debug(string.Format("Package file is \"{0}\"", archiveFileUrl));
 
             // determine destination path if not provided
@@ -283,37 +287,49 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
         }
 
-        // private helper to deploy destination location
+        // private helper to deploy destination location by name
         // @handled
         private static void Deploy(string archivePath, string deploymentName, string destPath) {
             if (!PyRevitClone.VerifyHasDeployments(archivePath))
                 throw new pyRevitException("There are no deployments configured.");
 
-            bool deploymentFound = false;
             foreach (var dep in PyRevitClone.GetConfiguredDeployments(archivePath)) {
                 // compare lowercase deployment names
                 if (dep.Name.ToLower() == deploymentName.ToLower()) {
                     logger.Debug(string.Format("Found deployment \"{0}\"", deploymentName));
-                    deploymentFound = true;
-                    foreach (var depPath in dep.Paths) {
-                        var depSrcPath = Path.Combine(archivePath, depPath);
-                        var depDestPath = Path.Combine(destPath, depPath);
-
-                        // remove existing
-                        if (CommonUtils.VerifyPath(depDestPath)) {
-                            logger.Debug(string.Format("Cleaning existing deployment at \"{0}\"", depDestPath));
-                            CommonUtils.DeleteDirectory(depDestPath);
-                        }
-
-                        // copy new
-                        CommonUtils.CopyDirectory(depSrcPath, depDestPath);
-                    }
+                    Deploy(archivePath, dep, destPath);
+                    return;
                 }
             }
 
-            if (!deploymentFound)
-                throw new pyRevitException(string.Format("Can not find deployment \"{0}\" in \"{1}\"",
-                                                         deploymentName, archivePath));
+            // means no deployment were found with given name
+            throw new pyRevitException(string.Format("Can not find deployment \"{0}\" in \"{1}\"",
+                                                        deploymentName, archivePath));
+        }
+
+        // private helper to deploy destination location by deployment
+        // @handled
+        private static void Deploy(string archivePath, PyRevitDeployment deployment, string destPath) {
+            logger.Debug(string.Format("Deploying from \"{0}\"", deployment.Name));
+            foreach (var depPath in deployment.Paths) {
+                var depSrcPath = Path.Combine(archivePath, depPath);
+                var depDestPath = Path.Combine(destPath, depPath);
+
+                // if source is a file
+                if (File.Exists(depSrcPath)) {
+                    // then copy and overwrite
+                    File.Copy(depSrcPath, depDestPath, true);
+                }
+                // otherwise it must be a directory
+                else {
+                    // remove existing first
+                    if (CommonUtils.VerifyPath(depDestPath))
+                        CommonUtils.DeleteDirectory(depDestPath);
+
+                    // copy new
+                    CommonUtils.CopyDirectory(depSrcPath, depDestPath);
+                }
+            }
         }
 
         // record source archive and deploy configs at clone path for later updates
