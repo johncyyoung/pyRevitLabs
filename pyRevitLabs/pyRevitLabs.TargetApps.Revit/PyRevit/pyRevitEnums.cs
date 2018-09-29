@@ -35,4 +35,11 @@ namespace pyRevitLabs.TargetApps.Revit {
         PanelButton,
         NoButton,
     }
+
+    // pyrevit attachment types
+    public enum PyRevitAttachmentType {
+        AllUsers,
+        CurrentUser
+    }
+
 }

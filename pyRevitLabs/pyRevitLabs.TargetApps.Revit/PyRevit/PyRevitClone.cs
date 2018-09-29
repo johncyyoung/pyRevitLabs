@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 using pyRevitLabs.Common;
 using pyRevitLabs.Common.Extensions;
@@ -11,43 +10,6 @@ using Nett;
 using NLog;
 
 namespace pyRevitLabs.TargetApps.Revit {
-    public class PyRevitEngine {
-        public PyRevitEngine(int engineVer, string enginePath) {
-            Version = engineVer;
-            Path = enginePath;
-        }
-
-        public override string ToString() {
-            return string.Format("PyRevitEngine Version: \"{0}\" | Path: \"{1}\"", Version, Path);
-        }
-
-        public int Version { get; private set; }
-        public string Path { get; private set; }
-
-        public string LoaderPath {
-            get {
-                return System.IO.Path.Combine(Path, PyRevitConsts.DllName).NormalizeAsPath();
-            }
-        }
-
-    }
-
-
-    public class PyRevitDeployment {
-        public PyRevitDeployment(string name, IEnumerable<string> paths) {
-            Name = name;
-            Paths = paths.ToList();
-        }
-
-        public override string ToString() {
-            return string.Format("PyRevitDeployment Name: \"{0}\" | Paths: \"{1}\"",
-                                 Name, Paths.ConvertToCommaSeparatedString());
-        }
-
-        public string Name { get; private set; }
-        public List<string> Paths { get; private set; }
-    }
-
     public class PyRevitClone {
         // private logger and data
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -189,20 +151,58 @@ namespace pyRevitLabs.TargetApps.Revit {
         // returns latest with default engineVer value
         // @handled @logs
         public static List<PyRevitEngine> GetEngines(string clonePath) {
-            logger.Debug(string.Format("Finding engines in \"{0}\"", clonePath));
-            var enginesDir = FindEnginesDirectory(clonePath);
-            return FindEngines(enginesDir);
+            if (GetPyRevitFilePath(clonePath) != null) {
+                return GetConfiguredEngines(clonePath);
+            }
+            else {
+                logger.Debug(string.Format("Finding engines in \"{0}\"", clonePath));
+                var enginesDir = FindEnginesDirectory(clonePath);
+                return FindEngines(enginesDir);
+            }
         }
 
         // extract deployment config from pyRevitfile inside the clone
-        public static List<PyRevitDeployment> GetDeployments(string clonePath) {
+        public static List<PyRevitEngine> GetConfiguredEngines(string clonePath) {
+            var engines = new List<PyRevitEngine>();
+
+            var prFile = GetPyRevitFilePath(clonePath);
+            try {
+                TomlTable table = Toml.ReadFile(prFile);
+                var enginesCfgs = table.Get<TomlTable>("engines");
+                foreach (var engineCfg in enginesCfgs) {
+                    logger.Debug(string.Format("Engine configuration found: {0}", engineCfg.Key));
+                    var infoTable = engineCfg.Value as TomlTable;
+                    foreach (KeyValuePair<string, TomlObject> entry in infoTable)
+                        logger.Debug(string.Format("\"{0}\" : \"{1}\"", entry.Key, entry.Value.TomlType));
+
+                    engines.Add(
+                        new PyRevitEngine(
+                            engineVer: infoTable["version"].Get<int>(),
+                            enginePath: infoTable["path"].Get<string>(),
+                            kernelName: infoTable["kernel"].Get<string>(),
+                            engineDescription: infoTable["description"].Get<string>(),
+                            compatibleProducts: new List<string>(((TomlArray)infoTable["compatproducts"]).To<string>())
+                            )
+                        );
+                }
+            }
+            catch (Exception ex) {
+                logger.Debug(string.Format("Error parsing clone \"{0}\" engines configs at \"{1}\" | {2}",
+                                           clonePath, prFile, ex.Message));
+            }
+
+            return engines;
+        }
+
+        // extract deployment config from pyRevitfile inside the clone
+        public static List<PyRevitDeployment> GetConfiguredDeployments(string clonePath) {
             var deps = new List<PyRevitDeployment>();
 
             var prFile = GetPyRevitFilePath(clonePath);
             try {
                 TomlTable table = Toml.ReadFile(prFile);
                 var depCfgs = table.Get<TomlTable>("deployments");
-                foreach (var entry in depCfgs) {
+                foreach (KeyValuePair<string, TomlObject> entry in depCfgs) {
                     logger.Debug(string.Format("\"{0}\" : \"{1}\"", entry.Key, entry.Value));
                     deps.Add(
                         new PyRevitDeployment(entry.Key,
@@ -219,7 +219,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public static bool VerifyHasDeployments(string clonePath) {
-            return GetDeployments(clonePath).Count > 0;
+            return GetConfiguredDeployments(clonePath).Count > 0;
         }
 
         // get checkedout branch in git repo
@@ -353,7 +353,9 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public PyRevitEngine GetEngine(int engineVer = 000) => GetEngine(ClonePath, engineVer: engineVer);
 
-        public List<PyRevitDeployment> GetDeployments() => GetDeployments(ClonePath);
+        public List<PyRevitEngine> GetConfiguredEngines() => GetConfiguredEngines(ClonePath);
+
+        public List<PyRevitDeployment> GetConfiguredDeployments() => GetConfiguredDeployments(ClonePath);
 
         public void SetBranch(string branchName) => SetBranch(ClonePath, branchName);
 

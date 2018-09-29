@@ -64,6 +64,8 @@ namespace pyRevitLabs.CommonWPF.Controls {
 
         public void ConsoleLog(string logEntry) { _consoleLog(logEntry); }
 
+        public void ConsoleLogOK(string logEntry) { _consoleLog(logEntry, indicate: Brushes.Green); }
+
         public void ConsoleLogInfo(string logEntry) { _consoleLog(logEntry, indicate: Brushes.Transparent); }
 
         public void ConsoleLogError(string logEntry) { _consoleLog(logEntry, indicate: Brushes.Red); }
@@ -91,6 +93,18 @@ namespace pyRevitLabs.CommonWPF.Controls {
                 taskProgress.IsIndeterminate = false;
                 indicateStuff.Opacity = 1.0;
             }
+        }
+
+        public void UpdateProgressBar(float curValue, float maxValue) {
+            taskProgress.IsIndeterminate = false;
+            taskProgress.Maximum = maxValue;
+            taskProgress.Value = curValue;
+        }
+
+        public void ResetProgressBar() {
+            taskProgress.IsIndeterminate = false;
+            taskProgress.Maximum = 0;
+            taskProgress.Value = 0;
         }
 
         public async Task<TResult> RunTask<TResult>(string taskName, Func<TResult> function) {
