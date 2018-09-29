@@ -61,6 +61,7 @@
     <Compile Include="Addons.cs" />
     <Compile Include="Kinoter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PyRevitBindings.cs" />
     <Compile Include="PyRevit\PyRevitDeployment.cs" />
     <Compile Include="PyRevit\PyRevitEngine.cs" />
     <Compile Include="PyRevit\PyRevitAttachment.cs" />
