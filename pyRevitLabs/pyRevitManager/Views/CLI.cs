@@ -433,10 +433,10 @@ namespace pyRevitManager.Views {
             // =======================================================================================================
             // $ pyrevit clones update (--all | <clone_name>)
             // =======================================================================================================
-            else if (VerifyCommand(activeKeys, "clones", "update", "--all"))
-                PyRevit.UpdateAllClones();
-
             else if (VerifyCommand(activeKeys, "clones", "update")) {
+                if (arguments["--all"].IsTrue)
+                    PyRevit.UpdateAllClones();
+
                 var cloneName = TryGetValue(arguments, "<clone_name>");
                 if (cloneName != null) {
                     var clone = PyRevit.GetRegisteredClone(cloneName);
