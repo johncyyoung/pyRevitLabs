@@ -120,7 +120,9 @@
     <EmbeddedResource Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="pyRevit.ico" />
+    <Content Include="pyRevit.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\pyRevitLabs.CommonCLI\pyRevitLabs.CommonCLI.csproj">
@@ -142,9 +144,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Views\WPF.xaml">
@@ -178,15 +177,23 @@
       <Version>4.5.10</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="pyRevit CLI.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetDir)lib\win32\x64\git2-6311e88.dll" "$(TargetDir)git2-6311e88.dll"
+
 
 rd /S /Q "$(TargetDir)lib"
 
 REM del /Q "$(TargetDir)*.pdb"
 
+
 REM del /Q "$(TargetDir)*.config"
+
 
 REM del /Q "$(TargetDir)*.xml"
 </PostBuildEvent>
