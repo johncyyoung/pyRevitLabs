@@ -19,12 +19,12 @@ namespace pyRevitLabs.TargetApps.Revit {
             string assmDllName = "";
 
             executingAssm = Assembly.GetExecutingAssembly();
-            AssemblyName[] refedAssemblies = executingAssm.GetReferencedAssemblies();
+            AssemblyName[] refrencedAssemblies = executingAssm.GetReferencedAssemblies();
 
             // loop through the array of referenced assembly names
-            foreach (AssemblyName assmName in refedAssemblies) {
+            foreach (AssemblyName assmName in refrencedAssemblies) {
                 // check for the assembly names that have raised the "AssemblyResolve" event
-                if (assmName.FullName.Substring(0, assmName.FullName.IndexOf(",")) == args.Name.Substring(0, args.Name.IndexOf(","))) {
+                if (assmName.FullName.Split(',')[0] == args.Name.Split(',')[0]) {
                     // build the path of the assembly from where it has to be loaded.
                     assmDllName = args.Name.Substring(0, args.Name.IndexOf(",")) + ".dll";
                     break;
