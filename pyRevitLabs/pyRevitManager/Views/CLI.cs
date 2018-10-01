@@ -99,8 +99,15 @@ namespace pyRevitManager.Views {
         
 
     Options:
+        -h --help                   Show this screen.
+        -V --version                Show version.
         --verbose                   Print info messages.
         --debug                     Print docopt options and logger debug messages.
+        --core                      Install original pyRevit core only (no defualt tools).
+        --all                       All applicable items.
+        --attached                  All Revits that are configured to load pyRevit.
+        --authgroup=<auth_groups>   User groups authorized to use the extension.
+        --branch=<branch_name>      Target git branch name.
         --log=<log_file>            Output all log levels to specified file.
 ";
 
