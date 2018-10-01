@@ -66,9 +66,9 @@ namespace pyRevitLabs.TargetApps.Revit {
                                               string addinName, string assemblyPath, string addinId, string addinClassName, string vendorId,
                                               bool allusers = false) {
             string manifest = string.Format(ManifestTemplate, addinName, assemblyPath, addinId, addinClassName, vendorId);
-            logger.Debug(string.Format("Creating addin manifest...\n{0}", manifest));
+            logger.Debug("Creating addin manifest...\n{0}", manifest);
             var addinFile = GetRevitAddonsFilePath(revitYear, addinFileName, allusers: allusers);
-            logger.Debug(string.Format("Creating manifest file \"{0}\"", addinFile));
+            logger.Debug("Creating manifest file \"{0}\"", addinFile);
             CommonUtils.ConfirmFile(addinFile);
             var f = File.CreateText(addinFile);
             f.Write(manifest);
@@ -79,13 +79,13 @@ namespace pyRevitLabs.TargetApps.Revit {
             RevitAddonManifest revitManifest = GetManifest(revitYear, addinName, allUsers: false);
 
             if (revitManifest != null) {
-                logger.Debug(string.Format("Removing manifest file \"{0}\"", revitManifest.FilePath));
+                logger.Debug("Removing manifest file \"{0}\"", revitManifest.FilePath);
                 File.Delete(revitManifest.FilePath);
             }
             if (currentAndAllUsers) {
                 revitManifest = GetManifest(revitYear, addinName, allUsers: true);
                 if (revitManifest != null) {
-                    logger.Debug(string.Format("Removing all users manifest file \"{0}\"", revitManifest.FilePath));
+                    logger.Debug("Removing all users manifest file \"{0}\"", revitManifest.FilePath);
                     File.Delete(revitManifest.FilePath);
                 }
             }
@@ -116,7 +116,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 return null;
             }
             else {
-                logger.Debug(string.Format("Addons path \"{0}\" does not exist", addinPath));
+                logger.Debug("Addons path \"{0}\" does not exist", addinPath);
             }
             return null;
         }

@@ -10,6 +10,13 @@ using Nett;
 using NLog;
 
 namespace pyRevitLabs.TargetApps.Revit {
+    // helper struct
+    public struct PyRevitCloneFromArchiveArgs {
+        public string Url;
+        public string BranchName;
+        public string DeploymentName;
+    }
+
     public class PyRevitClone {
         // private logger and data
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -117,7 +124,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         // @handled @logs
         public static bool VerifyCloneValidity(string clonePath) {
             var normClonePath = clonePath.NormalizeAsPath();
-            logger.Debug(string.Format("Checking pyRevit copy validity \"{0}\"", normClonePath));
+            logger.Debug("Checking pyRevit copy validity \"{0}\"", normClonePath);
             if (CommonUtils.VerifyPath(normClonePath)) {
                 // say yes if under test
                 if (!GlobalConfigs.AllClonesAreValid) {
@@ -131,7 +138,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                     if (IsDeployedWithRepo(normClonePath) && !GitInstaller.IsValidRepo(normClonePath))
                         throw new pyRevitInvalidGitCloneException(normClonePath);
                 }
-                logger.Debug(string.Format("Valid pyRevit clone \"{0}\"", normClonePath));
+                logger.Debug("Valid pyRevit clone \"{0}\"", normClonePath);
                 return true;
             }
 
@@ -142,7 +149,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         // returns latest with default engineVer value
         // @handled @logs
         public static PyRevitEngine GetEngine(string clonePath, int engineVer = 000) {
-            logger.Debug(string.Format("Finding engine \"{0}\" path in \"{1}\"", engineVer, clonePath));
+            logger.Debug("Finding engine \"{0}\" path in \"{1}\"", engineVer, clonePath);
             var enginesDir = FindEnginesDirectory(clonePath);
             return FindEngine(enginesDir, engineVer: engineVer);
         }
@@ -155,7 +162,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 return GetConfiguredEngines(clonePath);
             }
             else {
-                logger.Debug(string.Format("Finding engines in \"{0}\"", clonePath));
+                logger.Debug("Finding engines in \"{0}\"", clonePath);
                 var enginesDir = FindEnginesDirectory(clonePath);
                 return FindEngines(enginesDir);
             }
@@ -170,10 +177,10 @@ namespace pyRevitLabs.TargetApps.Revit {
                 TomlTable table = Toml.ReadFile(prFile);
                 var enginesCfgs = table.Get<TomlTable>("engines");
                 foreach (var engineCfg in enginesCfgs) {
-                    logger.Debug(string.Format("Engine configuration found: {0}", engineCfg.Key));
+                    logger.Debug("Engine configuration found: {0}", engineCfg.Key);
                     var infoTable = engineCfg.Value as TomlTable;
                     foreach (KeyValuePair<string, TomlObject> entry in infoTable)
-                        logger.Debug(string.Format("\"{0}\" : \"{1}\"", entry.Key, entry.Value.TomlType));
+                        logger.Debug("\"{0}\" : \"{1}\"", entry.Key, entry.Value.TomlType);
 
                     engines.Add(
                         new PyRevitEngine(
@@ -203,7 +210,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 TomlTable table = Toml.ReadFile(prFile);
                 var depCfgs = table.Get<TomlTable>("deployments");
                 foreach (KeyValuePair<string, TomlObject> entry in depCfgs) {
-                    logger.Debug(string.Format("\"{0}\" : \"{1}\"", entry.Key, entry.Value));
+                    logger.Debug("\"{0}\" : \"{1}\"", entry.Key, entry.Value);
                     deps.Add(
                         new PyRevitDeployment(entry.Key,
                                               new List<string>(((TomlArray)entry.Value).To<string>()))
@@ -216,6 +223,14 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
 
             return deps;
+        }
+
+        public static PyRevitDeployment GetCurrentDeployment(string clonePath) {
+            var cloneArgs = ReadDeploymentArgs(clonePath);
+            foreach (var dep in GetConfiguredDeployments(clonePath))
+                if (dep.Name == cloneArgs.DeploymentName)
+                    return dep;
+            return null;
         }
 
         public static bool VerifyHasDeployments(string clonePath) {
@@ -288,13 +303,13 @@ namespace pyRevitLabs.TargetApps.Revit {
                         latestEnginerVer = engine;
                 }
 
-                logger.Debug(string.Format("Latest engine path \"{0}\"", latestEnginerVer.Path ?? "NULL"));
+                logger.Debug("Latest engine path \"{0}\"", latestEnginerVer.Path ?? "NULL");
                 return latestEnginerVer;
             }
             else {
                 foreach (var engine in FindEngines(enginesDir)) {
                     if (engineVer == engine.Version) {
-                        logger.Debug(string.Format("Engine path \"{0}\"", engine.Path ?? "NULL"));
+                        logger.Debug("Engine path \"{0}\"", engine.Path ?? "NULL");
                         return engine;
                     }
                 }
@@ -315,7 +330,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                     var engineDirName = Path.GetFileName(engineDir);
                     if (engineFinder.IsMatch(engineDirName)) {
                         var engineVer = int.Parse(engineDirName);
-                        logger.Debug(string.Format("Engine found \"{0}\":\"{1}\"", engineDirName, engineDir));
+                        logger.Debug("Engine found \"{0}\":\"{1}\"", engineDirName, engineDir);
                         engines.Add(new PyRevitEngine(engineVer, engineDir));
                     }
                 }
@@ -357,10 +372,40 @@ namespace pyRevitLabs.TargetApps.Revit {
 
         public List<PyRevitDeployment> GetConfiguredDeployments() => GetConfiguredDeployments(ClonePath);
 
+        public PyRevitDeployment GetDeployment() => GetCurrentDeployment(ClonePath);
+
         public void SetBranch(string branchName) => SetBranch(ClonePath, branchName);
 
         public void SetTag(string tagName) => SetTag(ClonePath, tagName);
 
         public void SetCommit(string commitHash) => SetCommit(ClonePath, commitHash);
+
+        public PyRevitCloneFromArchiveArgs DeploymentArgs => ReadDeploymentArgs(ClonePath);
+
+        // private 
+        private static PyRevitCloneFromArchiveArgs ReadDeploymentArgs(string clonePath) {
+            var cloneMemoryFilePath = Path.Combine(clonePath, PyRevitConsts.DeployFromArchiveConfigsFilename);
+            logger.Debug("Reading nogit clone parmeters from \"{0}\"", cloneMemoryFilePath);
+
+            try {
+                var contents = File.ReadAllLines(cloneMemoryFilePath);
+                logger.Debug("Archive Path: \"{0}\"", contents[0]);
+                logger.Debug("Branch: \"{0}\"", contents[1]);
+                logger.Debug("Deployment: \"{0}\"", contents[2]);
+
+                var args = new PyRevitCloneFromArchiveArgs {
+                    Url = contents[0] == "" ? null : contents[0],
+                    BranchName = contents[1] == "" ? null : contents[1],
+                    DeploymentName = contents[2] == "" ? null : contents[2]
+                };
+
+                return args;
+            }
+            catch (Exception ex) {
+                throw new pyRevitException(string.Format("Error reading deployment arguments from \"{0}\" | {1}",
+                                                         clonePath, ex.Message));
+            }
+        }
+
     }
 }

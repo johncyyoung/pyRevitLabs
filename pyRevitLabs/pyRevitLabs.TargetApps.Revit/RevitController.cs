@@ -67,7 +67,7 @@ namespace pyRevitLabs.TargetApps.Revit {
             foreach (string line in rawBasicInfo.Split(new string[] { "\0", "\r\n" },
                                                     StringSplitOptions.RemoveEmptyEntries)) {
                 // find build number
-                logger.Debug(string.Format("Parsing info from BasicFileInfo: \"{0}\"", line));
+                logger.Debug("Parsing info from BasicFileInfo: \"{0}\"", line);
                 var revitProduct = RevitProduct.LookupRevitProduct(line);
                 if (revitProduct != null)
                     RevitProduct = revitProduct;
@@ -77,7 +77,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                     var match = IsWorksharedFinder.Match(line);
                     if (match.Success) {
                         var workshared = match.Groups["workshared"].Value;
-                        logger.Debug(string.Format("IsWorkshared: {0}", workshared));
+                        logger.Debug("IsWorkshared: {0}", workshared);
                         if (!workshared.Contains("Not"))
                             IsWorkshared = true;
                         workSharedFound = true;
@@ -89,7 +89,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                     var match = LastSavedPathFinder.Match(line);
                     if (match.Success) {
                         var path = match.Groups["path"].Value;
-                        logger.Debug(string.Format("Last Saved Path: {0}", path));
+                        logger.Debug("Last Saved Path: {0}", path);
                         LastSavedPath = path;
                         lastPathFound = true;
                     }
@@ -100,7 +100,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                     var match = CentralPathFinder.Match(line);
                     if (match.Success) {
                         var path = match.Groups["path"].Value;
-                        logger.Debug(string.Format("Central Model Path: {0}", path));
+                        logger.Debug("Central Model Path: {0}", path);
                         CentralModelPath = path;
                         centralPathFound = true;
                     }
@@ -111,7 +111,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                     var match = OpenWorksetFinder.Match(line);
                     if (match.Success) {
                         var owconfig = match.Groups["type"].Value;
-                        logger.Debug(string.Format("Open Workset Default: {0}", owconfig));
+                        logger.Debug("Open Workset Default: {0}", owconfig);
                         OpenWorksetConfig = (RevitModelFileOpenWorksetConfig)Enum.ToObject(typeof(RevitModelFileOpenWorksetConfig), int.Parse(owconfig));
                         openWorksetFound = true;
                     }
@@ -122,7 +122,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                     var match = DocumentIncrementFinder.Match(line);
                     if (match.Success) {
                         var docincrement = match.Groups["type"].Value;
-                        logger.Debug(string.Format("Unique Document Increments: {0}", docincrement));
+                        logger.Debug("Unique Document Increments: {0}", docincrement);
                         DocumentIncrement = int.Parse(docincrement);
                         documentIncrementFound = true;
                     }
@@ -131,7 +131,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 // find document guid
                 if (!guidFound && line.Contains("Unique Document GUID: ")) {
                     var guid = line.ExtractGuid();
-                    logger.Debug(string.Format("Extracted GUID: {0}", guid));
+                    logger.Debug("Extracted GUID: {0}", guid);
                     UniqueId = guid;
                     guidFound = true;
                 }
@@ -139,7 +139,7 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         private void ProcessPartAtom(string rawPartAtom) {
-            logger.Debug(string.Format("Parsing PartAtom Data:\n{0}", rawPartAtom));
+            logger.Debug("Parsing PartAtom Data:\n{0}", rawPartAtom);
             var doc = new XmlDocument();
             try {
                 doc.LoadXml(rawPartAtom);
@@ -156,7 +156,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 HostCategoryName = hostElement != null ? hostElement.InnerText : "";
             }
             catch (Exception ex) {
-                logger.Debug(string.Format("Error parsing PartAtom XML. | {0}", ex.Message));
+                logger.Debug("Error parsing PartAtom XML. | {0}", ex.Message);
             }
         }
 
@@ -413,7 +413,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                     else if (Version != null)
                         revitInstallDirName = string.Format("Revit {0}", 2000 + Version.Major);
                     var expectedPath = Path.Combine(DefaultInstallLocation, "Autodesk", revitInstallDirName);
-                    logger.Debug(string.Format("Expected path {0}", expectedPath));
+                    logger.Debug("Expected path {0}", expectedPath);
                     if (CommonUtils.VerifyPath(expectedPath))
                         return expectedPath;
                 }

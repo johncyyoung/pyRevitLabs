@@ -25,7 +25,7 @@ namespace pyRevitLabs.Common {
         {
             if (CommonUtils.VerifyPath(targetDir)) {
                 if (verbose)
-                    logger.Debug(string.Format("Recursive deleting directory \"{0}\"", targetDir));
+                    logger.Debug("Recursive deleting directory \"{0}\"", targetDir);
                 string[] files = Directory.GetFiles(targetDir);
                 string[] dirs = Directory.GetDirectories(targetDir);
 
@@ -51,7 +51,7 @@ namespace pyRevitLabs.Common {
         // helper for copying a directory recursively
         // @handled @logs
         public static void CopyDirectory(string sourceDir, string destDir) {
-            logger.Debug(string.Format("Copying \"{0}\" to \"{1}\"", sourceDir, destDir));
+            logger.Debug("Copying \"{0}\" to \"{1}\"", sourceDir, destDir);
             try {
                 // create all of the directories
                 foreach (string dirPath in Directory.GetDirectories(sourceDir, "*",

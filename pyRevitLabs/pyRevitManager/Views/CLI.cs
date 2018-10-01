@@ -28,7 +28,7 @@ namespace pyRevitManager.Views {
     }
 
     class pyRevitCLI {
-        private static Logger logger = null;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         private const string helpUrl = "https://github.com/eirannejad/pyRevitLabs/blob/master/README_CLI.md";
         private const string usage = @"pyrevit command line tool
@@ -39,39 +39,39 @@ namespace pyRevitManager.Views {
         pyrevit (-V | --version)
         pyrevit (blog | docs | source | youtube | support)
         pyrevit env
-        pyrevit clone <clone_name> [<dest_path>] [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit]
-        pyrevit clone <clone_name> <repo_or_archive_url> <dest_path> [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit]
+        pyrevit clone <clone_name> [<dest_path>] [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit] [--log=<log_file>]
+        pyrevit clone <clone_name> <repo_or_archive_url> <dest_path> [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit] [--log=<log_file>]
         pyrevit clones
         pyrevit clones (info | open) <clone_name>
-        pyrevit clones add <clone_name> <clone_path>
-        pyrevit clones forget (--all | <clone_name>)
-        pyrevit clones rename <clone_name> <clone_new_name>
-        pyrevit clones delete [(--all | <clone_name>)] [--clearconfigs]
-        pyrevit clones branch <clone_name> [<branch_name>]
-        pyrevit clones version <clone_name> [<tag_name>]
-        pyrevit clones commit <clone_name> [<commit_hash>]
-        pyrevit clones update (--all | <clone_name>)
+        pyrevit clones add <clone_name> <clone_path> [--log=<log_file>]
+        pyrevit clones forget (--all | <clone_name>) [--log=<log_file>]
+        pyrevit clones rename <clone_name> <clone_new_name> [--log=<log_file>]
+        pyrevit clones delete [(--all | <clone_name>)] [--clearconfigs] [--log=<log_file>]
+        pyrevit clones branch <clone_name> [<branch_name>] [--log=<log_file>]
+        pyrevit clones version <clone_name> [<tag_name>] [--log=<log_file>]
+        pyrevit clones commit <clone_name> [<commit_hash>] [--log=<log_file>]
+        pyrevit clones update (--all | <clone_name>) [--log=<log_file>]
         pyrevit clones deployments <clone_name>
         pyrevit clones engines <clone_name>
-        pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --all | --attached) [--allusers]
+        pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --all | --attached) [--allusers] [--log=<log_file>]
         pyrevit attached
-        pyrevit detach (--all | <revit_year>)
-        pyrevit extend <extension_name> <dest_path> [--branch=<branch_name>]
-        pyrevit extend (ui | lib) <extension_name> <repo_url> <dest_path> [--branch=<branch_name>]
+        pyrevit detach (--all | <revit_year>) [--log=<log_file>]
+        pyrevit extend <extension_name> <dest_path> [--branch=<branch_name>] [--log=<log_file>]
+        pyrevit extend (ui | lib) <extension_name> <repo_url> <dest_path> [--branch=<branch_name>] [--log=<log_file>]
         pyrevit extensions
         pyrevit extensions search <search_pattern>
         pyrevit extensions (info | help | open) <extension_name>
-        pyrevit extensions delete <extension_name>
+        pyrevit extensions delete <extension_name> [--log=<log_file>]
         pyrevit extensions paths
-        pyrevit extensions paths forget --all
-        pyrevit extensions paths (add | forget) <extensions_path>
-        pyrevit extensions (enable | disable) <extension_name>
+        pyrevit extensions paths forget --all [--log=<log_file>]
+        pyrevit extensions paths (add | forget) <extensions_path> [--log=<log_file>]
+        pyrevit extensions (enable | disable) <extension_name> [--log=<log_file>]
         pyrevit extensions sources
-        pyrevit extensions sources forget --all
-        pyrevit extensions sources (add | forget) <source_json_or_url>
-        pyrevit extensions update (--all | <extension_name>)
-        pyrevit revits [--installed]
-        pyrevit revits killall [<revit_year>]
+        pyrevit extensions sources forget --all [--log=<log_file>]
+        pyrevit extensions sources (add | forget) <source_json_or_url> [--log=<log_file>]
+        pyrevit extensions update (--all | <extension_name>) [--log=<log_file>]
+        pyrevit revits [--installed] [--log=<log_file>]
+        pyrevit revits killall [<revit_year>] [--log=<log_file>]
         pyrevit revits fileinfo <file_or_dir_path> [--csv=<output_file>]
         pyrevit revits addons
         pyrevit revits addons install <addon_name> <dest_path> [--allusers]
@@ -80,22 +80,22 @@ namespace pyRevitManager.Views {
         pyrevit init (tab | panel | pull | split | push | smart | command) <bundle_name>
         pyrevit init templates
         pyrevit init templates (add | forget) <init_templates_path>
-        pyrevit caches clear (--all | <revit_year>)
-        pyrevit config <template_config_path>
-        pyrevit configs logs [(none | verbose | debug)]
-        pyrevit configs allowremotedll [(enable | disable)]
-        pyrevit configs checkupdates [(enable | disable)]
-        pyrevit configs autoupdate [(enable | disable)]
-        pyrevit configs rocketmode [(enable | disable)]
-        pyrevit configs filelogging [(enable | disable)]
-        pyrevit configs loadbeta [(enable | disable)]
+        pyrevit caches clear (--all | <revit_year>) [--log=<log_file>]
+        pyrevit config <template_config_path> [--log=<log_file>]
+        pyrevit configs logs [(none | verbose | debug)] [--log=<log_file>]
+        pyrevit configs allowremotedll [(enable | disable)] [--log=<log_file>]
+        pyrevit configs checkupdates [(enable | disable)] [--log=<log_file>]
+        pyrevit configs autoupdate [(enable | disable)] [--log=<log_file>]
+        pyrevit configs rocketmode [(enable | disable)] [--log=<log_file>]
+        pyrevit configs filelogging [(enable | disable)] [--log=<log_file>]
+        pyrevit configs loadbeta [(enable | disable)] [--log=<log_file>]
         pyrevit configs usagelogging
-        pyrevit configs usagelogging enable (file | server) <dest_path>
-        pyrevit configs usagelogging disable
-        pyrevit configs outputcss [<css_path>]
-        pyrevit configs seed [--lock]
-        pyrevit configs <option_path> (enable | disable)
-        pyrevit configs <option_path> [<option_value>]
+        pyrevit configs usagelogging enable (file | server) <dest_path> [--log=<log_file>]
+        pyrevit configs usagelogging disable [--log=<log_file>]
+        pyrevit configs outputcss [<css_path>] [--log=<log_file>]
+        pyrevit configs seed [--lock] [--log=<log_file>]
+        pyrevit configs <option_path> (enable | disable) [--log=<log_file>]
+        pyrevit configs <option_path> [<option_value>] [--log=<log_file>]
         
 
     Options:
@@ -108,6 +108,7 @@ namespace pyRevitManager.Views {
         --attached                  All Revits that are configured to load pyRevit.
         --authgroup=<auth_groups>   User groups authorized to use the extension.
         --branch=<branch_name>      Target git branch name.
+        --log=<log_file>            Output all log levels to specified file.
 ";
 
         public static void ProcessArguments(string[] args) {
@@ -116,17 +117,8 @@ namespace pyRevitManager.Views {
 
             // setup logger
             var config = new LoggingConfiguration();
-            var consoleTarget = new ConsoleTarget("target1") {
-                Layout = @"${level}: ${message} ${exception}"
-            };
-            config.AddTarget(consoleTarget);
-            config.AddRuleForAllLevels(consoleTarget);
-            LogManager.Configuration = config;
-            // disable debug by default
-            foreach (var rule in LogManager.Configuration.LoggingRules) {
-                rule.DisableLoggingForLevel(LogLevel.Info);
-                rule.DisableLoggingForLevel(LogLevel.Debug);
-            }
+            var logconsole = new ConsoleTarget("logconsole") { Layout = @"${level}: ${message} ${exception}" };
+            config.AddTarget(logconsole);
 
             // process arguments for logging level
             var argsList = new List<string>(args);
@@ -139,16 +131,15 @@ namespace pyRevitManager.Views {
             if (argsList.Contains("--verbose")) {
                 argsList.Remove("--verbose");
                 logLevel = pyRevitManagerLogLevel.InfoMessages;
-                foreach (var rule in LogManager.Configuration.LoggingRules)
-                    rule.EnableLoggingForLevel(LogLevel.Info);
+                config.AddRule(LogLevel.Info, LogLevel.Info, logconsole);
             }
 
             if (argsList.Contains("--debug")) {
                 argsList.Remove("--debug");
                 logLevel = pyRevitManagerLogLevel.Debug;
-                foreach (var rule in LogManager.Configuration.LoggingRules)
-                    rule.EnableLoggingForLevel(LogLevel.Debug);
+                config.AddRule(LogLevel.Debug, LogLevel.Debug, logconsole);
             }
+
 
             // process docopt
             var arguments = new Docopt().Apply(
@@ -167,8 +158,18 @@ namespace pyRevitManager.Views {
                         Console.WriteLine("{0} = {1}", argument.Key, argument.Value);
                 }
 
-            // get logger
-            logger = LogManager.GetCurrentClassLogger();
+            // setup output log
+            if (arguments["--log"] != null) {
+                var logfile = new FileTarget("logfile") { FileName = arguments["--log"].Value as string };
+                config.AddTarget(logfile);
+                config.AddRuleForAllLevels(logfile);
+
+                arguments.Remove("--log");
+            }
+
+            // config logger
+            LogManager.Configuration = config;
+
             // get active keys for safe command extraction
             var activeKeys = ExtractEnabledKeywords(arguments);
 
@@ -181,6 +182,8 @@ namespace pyRevitManager.Views {
             }
 
             ProcessErrorCodes();
+
+            LogManager.Shutdown(); // Flush and close down internal threads and timers
         }
 
 
@@ -515,7 +518,7 @@ namespace pyRevitManager.Views {
 
                 var ext = PyRevit.FindExtension(extName);
                 if (ext != null) {
-                    logger.Debug(string.Format("Matching extension found \"{0}\"", ext.Name));
+                    logger.Debug("Matching extension found \"{0}\"", ext.Name);
                     PyRevit.InstallExtension(ext, destPath, branchName);
                 }
                 else {
@@ -987,7 +990,7 @@ namespace pyRevitManager.Views {
                         && !argument.Key.Contains(">")
                         && !argument.Key.Contains("--")
                         && argument.Value.IsTrue) {
-                    logger.Debug(string.Format("Active Keyword: {0}", argument.Key));
+                    logger.Debug("Active Keyword: {0}", argument.Key);
                     enabledKeywords.Add(argument.Key);
                 }
             }
@@ -1072,7 +1075,7 @@ namespace pyRevitManager.Views {
             }
 
             // write list of files with errors
-            logger.Debug(string.Format("Adding errors to \"{0}\"", outputCSV));
+            logger.Debug("Adding errors to \"{0}\"", outputCSV);
             foreach (var errinfo in errorList)
                 csv.Append(string.Format("\"{0}\",,,,,,,\"{1}\"\n", errinfo.Item1, errinfo.Item2));
 
