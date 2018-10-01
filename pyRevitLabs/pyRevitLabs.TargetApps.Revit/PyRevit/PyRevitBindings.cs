@@ -2,6 +2,9 @@
 using System.IO;
 using System.Reflection;
 
+// from this link (method 3)
+// https://support.microsoft.com/en-us/help/837908/how-to-load-an-assembly-at-runtime-that-is-located-in-a-folder-that-is
+
 namespace pyRevitLabs.TargetApps.Revit {
     public static class PyRevitBindings {
         // activates a resolver that looks into the current binary folder to find missing libraries
