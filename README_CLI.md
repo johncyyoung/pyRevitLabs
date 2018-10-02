@@ -2,6 +2,30 @@
 
 `pyrevit` is the command line tool, developed specifically to install and configure pyRevit in your production/development environment. Each section below showcases a specific set of functionality of the command line tool.
 
+- [Getting Help](#getting-help)
+  * [pyrevit CLI version](#pyrevit-cli-version)
+  * [pyRevit Online Resources](#pyrevit-online-resources)
+- [Managing pyRevit clones](#managing-pyrevit-clones)
+  * [Installing pyRevit](#installing-pyrevit)
+  * [Installing Custom Clones](#installing-custom-clones)
+  * [Maintaining Clones](#maintaining-clones)
+    + [Managing Git Clones](#managing-git-clones)
+    + [Updating Clones](#updating-clones)
+- [Attaching pyRevit to Installed Revits](#attaching-pyrevit-to-installed-revits)
+- [Managing pyRevit extensions](#managing-pyrevit-extensions)
+  * [Finding Extensions](#finding-extensions)
+  * [Installing Extensions](#installing-extensions)
+  * [Managing Installed Extensions](#managing-installed-extensions)
+    + [Updating Extensions](#updating-extensions)
+  * [Managing Extensions Lookup Sources](#managing-extensions-lookup-sources)
+- [Getting Environment Info](#getting-environment-info)
+- [Configuring pyRevit](#configuring-pyrevit)
+- [Extra Revit-Related Functionality](#extra-revit-related-functionality)
+  * [Clear pyRevit Cache Files](#clear-pyrevit-cache-files)
+- [Logging CLI messages](#logging-cli-messages)
+
+
+## Getting Help
 There is a lot of commands and options available in `pyrevit`. These functionalities are grouped by their function. This document will guide you in using these commands and options based on what you're trying to achieve. See the sections below. A full list can be obtained by running:
 
 ``` shell
@@ -78,6 +102,8 @@ $ pyrevit clone dev "C:\pyRevit\dev" --branch=develop
 ```
 
 - `--branch=`: Specify a specific branch to be cloned
+
+#### Installing Custom Clones
 
 You can also use the clone command to install your own pyRevit clones from any git url:
 
@@ -488,7 +514,7 @@ pyrevit caches clear (--all | <revit_year>) [--log=<log_file>]
 $ pyrevit caches clear 2018     # clear all caches for Revit 2018
 ```
 
-## Logging CLI messages
+## Logging CLI Debug Messages
 
 With many commands you can log the complete log messages to a log file:
 
