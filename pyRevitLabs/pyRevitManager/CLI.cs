@@ -31,6 +31,7 @@ namespace pyRevitManager.Views {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         private const string helpUrl = "https://github.com/eirannejad/pyRevitLabs/blob/master/README_CLI.md";
+        private const string updaterExecutive = "pyRevitUpdater.exe";
         private const string usage = @"pyrevit command line tool
 
     Usage:
@@ -119,6 +120,7 @@ namespace pyRevitManager.Views {
             var config = new LoggingConfiguration();
             var logconsole = new ConsoleTarget("logconsole") { Layout = @"${level}: ${message} ${exception}" };
             config.AddTarget(logconsole);
+            config.AddRule(LogLevel.Error, LogLevel.Fatal, logconsole);
 
             // process arguments for logging level
             var argsList = new List<string>(args);
@@ -437,14 +439,41 @@ namespace pyRevitManager.Views {
             // $ pyrevit clones update (--all | <clone_name>)
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "clones", "update")) {
-                if (arguments["--all"].IsTrue)
-                    PyRevit.UpdateAllClones();
+                // TODO: ask for closing running Revits
 
-                var cloneName = TryGetValue(arguments, "<clone_name>");
-                if (cloneName != null) {
-                    var clone = PyRevit.GetRegisteredClone(cloneName);
-                    PyRevit.Update(clone);
+                // prepare a list of clones to be updated
+                var clones = new List<PyRevitClone>();
+                // separate the clone that this process might be running from
+                // this is used to update this clone from outside since the dlls will be locked
+                PyRevitClone myClone = null;
+
+                // all clones
+                if (arguments["--all"].IsTrue) {
+                    foreach (var clone in PyRevit.GetRegisteredClones())
+                        if (IsRunningInsideClone(clone))
+                            myClone = clone;
+                        else
+                            clones.Add(clone);
                 }
+                // or single clone
+                else {
+                    var cloneName = TryGetValue(arguments, "<clone_name>");
+                    if (cloneName != null) {
+                        var clone = PyRevit.GetRegisteredClone(cloneName);
+                        if (IsRunningInsideClone(clone))
+                            myClone = clone;
+                        else
+                            clones.Add(clone);
+                    }
+                }
+
+                // update clones that do not include this process
+                foreach(var clone in clones)
+                    PyRevit.Update(clone);
+
+                // now update myClone if any, as last step
+                if (myClone != null)
+                    UpdateFromOutsideAndClose(myClone);
             }
 
             // =======================================================================================================
@@ -1088,6 +1117,42 @@ namespace pyRevitManager.Views {
                 string.Format("Clone \"{0}\" is deployed with `--nogit` option and is not a git repo.",
                 clone.Name)
                 );
+        }
+
+        private static string GetProcessPath() {
+            return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+        }
+
+        private static bool IsRunningInsideClone(PyRevitClone clone) {
+            return GetProcessPath().NormalizeAsPath().Contains(clone.ClonePath.NormalizeAsPath());
+        }
+
+        private static void UpdateFromOutsideAndClose(PyRevitClone clone) {
+            var userTemp = Environment.ExpandEnvironmentVariables("%TEMP%");
+            var sourceUpdater = Path.Combine(GetProcessPath(), updaterExecutive);
+            var updaterPath = Path.Combine(userTemp, updaterExecutive);
+
+            // prepare outside updater
+            logger.Debug("Setting up \"{0}\" to \"{1}\"", sourceUpdater, updaterPath);
+            File.Copy(sourceUpdater, updaterPath, overwrite: true);
+
+            // make a updater bat file
+            var updaterBATFile = Path.Combine(userTemp, updaterExecutive.ToLower().Replace(".exe", ".bat"));
+            using (var batFile = new StreamWriter(File.Create(updaterBATFile))) {
+                batFile.WriteLine("@ECHO OFF");
+                batFile.WriteLine("TIMEOUT /t 1 /nobreak > NUL");
+                batFile.WriteLine("TASKKILL /IM \"{0}\" > NUL", Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
+                batFile.WriteLine("START \"\" /B \"{0}\" \"{1}\"", updaterPath, clone.ClonePath);
+            }
+
+            // launch update
+            ProcessStartInfo updaterProcessInfo = new ProcessStartInfo(updaterBATFile);
+            updaterProcessInfo.WorkingDirectory = Path.GetDirectoryName(updaterPath);
+            updaterProcessInfo.UseShellExecute = false;
+            logger.Debug("Calling outside update and exiting...");
+            Process.Start(updaterProcessInfo);
+            // and exit self
+            Environment.Exit(0);
         }
 
         private static void PrintHeader(string header) {

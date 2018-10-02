@@ -1,6 +1,8 @@
-﻿<Window x:Class="pyRevitInstaller.MainWindow"
+﻿<Window x:Class="pyRevitLabs.CommonWPF.Windows.InstallerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         Title="MainWindow"
         Height="325" Width="690" Margin="0"
         ShowInTaskbar="False"
@@ -12,7 +14,7 @@
         UseLayoutRounding="False"
         FontFamily="Courier New"
         AllowsTransparency="True"
-        WindowStyle="None" PreviewKeyDown="Window_PreviewKeyDown">
+        WindowStyle="None">
     <Window.Resources>
         <Color x:Key="pyRevitDarkColor">#2c3e50</Color>
         <Color x:Key="pyRevitAccentColor">#f39c12</Color>
@@ -323,7 +325,7 @@
                            FontSize="44">
                     <Run Text="pyRevit"/><Run x:Name="short_version_info"
                                               FontSize="20"
-                                              Text=" vX.X"/>
+                                              Text=""/>
                     </TextBlock>
                     <TextBlock x:Name="pyrevit_subtitle"
                            HorizontalAlignment="Center"
@@ -337,8 +339,8 @@
                 <StackPanel Margin="0,110,0,0"
                             HorizontalAlignment="Center">
                     <ProgressBar x:Name="InstallButton" Value="0" IsIndeterminate="False"
-                                 Width="320" Height="36" Tag="Install" MouseUp="ProgressBar_MouseUp"/>
-                    <Button x:Name="CustomizeButton"
+                                 Width="320" Height="36" Tag="Install"/>
+                    <Button x:Name="CustomizeButton" Visibility="Collapsed"
                             Content="Customize"
                             FontSize="14"
                             Width="150" Height="24"
@@ -357,7 +359,7 @@
                     <Run Text="in ['pdx', 'hio', 'rno']"/>
                     <LineBreak/>
                     </TextBlock>
-                    <TextBlock Text="© 2015-2017 Ehsan Iran-Nejad"
+                    <TextBlock Text="© 2014-2018 Ehsan Iran-Nejad"
                                TextAlignment="Center"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
