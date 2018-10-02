@@ -1140,8 +1140,8 @@ namespace pyRevitManager.Views {
             var updaterBATFile = Path.Combine(userTemp, updaterExecutive.ToLower().Replace(".exe", ".bat"));
             using (var batFile = new StreamWriter(File.Create(updaterBATFile))) {
                 batFile.WriteLine("@ECHO OFF");
-                batFile.WriteLine("TIMEOUT /t 1 /nobreak > NUL");
-                batFile.WriteLine("TASKKILL /IM \"{0}\" > NUL", Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
+                batFile.WriteLine("TIMEOUT /t 1 /nobreak >NUL  2>NUL");
+                batFile.WriteLine("TASKKILL /IM \"{0}\" >NUL  2>NUL", Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
                 batFile.WriteLine("START \"\" /B \"{0}\" \"{1}\"", updaterPath, clone.ClonePath);
             }
 
