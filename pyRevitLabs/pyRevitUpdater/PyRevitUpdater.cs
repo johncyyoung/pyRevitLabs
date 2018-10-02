@@ -13,7 +13,7 @@ namespace pyRevitUpdater {
                 try {
                     var clone = PyRevit.GetRegisteredClone(clonePath);
                     PyRevit.Update(clone);
-                    MessageBox.Show("pyRevitUpdater", "Update Completed", MessageBoxButton.OK);
+                    MessageBox.Show("Update Completed.", "pyRevitUpdater", MessageBoxButton.OK);
                 }
                 catch {
 
