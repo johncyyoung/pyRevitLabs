@@ -85,9 +85,8 @@ namespace pyRevitLabs.TargetApps.Revit {
                                  string deploymentName = null,
                                  string branchName = null,
                                  string repoOrArchivePath = null,
-                                 string destPath = null,
-                                 bool nogit = false) {
-            if (nogit)
+                                 string destPath = null) {
+            if (deploymentName != null)
                 DeployFromArchive(cloneName, deploymentName, branchName, repoOrArchivePath, destPath);
             else
                 DeployFromRepo(cloneName, deploymentName, branchName, repoOrArchivePath, destPath);

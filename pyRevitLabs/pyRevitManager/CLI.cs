@@ -40,8 +40,8 @@ namespace pyRevitManager.Views {
         pyrevit (-V | --version)
         pyrevit (blog | docs | source | youtube | support)
         pyrevit env
-        pyrevit clone <clone_name> [<dest_path>] [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit] [--log=<log_file>]
-        pyrevit clone <clone_name> <repo_or_archive_url> <dest_path> [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit] [--log=<log_file>]
+        pyrevit clone <clone_name> <deployment_name> [--dest=<dest_path>] [--source=<archive_url>] [--branch=<branch_name>] [--log=<log_file>]
+        pyrevit clone <clone_name> [--dest=<dest_path>] [--source=<repo_url>] [--branch=<branch_name>] [--log=<log_file>]
         pyrevit clones
         pyrevit clones (info | open) <clone_name>
         pyrevit clones add <clone_name> <clone_path> [--log=<log_file>]
@@ -232,20 +232,19 @@ namespace pyRevitManager.Views {
             }
 
             // =======================================================================================================
-            // $ pyrevit clone <clone_name> [<dest_path>] [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit]
-            // $ pyrevit clone <clone_name> <repo_or_archive_url> <dest_path> [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit]
+            // $ pyrevit clone <clone_name> <deployment_name> [--dest=<dest_path>] [--source=<archive_url>] [--branch=<branch_name>] [--log=<log_file>]
+            // $ pyrevit clone <clone_name> [--dest=<dest_path>] [--source=<repo_url>] [--branch=<branch_name>] [--log=<log_file>]
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "clone")) {
                 var cloneName = TryGetValue(arguments, "<clone_name>");
-                var deployName = TryGetValue(arguments, "--deploy");
+                var deployName = TryGetValue(arguments, "<deployment_name>");
                 if (cloneName != null) {
                     PyRevit.Clone(
                         cloneName,
                         deploymentName: deployName,
                         branchName: TryGetValue(arguments, "--branch"),
-                        repoOrArchivePath: TryGetValue(arguments, "<repo_or_archive_url>"),
-                        destPath: TryGetValue(arguments, "<dest_path>"),
-                        nogit: arguments["--nogit"].IsTrue
+                        repoOrArchivePath: TryGetValue(arguments, "--source"),
+                        destPath: TryGetValue(arguments, "--dest")
                         );
                 }
             }
