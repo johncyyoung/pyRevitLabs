@@ -1178,13 +1178,12 @@ namespace pyRevitManager.Views {
         private static void PrintAttachments() {
             PrintHeader("Attachments");
             foreach (var attachment in PyRevit.GetAttachments()) {
-                var clone = PyRevit.GetAttachedClone(attachment.Product.ProductYear);
-                if (clone != null)
-                    Console.WriteLine(string.Format("{0} | Clone: \"{1}\"",
-                                                    attachment.Product.ProductName, clone.Name));
+                if (attachment.Clone != null && attachment.Engine != null)
+                    Console.WriteLine(string.Format("{0} | Clone: \"{1}\" | Engine: \"{2}\"",
+                                                    attachment.Product.ProductName, attachment.Clone.Name, attachment.Engine.Version));
                 else
                     logger.Error(
-                        string.Format("pyRevit is attached to Revit {0} but can not determine the clone",
+                        string.Format("pyRevit is attached to Revit {0} but can not determine the clone and engine",
                                       attachment.Product.ProductYear)
                         );
             }

@@ -20,7 +20,7 @@ namespace pyRevitManager {
             //if (e.Args.Length > 0) {
                 ConsoleProvider.Attach();
                 pyRevitCLI.ProcessArguments(e.Args);
-                ConsoleProvider.Detach();
+                //ConsoleProvider.Detach();
             //}
 
             Environment.Exit(0);

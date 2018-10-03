@@ -180,6 +180,6 @@ rd /S /Q "$(TargetDir)lib"
 REM del /Q "$(TargetDir)*.pdb"
 REM del /Q "$(TargetDir)*.config"
 REM del /Q "$(TargetDir)*.xml"
-signtool sign /n "Ehsan Iran Nejad" /t http://timestamp.digicert.com /fd sha256 "$(TargetPath)"</PostBuildEvent>
+REM signtool sign /n "Ehsan Iran Nejad" /t http://timestamp.digicert.com /fd sha256 "$(TargetPath)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

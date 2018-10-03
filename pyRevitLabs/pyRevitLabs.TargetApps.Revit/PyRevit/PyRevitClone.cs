@@ -194,7 +194,7 @@ namespace pyRevitLabs.TargetApps.Revit {
                 }
             }
             catch (Exception ex) {
-                logger.Debug(string.Format("Error parsing clone \"{0}\" engines configs at \"{1}\" | {2}",
+                logger.Debug(string.Format("Error parsing clone \"{0}\" engines configs from \"{1}\" | {2}",
                                            clonePath, prFile, ex.Message));
             }
 
