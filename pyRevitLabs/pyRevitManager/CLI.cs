@@ -1172,7 +1172,7 @@ namespace pyRevitManager.Views {
             PrintHeader("Registered Clones (deployed from archive)");
             foreach (var clone in clones)
                 if (!clone.IsRepoDeploy)
-                    Console.WriteLine(string.Format("Name: \"{0}\" | Path: \"{1}\"", clone.Name, clone.ClonePath));
+                    Console.WriteLine(string.Format("Name: \"{0}\" | Deploy: \"{1}\" | Path: \"{2}\"", clone.Name, clone.GetDeployment().Name, clone.ClonePath));
         }
 
         private static void PrintAttachments() {
