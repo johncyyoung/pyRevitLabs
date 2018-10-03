@@ -39,7 +39,7 @@ namespace pyRevitManager.Views {
         pyrevit (-h | --help)
         pyrevit (-V | --version)
         pyrevit (blog | docs | source | youtube | support)
-        pyrevit env
+        pyrevit env [--log=<log_file>]
         pyrevit clone <clone_name> <deployment_name> [--dest=<dest_path>] [--source=<archive_url>] [--branch=<branch_name>] [--log=<log_file>]
         pyrevit clone <clone_name> [--dest=<dest_path>] [--source=<repo_url>] [--branch=<branch_name>] [--log=<log_file>]
         pyrevit clones
