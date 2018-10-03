@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml;
 
 using pyRevitLabs.Common;
+using pyRevitLabs.Common.Extensions;
 using NLog;
 
 namespace pyRevitLabs.TargetApps.Revit {
@@ -17,7 +18,7 @@ namespace pyRevitLabs.TargetApps.Revit {
             var doc = new XmlDocument();
             doc.Load(manifestFile);
             Name = doc.DocumentElement.SelectSingleNode("/RevitAddIns/AddIn/Name").InnerText;
-            Assembly = doc.DocumentElement.SelectSingleNode("/RevitAddIns/AddIn/Assembly").InnerText;
+            Assembly = doc.DocumentElement.SelectSingleNode("/RevitAddIns/AddIn/Assembly").InnerText.NormalizeAsPath();
             AddInId = doc.DocumentElement.SelectSingleNode("/RevitAddIns/AddIn/AddInId").InnerText;
             FullClassName = doc.DocumentElement.SelectSingleNode("/RevitAddIns/AddIn/FullClassName").InnerText;
             VendorId = doc.DocumentElement.SelectSingleNode("/RevitAddIns/AddIn/VendorId").InnerText;

@@ -31,6 +31,7 @@ namespace pyRevitManager.Views {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         private const string helpUrl = "https://github.com/eirannejad/pyRevitLabs/blob/master/README_CLI.md";
+        private const string updaterExecutive = "pyRevitUpdater.exe";
         private const string usage = @"pyrevit command line tool
 
     Usage:
@@ -38,9 +39,9 @@ namespace pyRevitManager.Views {
         pyrevit (-h | --help)
         pyrevit (-V | --version)
         pyrevit (blog | docs | source | youtube | support)
-        pyrevit env
-        pyrevit clone <clone_name> [<dest_path>] [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit] [--log=<log_file>]
-        pyrevit clone <clone_name> <repo_or_archive_url> <dest_path> [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit] [--log=<log_file>]
+        pyrevit env [--log=<log_file>]
+        pyrevit clone <clone_name> <deployment_name> [--dest=<dest_path>] [--source=<archive_url>] [--branch=<branch_name>] [--log=<log_file>]
+        pyrevit clone <clone_name> [--dest=<dest_path>] [--source=<repo_url>] [--branch=<branch_name>] [--log=<log_file>]
         pyrevit clones
         pyrevit clones (info | open) <clone_name>
         pyrevit clones add <clone_name> <clone_path> [--log=<log_file>]
@@ -99,16 +100,20 @@ namespace pyRevitManager.Views {
         
 
     Options:
-        -h --help                   Show this screen.
-        -V --version                Show version.
-        --verbose                   Print info messages.
-        --debug                     Print docopt options and logger debug messages.
-        --core                      Install original pyRevit core only (no defualt tools).
-        --all                       All applicable items.
-        --attached                  All Revits that are configured to load pyRevit.
-        --authgroup=<auth_groups>   User groups authorized to use the extension.
-        --branch=<branch_name>      Target git branch name.
-        --log=<log_file>            Output all log levels to specified file.
+        -h --help                   Show this screen
+        -V --version                Show version
+        --verbose                   Print info messages
+        --debug                     Print docopt options and logger debug messages
+        --all                       All applicable items
+        --allusers                  Use %PROGRAMDATA% instead of %APPDATA%
+        --attached                  All Revits that are configured to load pyRevit
+        --installed                 Only installed Revit versions
+        --lock                      Lock the target file to current user
+        --dest=<dest_path>          Destination path
+        --source=<repo_url>         Source repo or archive
+        --branch=<branch_name>      Target git branch name
+        --csv=<output_file>         Output to CSV file
+        --log=<log_file>            Output all log levels to specified file
 ";
 
         public static void ProcessArguments(string[] args) {
@@ -119,6 +124,7 @@ namespace pyRevitManager.Views {
             var config = new LoggingConfiguration();
             var logconsole = new ConsoleTarget("logconsole") { Layout = @"${level}: ${message} ${exception}" };
             config.AddTarget(logconsole);
+            config.AddRule(LogLevel.Error, LogLevel.Fatal, logconsole);
 
             // process arguments for logging level
             var argsList = new List<string>(args);
@@ -230,20 +236,19 @@ namespace pyRevitManager.Views {
             }
 
             // =======================================================================================================
-            // $ pyrevit clone <clone_name> [<dest_path>] [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit]
-            // $ pyrevit clone <clone_name> <repo_or_archive_url> <dest_path> [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit]
+            // $ pyrevit clone <clone_name> <deployment_name> [--dest=<dest_path>] [--source=<archive_url>] [--branch=<branch_name>] [--log=<log_file>]
+            // $ pyrevit clone <clone_name> [--dest=<dest_path>] [--source=<repo_url>] [--branch=<branch_name>] [--log=<log_file>]
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "clone")) {
                 var cloneName = TryGetValue(arguments, "<clone_name>");
-                var deployName = TryGetValue(arguments, "--deploy");
+                var deployName = TryGetValue(arguments, "<deployment_name>");
                 if (cloneName != null) {
                     PyRevit.Clone(
                         cloneName,
                         deploymentName: deployName,
                         branchName: TryGetValue(arguments, "--branch"),
-                        repoOrArchivePath: TryGetValue(arguments, "<repo_or_archive_url>"),
-                        destPath: TryGetValue(arguments, "<dest_path>"),
-                        nogit: arguments["--nogit"].IsTrue
+                        repoOrArchivePath: TryGetValue(arguments, "--source"),
+                        destPath: TryGetValue(arguments, "--dest")
                         );
                 }
             }
@@ -437,14 +442,41 @@ namespace pyRevitManager.Views {
             // $ pyrevit clones update (--all | <clone_name>)
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "clones", "update")) {
-                if (arguments["--all"].IsTrue)
-                    PyRevit.UpdateAllClones();
+                // TODO: ask for closing running Revits
 
-                var cloneName = TryGetValue(arguments, "<clone_name>");
-                if (cloneName != null) {
-                    var clone = PyRevit.GetRegisteredClone(cloneName);
-                    PyRevit.Update(clone);
+                // prepare a list of clones to be updated
+                var clones = new List<PyRevitClone>();
+                // separate the clone that this process might be running from
+                // this is used to update this clone from outside since the dlls will be locked
+                PyRevitClone myClone = null;
+
+                // all clones
+                if (arguments["--all"].IsTrue) {
+                    foreach (var clone in PyRevit.GetRegisteredClones())
+                        if (IsRunningInsideClone(clone))
+                            myClone = clone;
+                        else
+                            clones.Add(clone);
                 }
+                // or single clone
+                else {
+                    var cloneName = TryGetValue(arguments, "<clone_name>");
+                    if (cloneName != null) {
+                        var clone = PyRevit.GetRegisteredClone(cloneName);
+                        if (IsRunningInsideClone(clone))
+                            myClone = clone;
+                        else
+                            clones.Add(clone);
+                    }
+                }
+
+                // update clones that do not include this process
+                foreach(var clone in clones)
+                    PyRevit.Update(clone);
+
+                // now update myClone if any, as last step
+                if (myClone != null)
+                    UpdateFromOutsideAndClose(myClone);
             }
 
             // =======================================================================================================
@@ -1085,9 +1117,45 @@ namespace pyRevitManager.Views {
 
         private static void ReportCloneAsNoGit(PyRevitClone clone) {
             Console.WriteLine(
-                string.Format("Clone \"{0}\" is deployed with `--nogit` option and is not a git repo.",
+                string.Format("Clone \"{0}\" is a deployment and is not a git repo.",
                 clone.Name)
                 );
+        }
+
+        private static string GetProcessPath() {
+            return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+        }
+
+        private static bool IsRunningInsideClone(PyRevitClone clone) {
+            return GetProcessPath().NormalizeAsPath().Contains(clone.ClonePath.NormalizeAsPath());
+        }
+
+        private static void UpdateFromOutsideAndClose(PyRevitClone clone) {
+            var userTemp = Environment.ExpandEnvironmentVariables("%TEMP%");
+            var sourceUpdater = Path.Combine(GetProcessPath(), updaterExecutive);
+            var updaterPath = Path.Combine(userTemp, updaterExecutive);
+
+            // prepare outside updater
+            logger.Debug("Setting up \"{0}\" to \"{1}\"", sourceUpdater, updaterPath);
+            File.Copy(sourceUpdater, updaterPath, overwrite: true);
+
+            // make a updater bat file
+            var updaterBATFile = Path.Combine(userTemp, updaterExecutive.ToLower().Replace(".exe", ".bat"));
+            using (var batFile = new StreamWriter(File.Create(updaterBATFile))) {
+                batFile.WriteLine("@ECHO OFF");
+                batFile.WriteLine("TIMEOUT /t 1 /nobreak >NUL  2>NUL");
+                batFile.WriteLine("TASKKILL /IM \"{0}\" >NUL  2>NUL", Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
+                batFile.WriteLine("START \"\" /B \"{0}\" \"{1}\"", updaterPath, clone.ClonePath);
+            }
+
+            // launch update
+            ProcessStartInfo updaterProcessInfo = new ProcessStartInfo(updaterBATFile);
+            updaterProcessInfo.WorkingDirectory = Path.GetDirectoryName(updaterPath);
+            updaterProcessInfo.UseShellExecute = false;
+            logger.Debug("Calling outside update and exiting...");
+            Process.Start(updaterProcessInfo);
+            // and exit self
+            Environment.Exit(0);
         }
 
         private static void PrintHeader(string header) {
@@ -1095,28 +1163,27 @@ namespace pyRevitManager.Views {
         }
 
         private static void PrintClones() {
-            PrintHeader("Registered Clones (full repos)");
+            PrintHeader("Registered Clones (full git repos)");
             var clones = PyRevit.GetRegisteredClones();
             foreach (var clone in clones)
                 if (clone.IsRepoDeploy)
                     Console.WriteLine(string.Format("Name: \"{0}\" | Path: \"{1}\"", clone.Name, clone.ClonePath));
 
-            PrintHeader("Registered Clones (`--nogit` from archive)");
+            PrintHeader("Registered Clones (deployed from archive)");
             foreach (var clone in clones)
                 if (!clone.IsRepoDeploy)
-                    Console.WriteLine(string.Format("Name: \"{0}\" | Path: \"{1}\"", clone.Name, clone.ClonePath));
+                    Console.WriteLine(string.Format("Name: \"{0}\" | Deploy: \"{1}\" | Path: \"{2}\"", clone.Name, clone.GetDeployment().Name, clone.ClonePath));
         }
 
         private static void PrintAttachments() {
             PrintHeader("Attachments");
             foreach (var attachment in PyRevit.GetAttachments()) {
-                var clone = PyRevit.GetAttachedClone(attachment.Product.ProductYear);
-                if (clone != null)
-                    Console.WriteLine(string.Format("{0} | Clone: \"{1}\"",
-                                                    attachment.Product.ProductName, clone.Name));
+                if (attachment.Clone != null && attachment.Engine != null)
+                    Console.WriteLine(string.Format("{0} | Clone: \"{1}\" | Engine: \"{2}\"",
+                                                    attachment.Product.ProductName, attachment.Clone.Name, attachment.Engine.Version));
                 else
                     logger.Error(
-                        string.Format("pyRevit is attached to Revit {0} but can not determine the clone",
+                        string.Format("pyRevit is attached to Revit {0} but can not determine the clone and engine",
                                       attachment.Product.ProductYear)
                         );
             }

@@ -6,11 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-using pyRevitManager.Views;
-
 using pyRevitLabs.CommonCLI;
 
-namespace pyRevitManager {
+namespace pyRevitUpdater {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
@@ -19,8 +17,8 @@ namespace pyRevitManager {
         private void ApplicationStartup(object sender, StartupEventArgs e) {
             //if (e.Args.Length > 0) {
                 ConsoleProvider.Attach();
-                pyRevitCLI.ProcessArguments(e.Args);
-                //ConsoleProvider.Detach();
+                PyRevitUpdaterCLI.ProcessArguments(e.Args);
+                ConsoleProvider.Detach();
             //}
 
             Environment.Exit(0);
