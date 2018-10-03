@@ -220,10 +220,10 @@ $ pyrevit clones update dev         # update `dev` clone only
 `pyrevit` can detect the exact installed Revit versions on your machine. You can use the commands below to attach any pyRevit clone to any or all installed Revits. Make sure to specify the clone to be attached and the desired engine version:
 
 ``` shell
-pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --all | --attached) [--allusers] [--log=<log_file>]
+pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --installed | --attached) [--allusers] [--log=<log_file>]
 
-$ pyrevit attach dev latest --all       # attach `dev` clone to all installed Revits using latest engine
-$ pyrevit attach dev 277 --all       # attach `dev` clone to all installed Revits using 277 engine
+$ pyrevit attach dev latest --installed       # attach `dev` clone to all installed Revits using latest engine
+$ pyrevit attach dev 277 --installed       # attach `dev` clone to all installed Revits using 277 engine
 $ pyrevit attach dev dynamosafe 2018       # attach `dev` clone to Revit 2018 using an engine that has no conflicts with Dynamo BIM
 ```
 
