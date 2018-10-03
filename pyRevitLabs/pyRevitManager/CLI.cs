@@ -54,7 +54,7 @@ namespace pyRevitManager.Views {
         pyrevit clones update (--all | <clone_name>) [--log=<log_file>]
         pyrevit clones deployments <clone_name>
         pyrevit clones engines <clone_name>
-        pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --all | --attached) [--allusers] [--log=<log_file>]
+        pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --installed | --attached) [--allusers] [--log=<log_file>]
         pyrevit attached
         pyrevit detach (--all | <revit_year>) [--log=<log_file>]
         pyrevit extend <extension_name> <dest_path> [--branch=<branch_name>] [--log=<log_file>]
@@ -75,6 +75,7 @@ namespace pyRevitManager.Views {
         pyrevit revits killall [<revit_year>] [--log=<log_file>]
         pyrevit revits fileinfo <file_or_dir_path> [--csv=<output_file>]
         pyrevit revits addons
+        pyrevit revits addons prepare <revit_year> [--allusers]
         pyrevit revits addons install <addon_name> <dest_path> [--allusers]
         pyrevit revits addons uninstall <addon_name>
         pyrevit init (ui | lib) <extension_name>
@@ -480,7 +481,7 @@ namespace pyRevitManager.Views {
             }
 
             // =======================================================================================================
-            // $ pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --all | --attached) [--allusers]
+            // $ pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --installed | --attached) [--allusers]
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "attach")
                     || VerifyCommand(activeKeys, "attach", "latest")
@@ -497,7 +498,7 @@ namespace pyRevitManager.Views {
                             engineVer = int.Parse(engineVersion);
                     }
 
-                    if (arguments["--all"].IsTrue) {
+                    if (arguments["--installed"].IsTrue) {
                         foreach (var revit in RevitController.ListInstalledRevits())
                             PyRevit.Attach(revit.FullVersion.Major,
                                            clone,
@@ -792,9 +793,17 @@ namespace pyRevitManager.Views {
 
             // =======================================================================================================
             // $ pyrevit revits addons
+            // $ pyrevit revits addons prepare <revit_year> [--allusers]
             // $ pyrevit revits addons install <addon_name> <dest_path> [--allusers]
             // $ pyrevit revits addons uninstall <addon_name>
             // =======================================================================================================
+            else if (VerifyCommand(activeKeys, "revits", "addons", "prepare")) {
+                // setup the addon folders
+                var revitYear = TryGetValue(arguments, "<revit_year>");
+                if (revitYear != null)
+                    Addons.PrepareAddonPath(int.Parse(revitYear), allUsers: arguments["--allusers"].IsTrue);
+            }
+
             else if (VerifyCommand(activeKeys, "revits", "addons")
                         || VerifyCommand(activeKeys, "revits", "addons", "install")
                         || VerifyCommand(activeKeys, "revits", "addons", "uninstall")) {

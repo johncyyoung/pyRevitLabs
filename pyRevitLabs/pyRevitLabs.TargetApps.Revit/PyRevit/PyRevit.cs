@@ -107,6 +107,8 @@ namespace pyRevitLabs.TargetApps.Revit {
             if (destPath == null)
                 destPath = Path.Combine(pyRevitAppDataPath, PyRevitConsts.DefaultCloneInstallName);
             logger.Debug("Destination path determined as \"{0}\"", destPath);
+            // make sure destPath exists
+            CommonUtils.ConfirmPath(destPath);
 
             // start the clone process
             LibGit2Sharp.Repository repo = null;
@@ -443,7 +445,8 @@ namespace pyRevitLabs.TargetApps.Revit {
         public static void Attach(int revitYear,
                                   PyRevitClone clone,
                                   int engineVer = 000,
-                                  bool allUsers = false) {
+                                  bool allUsers = false,
+                                  bool force = false) {
             // make the addin manifest file
             var engine = clone.GetEngine(engineVer);
 

@@ -121,5 +121,12 @@ namespace pyRevitLabs.TargetApps.Revit {
             }
             return null;
         }
+
+        public static string PrepareAddonPath(int revitYear, bool allUsers) {
+            var addonPath = GetRevitAddonsFolder(revitYear, allUsers: allUsers);
+            CommonUtils.ConfirmPath(addonPath);
+            logger.Debug("Prepared: {0}", addonPath);
+            return addonPath;
+        }
     }
 }
