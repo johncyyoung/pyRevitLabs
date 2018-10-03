@@ -69,13 +69,14 @@ $ pyrevit support   # pyRevit suppport page for pyRevit patrons
 ### Installing pyRevit
 
 ``` shell
-pyrevit clone <clone_name> [<dest_path>] [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit] [--log=<log_file>]
+pyrevit clone <clone_name> <deployment_name> [--dest=<dest_path>] [--source=<archive_url>] [--branch=<branch_name>] [--log=<log_file>]
+pyrevit clone <clone_name> [--dest=<dest_path>] [--source=<repo_url>] [--branch=<branch_name>] [--log=<log_file>]
 ```
 `pyrevit` can maintain multiple clones of pyRevit on your system. In order to do so, it needs to assign a name to each clone (`<clone_name>`). You'll set this name when cloning pyRevit or when adding an existing clone to `pyrevit` registry. From then on you can always refer to that clone by its name.
 
 Let's say I want one clone of pyRevit `master` branch as my master repo; one clone of pyRevit without the full git repository (much smaller download) as my main repo; and finally one clone of the `develop` branch of pyRevit as my development repo.
 
-Let's create the master clone first:
+Let's create the master clone first. This will be a full git repo of the master branch.
 
 ``` shell
 $ # master is <clone_name> that we're providing to pyrevit cli
@@ -89,36 +90,31 @@ Now let's create the main clone. This one does not include the full repository. 
 ``` shell
 $ # we're providing the <dest_path> for this clone
 $ # we're using the `base` deployment in this example which includes the base pyRevit tools
-$ pyrevit clone main "C:\pyRevit\main" --nogit --deploy=base
+$ pyrevit clone main base --dest="C:\pyRevit\main"
 ```
 
-- `--nogit`: Install from the ZIP archive and NOT the complete git repo
-- `--deploy=`: pyRevit can have multiple deployments. These deployments are defined in the [pyRevitfile](https://github.com/eirannejad/pyRevit/blob/develop/pyRevitfile) inside the pyRevit repo. Each deployment, only deploys a set of directories.
+- `<deployment_name>`: When provided the tool installs from the ZIP archive and NOT the complete git repo. This is the preferred method and is used with the native pyRevit installer. pyRevit has multiple deployments. These deployments are defined in the [pyRevitfile](https://github.com/eirannejad/pyRevit/blob/develop/pyRevitfile) inside the pyRevit repo. Each deployment, only deploys a subset of directories.
 
-Now let's create the final development clone.
+Now let's create the final development clone. This is a full git repo.
 
 ``` shell
-$ pyrevit clone dev "C:\pyRevit\dev" --branch=develop
+$ pyrevit clone dev --dest="C:\pyRevit\dev" --branch=develop
 ```
 
 - `--branch=`: Specify a specific branch to be cloned
 
 #### Installing Custom Clones
 
-You can also use the clone command to install your own pyRevit clones from any git url:
+You can also use the clone command to install your own pyRevit clones from any git url. This is done by providing `--source=<repo_url>` or `--source=<archive_url>` depending on if you're cloning from a git repo or an archive.
 
 ``` shell
-pyrevit clone <clone_name> <repo_or_archive_url> <dest_path> [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit] [--log=<log_file>]
-
-$ pyrevit clone mypyrevit "https://www.github.com/my-pyrevit.git" "C:\pyRevit\mypyrevit" --branch=develop
+$ pyrevit clone mypyrevit --source="https://www.github.com/my-pyrevit.git" --dest="C:\pyRevit\mypyrevit" --branch=develop
 ```
 
-Or install from a ZIP archive using `--nogit` option:
+Or install from a ZIP archive using `<deployment_name>`:
 
 ``` shell
-pyrevit clone <clone_name> <repo_or_archive_url> <dest_path> [--branch=<branch_name>] [--deploy=<deployment_name>] [--nogit] [--log=<log_file>]
-
-$ pyrevit clone mypyrevit "\\network\my-pyrevit.ZIP" "C:\pyRevit\mypyrevit" --nogit --deploy=core
+$ pyrevit clone mypyrevit base --source="\\network\my-pyrevit.ZIP" --dest="C:\pyRevit\mypyrevit"
 ```
 
 ### Maintaining Clones
@@ -128,11 +124,11 @@ You can see a list of registered clones using. Notice the full clones and the no
 ``` shell
 $ pyrevit clones
 
-==> Registered Clones (full repos)
+==> Registered Clones (full git repos)
 Name: "master" | Path: "%APPDATA%\pyRevit\pyRevit"
 Name: "dev" | Path: "C:\pyRevit\dev"
 
-==> Registered Clones (`--nogit` from archive)
+==> Registered Clones (deployed from archive)
 Name: "main" | Path: "C:\pyRevit\main"
 ```
 
@@ -362,11 +358,11 @@ Use `env` command to get info about the current `pyrevit` environment:
 ``` shell
 $ pyrevit env
 
-==> Registered Clones (full repos)
+==> Registered Clones (full git repos)
 Name: "master" | Path: "%APPDATA%\pyRevit\pyRevit"
 Name: "dev" | Path: "C:\pyRevit\dev"
 
-==> Registered Clones (`--nogit` from archive)
+==> Registered Clones (deployed from archive)
 Name: "main" | Path: "C:\pyRevit\main"
 
 ==> Attachments

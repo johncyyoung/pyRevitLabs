@@ -100,16 +100,20 @@ namespace pyRevitManager.Views {
         
 
     Options:
-        -h --help                   Show this screen.
-        -V --version                Show version.
-        --verbose                   Print info messages.
-        --debug                     Print docopt options and logger debug messages.
-        --core                      Install original pyRevit core only (no defualt tools).
-        --all                       All applicable items.
-        --attached                  All Revits that are configured to load pyRevit.
-        --authgroup=<auth_groups>   User groups authorized to use the extension.
-        --branch=<branch_name>      Target git branch name.
-        --log=<log_file>            Output all log levels to specified file.
+        -h --help                   Show this screen
+        -V --version                Show version
+        --verbose                   Print info messages
+        --debug                     Print docopt options and logger debug messages
+        --all                       All applicable items
+        --allusers                  Use %PROGRAMDATA% instead of %APPDATA%
+        --attached                  All Revits that are configured to load pyRevit
+        --installed                 Only installed Revit versions
+        --lock                      Lock the target file to current user
+        --dest=<dest_path>          Destination path
+        --source=<repo_url>         Source repo or archive
+        --branch=<branch_name>      Target git branch name
+        --csv=<output_file>         Output to CSV file
+        --log=<log_file>            Output all log levels to specified file
 ";
 
         public static void ProcessArguments(string[] args) {
@@ -1113,7 +1117,7 @@ namespace pyRevitManager.Views {
 
         private static void ReportCloneAsNoGit(PyRevitClone clone) {
             Console.WriteLine(
-                string.Format("Clone \"{0}\" is deployed with `--nogit` option and is not a git repo.",
+                string.Format("Clone \"{0}\" is a deployment and is not a git repo.",
                 clone.Name)
                 );
         }
@@ -1159,13 +1163,13 @@ namespace pyRevitManager.Views {
         }
 
         private static void PrintClones() {
-            PrintHeader("Registered Clones (full repos)");
+            PrintHeader("Registered Clones (full git repos)");
             var clones = PyRevit.GetRegisteredClones();
             foreach (var clone in clones)
                 if (clone.IsRepoDeploy)
                     Console.WriteLine(string.Format("Name: \"{0}\" | Path: \"{1}\"", clone.Name, clone.ClonePath));
 
-            PrintHeader("Registered Clones (`--nogit` from archive)");
+            PrintHeader("Registered Clones (deployed from archive)");
             foreach (var clone in clones)
                 if (!clone.IsRepoDeploy)
                     Console.WriteLine(string.Format("Name: \"{0}\" | Path: \"{1}\"", clone.Name, clone.ClonePath));
