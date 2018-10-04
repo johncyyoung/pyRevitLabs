@@ -1,24 +1,38 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Threading;
 using System.Windows;
+
 using pyRevitLabs.TargetApps.Revit;
 
 namespace pyRevitUpdater {
     public class PyRevitUpdaterCLI {
         public static void ProcessArguments(string[] args) {
-            if (args.Length == 1) {
+            if (args.Length >= 1) {
                 var clonePath = args[0];
-
-                try {
-                    var clone = PyRevit.GetRegisteredClone(clonePath);
-                    PyRevit.Update(clone);
-                    MessageBox.Show("Update Completed.", "pyRevitUpdater", MessageBoxButton.OK);
+                if (args.Length == 2 && args[1] == "--gui") {
+                    // show gui
+                    var updaterWindow = new UpdaterWindow();
+                    updaterWindow.ClonePath = clonePath;
+                    updaterWindow.ShowDialog();
                 }
-                catch {
-
+                else {
+                    RunUpdate(clonePath);
                 }
             }
         }
+
+        public static bool RevitsAreRunning() {
+            return RevitController.ListRunningRevits().Count > 0;
+        }
+
+        public static void RunUpdate(string clonePath) {
+            try {
+                var clone = PyRevit.GetRegisteredClone(clonePath);
+                PyRevit.Update(clone);
+            }
+            catch (Exception ex){
+                MessageBox.Show(ex.Message, PyRevitConsts.AddinFileName);
+            }
+        }
+
     }
 }
