@@ -71,6 +71,9 @@ namespace pyRevitLabs.TargetApps.Revit {
         public const string ConfigsUsageLoggingStatusKey = "active";
         public const string ConfigsUsageLogFilePathKey = "logfilepath";
         public const string ConfigsUsageLogServerUrlKey = "logserverurl";
+        public const string ConfigsUserCanUpdateKey = "usercanupdate";
+        public const string ConfigsUserCanExtendKey = "usercanextend";
+        public const string ConfigsUserCanConfigKey = "usercanconfig";
         // pyrevit.exe specific configs
         public const string EnvConfigsSectionName = "environment";
         public const string EnvConfigsInstalledClonesKey = "clones";

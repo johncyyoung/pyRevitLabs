@@ -1158,6 +1158,32 @@ namespace pyRevitLabs.TargetApps.Revit {
                             outputCSSFilePath);
         }
 
+        // user access to tools
+        // @handled @logs
+        public static bool GetUserCanUpdate() {
+            return bool.Parse(GetKeyValue(PyRevitConsts.ConfigsCoreSection, PyRevitConsts.ConfigsUserCanUpdateKey));
+        }
+
+        public static bool GetUserCanExtend() {
+            return bool.Parse(GetKeyValue(PyRevitConsts.ConfigsCoreSection, PyRevitConsts.ConfigsUserCanExtendKey));
+        }
+
+        public static bool GetUserCanConfig() {
+            return bool.Parse(GetKeyValue(PyRevitConsts.ConfigsCoreSection, PyRevitConsts.ConfigsUserCanConfigKey));
+        }
+
+        public static void SetUserCanUpdate(bool state) {
+            SetKeyValue(PyRevitConsts.ConfigsCoreSection, PyRevitConsts.ConfigsUserCanUpdateKey, state);
+        }
+
+        public static void SetUserCanExtend(bool state) {
+            SetKeyValue(PyRevitConsts.ConfigsCoreSection, PyRevitConsts.ConfigsUserCanExtendKey, state);
+        }
+
+        public static void SetUserCanConfig(bool state) {
+            SetKeyValue(PyRevitConsts.ConfigsCoreSection, PyRevitConsts.ConfigsUserCanConfigKey, state);
+        }
+
         // deletes config file
         // @handled @logs
         public static void DeleteConfigs() {

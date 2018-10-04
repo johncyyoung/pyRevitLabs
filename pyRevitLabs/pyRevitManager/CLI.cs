@@ -91,12 +91,15 @@ namespace pyRevitManager.Views {
         pyrevit configs rocketmode [(enable | disable)] [--log=<log_file>]
         pyrevit configs filelogging [(enable | disable)] [--log=<log_file>]
         pyrevit configs loadbeta [(enable | disable)] [--log=<log_file>]
+        pyrevit configs usercanupdate [(Yes | No)] [--log=<log_file>]
+        pyrevit configs usercanextend [(Yes | No)] [--log=<log_file>]
+        pyrevit configs usercanconfig [(Yes | No)] [--log=<log_file>]
         pyrevit configs usagelogging
         pyrevit configs usagelogging enable (file | server) <dest_path> [--log=<log_file>]
         pyrevit configs usagelogging disable [--log=<log_file>]
         pyrevit configs outputcss [<css_path>] [--log=<log_file>]
         pyrevit configs seed [--lock] [--log=<log_file>]
-        pyrevit configs <option_path> (enable | disable) [--log=<log_file>]
+        pyrevit configs <option_path> [(enable | disable)] [--log=<log_file>]
         pyrevit configs <option_path> [<option_value>] [--log=<log_file>]
         
 
@@ -932,6 +935,45 @@ namespace pyRevitManager.Views {
                 PyRevit.SetLoadBetaTools(arguments["enable"].IsTrue);
 
             // =======================================================================================================
+            // $ pyrevit configs usercanupdate [(Yes | No)]
+            // =======================================================================================================
+            else if (VerifyCommand(activeKeys, "configs", "usercanupdate"))
+                Console.WriteLine(
+                    String.Format("User {0} update.",
+                    PyRevit.GetUserCanUpdate() ? "CAN" : "CAN NOT")
+                    );
+
+            else if (VerifyCommand(activeKeys, "configs", "usercanupdate", "Yes")
+                    || VerifyCommand(activeKeys, "configs", "usercanupdate", "No"))
+                PyRevit.SetUserCanUpdate(arguments["Yes"].IsTrue);
+
+            // =======================================================================================================
+            // $ pyrevit configs usercanextend [(Yes | No)]
+            // =======================================================================================================
+            else if (VerifyCommand(activeKeys, "configs", "usercanextend"))
+                Console.WriteLine(
+                    String.Format("User {0} extend.",
+                    PyRevit.GetUserCanExtend() ? "CAN" : "CAN NOT")
+                    );
+
+            else if (VerifyCommand(activeKeys, "configs", "usercanextend", "Yes")
+                    || VerifyCommand(activeKeys, "configs", "usercanextend", "No"))
+                PyRevit.SetUserCanExtend(arguments["Yes"].IsTrue);
+
+            // =======================================================================================================
+            // $ pyrevit configs usercanconfig [(Yes | No)]
+            // =======================================================================================================
+            else if (VerifyCommand(activeKeys, "configs", "usercanconfig"))
+                Console.WriteLine(
+                    String.Format("User {0} config.",
+                    PyRevit.GetUserCanConfig() ? "CAN" : "CAN NOT")
+                    );
+
+            else if (VerifyCommand(activeKeys, "configs", "usercanconfig", "Yes")
+                    || VerifyCommand(activeKeys, "configs", "usercanconfig", "No"))
+                PyRevit.SetUserCanConfig(arguments["Yes"].IsTrue);
+
+            // =======================================================================================================
             // $ pyrevit configs usagelogging
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "configs", "usagelogging")) {
@@ -978,7 +1020,7 @@ namespace pyRevitManager.Views {
                 PyRevit.SeedConfig(makeCurrentUserAsOwner: arguments["--lock"].IsTrue);
 
             // =======================================================================================================
-            // $ pyrevit configs <option_path> (enable | disable)
+            // $ pyrevit configs <option_path> [(enable | disable)]
             // $ pyrevit configs <option_path> [<option_value>]
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "configs")) {
