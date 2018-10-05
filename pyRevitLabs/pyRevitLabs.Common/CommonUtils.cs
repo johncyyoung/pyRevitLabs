@@ -181,8 +181,17 @@ namespace pyRevitLabs.Common {
             Process.Start("explorer.exe", resourcePath);
         }
 
-        public static void AddShortcut(string shortCutName, string appName, string pathToExe, string args, string workingDir, string iconPath, string description) {
-            string commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
+        public static void AddShortcut(string shortCutName,
+                                       string appName,
+                                       string pathToExe,
+                                       string args,
+                                       string workingDir,
+                                       string iconPath,
+                                       string description,
+                                       bool allUsers = false) {
+            string commonStartMenuPath = Environment.GetFolderPath(
+                allUsers ? Environment.SpecialFolder.CommonStartMenu : Environment.SpecialFolder.StartMenu
+                );
             string appStartMenuPath = Path.Combine(commonStartMenuPath, "Programs", appName);
 
             ConfirmPath(appStartMenuPath);

@@ -102,7 +102,7 @@ namespace pyRevitManager.Views {
         pyrevit configs seed [--lock] [--log=<log_file>]
         pyrevit configs <option_path> [(enable | disable)] [--log=<log_file>]
         pyrevit configs <option_path> [<option_value>] [--log=<log_file>]
-        pyrevit cli addshortcut <shortcut_name> <shortcut_args> [--desc=<shortcut_description>]
+        pyrevit cli addshortcut <shortcut_name> <shortcut_args> [--desc=<shortcut_description>] [--allusers]
         
 
     Options:
@@ -1071,7 +1071,7 @@ namespace pyRevitManager.Views {
             }
 
             // =======================================================================================================
-            // $ pyrevit cli addshortcut <shortcut_name> <shortcut_args> [--desc=<shortcut_description>]
+            // $ pyrevit cli addshortcut <shortcut_name> <shortcut_args> [--desc=<shortcut_description>] [--allusers]
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "cli", "addshortcut")) {
                 var shortcutName = TryGetValue(arguments, "<shortcut_name>");
@@ -1087,7 +1087,8 @@ namespace pyRevitManager.Views {
                         shortcutArgs,
                         processPath,
                         iconPath,
-                        shortcutDesc
+                        shortcutDesc,
+                        allUsers: arguments["--allusers"].IsTrue
                         );
                 }
             }
