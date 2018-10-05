@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
+using IWshRuntimeLibrary;
 
 using NLog;
 
@@ -31,8 +32,8 @@ namespace pyRevitLabs.Common {
 
                 try {
                     foreach (string file in files) {
-                        File.SetAttributes(file, FileAttributes.Normal);
-                        File.Delete(file);
+                        System.IO.File.SetAttributes(file, FileAttributes.Normal);
+                        System.IO.File.Delete(file);
                     }
 
                     foreach (string dir in dirs) {
@@ -61,7 +62,7 @@ namespace pyRevitLabs.Common {
                 // copy all the files & Replaces any files with the same name
                 foreach (string newPath in Directory.GetFiles(sourceDir, "*.*",
                     SearchOption.AllDirectories))
-                    File.Copy(newPath, newPath.Replace(sourceDir, destDir), true);
+                    System.IO.File.Copy(newPath, newPath.Replace(sourceDir, destDir), true);
             }
             catch (Exception ex) {
                 throw new pyRevitException(
@@ -78,8 +79,8 @@ namespace pyRevitLabs.Common {
         public static void ConfirmFile(string filepath)
         {
             ConfirmPath(Path.GetDirectoryName(filepath));
-            if (!File.Exists(filepath)) {
-                var file = File.CreateText(filepath);
+            if (!System.IO.File.Exists(filepath)) {
+                var file = System.IO.File.CreateText(filepath);
                 file.Close();
             }
         }
@@ -173,11 +174,32 @@ namespace pyRevitLabs.Common {
             //    );
 
             //flush security access.
-            File.SetAccessControl(filePath, fs);
+            System.IO.File.SetAccessControl(filePath, fs);
         }
 
         public static void OpenInExplorer(string resourcePath) {
             Process.Start("explorer.exe", resourcePath);
         }
+
+        public static void AddShortcut(string shortCutName, string appName, string pathToExe, string args, string workingDir, string iconPath, string description) {
+            string commonStartMenuPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu);
+            string appStartMenuPath = Path.Combine(commonStartMenuPath, "Programs", appName);
+
+            ConfirmPath(appStartMenuPath);
+
+            string shortcutLocation = Path.Combine(appStartMenuPath, shortCutName + ".lnk");
+            WshShell shell = new WshShell();
+            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutLocation);
+
+            shortcut.Description = "Test App Description";
+            //shortcut.IconLocation = @"C:\Program Files (x86)\TestApp\TestApp.ico"; //uncomment to set the icon of the shortcut
+            shortcut.TargetPath = pathToExe;
+            shortcut.Arguments = args;
+            shortcut.Description = description;
+            shortcut.IconLocation = iconPath;
+            shortcut.WorkingDirectory = workingDir;
+            shortcut.Save();
+        }
     }
 }
+

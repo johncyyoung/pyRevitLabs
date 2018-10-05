@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 
 using pyRevitLabs.Common;
+using pyRevitLabs.CommonCLI;
 using pyRevitLabs.Common.Extensions;
 using pyRevitLabs.TargetApps.Revit;
 using pyRevitLabs.Language.Properties;
@@ -101,6 +102,7 @@ namespace pyRevitManager.Views {
         pyrevit configs seed [--lock] [--log=<log_file>]
         pyrevit configs <option_path> [(enable | disable)] [--log=<log_file>]
         pyrevit configs <option_path> [<option_value>] [--log=<log_file>]
+        pyrevit cli addshortcut <shortcut_name> <shortcut_args> [--desc=<shortcut_description>]
         
 
     Options:
@@ -121,22 +123,28 @@ namespace pyRevitManager.Views {
 ";
 
         public static void ProcessArguments(string[] args) {
-            // process arguments for hidden debug mode switch
-            pyRevitManagerLogLevel logLevel = pyRevitManagerLogLevel.InfoMessages;
-
-            // setup logger
-            var config = new LoggingConfiguration();
-            var logconsole = new ConsoleTarget("logconsole") { Layout = @"${level}: ${message} ${exception}" };
-            config.AddTarget(logconsole);
-            config.AddRule(LogLevel.Error, LogLevel.Fatal, logconsole);
 
             // process arguments for logging level
             var argsList = new List<string>(args);
 
+            
             if (argsList.Contains("--test")) {
                 argsList.Remove("--test");
                 GlobalConfigs.UnderTest = true;
             }
+
+            // detach from console if 
+            if (argsList.Contains("--gui")) {
+                ConsoleProvider.Detach();
+            }
+
+            // setup logger
+            // process arguments for hidden debug mode switch
+            pyRevitManagerLogLevel logLevel = pyRevitManagerLogLevel.InfoMessages;
+            var config = new LoggingConfiguration();
+            var logconsole = new ConsoleTarget("logconsole") { Layout = @"${level}: ${message} ${exception}" };
+            config.AddTarget(logconsole);
+            config.AddRule(LogLevel.Error, LogLevel.Fatal, logconsole);
 
             if (argsList.Contains("--verbose")) {
                 argsList.Remove("--verbose");
@@ -1061,6 +1069,28 @@ namespace pyRevitManager.Views {
                     }
                 }
             }
+
+            // =======================================================================================================
+            // $ pyrevit cli addshortcut <shortcut_name> <shortcut_args> [--desc=<shortcut_description>]
+            // =======================================================================================================
+            else if (VerifyCommand(activeKeys, "cli", "addshortcut")) {
+                var shortcutName = TryGetValue(arguments, "<shortcut_name>");
+                var shortcutArgs = TryGetValue(arguments, "<shortcut_args>");
+                var shortcutDesc = TryGetValue(arguments, "--desc");
+                if (shortcutName != null && shortcutArgs != null) {
+                    var processPath = GetProcessPath();
+                    var iconPath = Path.Combine(processPath, "pyRevit.ico");
+                    CommonUtils.AddShortcut(
+                        shortcutName,
+                        "pyRevit",
+                        GetProcessFileName(),
+                        shortcutArgs,
+                        processPath,
+                        iconPath,
+                        shortcutDesc
+                        );
+                }
+            }
         }
 
         // get enabled keywords
@@ -1173,8 +1203,13 @@ namespace pyRevitManager.Views {
                 );
         }
 
+        private static string GetProcessFileName() {
+            return Process.GetCurrentProcess().MainModule.FileName;
+        }
+
+
         private static string GetProcessPath() {
-            return Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            return Path.GetDirectoryName(GetProcessFileName());
         }
 
         private static bool IsRunningInsideClone(PyRevitClone clone) {
@@ -1206,6 +1241,7 @@ namespace pyRevitManager.Views {
             ProcessStartInfo updaterProcessInfo = new ProcessStartInfo(updaterBATFile);
             updaterProcessInfo.WorkingDirectory = Path.GetDirectoryName(updaterPath);
             updaterProcessInfo.UseShellExecute = false;
+            updaterProcessInfo.CreateNoWindow = true;
             logger.Debug("Calling outside update and exiting...");
             Process.Start(updaterProcessInfo);
             // and exit self
