@@ -15,11 +15,7 @@ namespace pyRevitUpdater {
     public partial class App : Application
     {
         private void ApplicationStartup(object sender, StartupEventArgs e) {
-            //if (e.Args.Length > 0) {
-                ConsoleProvider.Attach();
-                PyRevitUpdaterCLI.ProcessArguments(e.Args);
-                ConsoleProvider.Detach();
-            //}
+            PyRevitUpdaterCLI.ProcessArguments(e.Args);
 
             Environment.Exit(0);
         }

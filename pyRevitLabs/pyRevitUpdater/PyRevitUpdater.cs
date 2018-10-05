@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 
+using pyRevitLabs.CommonCLI;
 using pyRevitLabs.TargetApps.Revit;
 
 namespace pyRevitUpdater {
@@ -15,7 +16,9 @@ namespace pyRevitUpdater {
                     updaterWindow.ShowDialog();
                 }
                 else {
+                    ConsoleProvider.Attach();
                     RunUpdate(clonePath);
+                    ConsoleProvider.Detach();
                 }
             }
         }

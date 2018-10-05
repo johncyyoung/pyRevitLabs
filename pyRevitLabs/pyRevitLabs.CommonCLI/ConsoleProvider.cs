@@ -11,23 +11,45 @@ namespace pyRevitLabs.CommonCLI
 {
     public class ConsoleProvider
     {
+        private enum StandardHandle : uint {
+            Input = unchecked((uint)-10),
+            Output = unchecked((uint)-11),
+            Error = unchecked((uint)-12)
+        }
+
+        private enum FileType : uint {
+            Unknown = 0x0000,
+            Disk = 0x0001,
+            Char = 0x0002,
+            Pipe = 0x0003
+        }
+
         private const string    KEREL32_DLLNAME = "kernel32.dll";
         private const int       ATTACH_PARENT_PROCESS = -1;
 
         [DllImport(KEREL32_DLLNAME)]
-        private static extern bool AttachConsole(int processId);
-
-        [DllImport(KEREL32_DLLNAME)]
         private static extern bool AllocConsole();
 
-        [DllImport(KEREL32_DLLNAME)]
-        private static extern bool FreeConsole();
+        [DllImport(KEREL32_DLLNAME, SetLastError = true)]
+        private static extern int FreeConsole();
 
         [DllImport(KEREL32_DLLNAME)]
         private static extern IntPtr GetConsoleWindow();
 
         [DllImport(KEREL32_DLLNAME)]
         private static extern int GetConsoleOutputCP();
+
+        [DllImport(KEREL32_DLLNAME, SetLastError = true)]
+        private static extern bool AttachConsole(int dwProcessId);
+
+        [DllImport(KEREL32_DLLNAME, SetLastError = true)]
+        private static extern IntPtr GetStdHandle(StandardHandle nStdHandle);
+
+        [DllImport(KEREL32_DLLNAME, SetLastError = true)]
+        private static extern bool SetStdHandle(StandardHandle nStdHandle, IntPtr handle);
+
+        [DllImport(KEREL32_DLLNAME, SetLastError = true)]
+        private static extern FileType GetFileType(IntPtr handle);
 
         public static bool HasConsole
         {
@@ -95,7 +117,7 @@ namespace pyRevitLabs.CommonCLI
             }
         }
 
-        static void InvalidateOutAndError()
+        public static void InvalidateOutAndError()
         {
             Type type = typeof(System.Console);
 
@@ -119,10 +141,32 @@ namespace pyRevitLabs.CommonCLI
             _InitializeStdOutError.Invoke(null, new object[] { true });
         }
 
-        static void SetOutAndErrorNull()
+        public static void SetOutAndErrorNull()
         {
             Console.SetOut(TextWriter.Null);
             Console.SetError(TextWriter.Null);
+        }
+
+        private static bool IsRedirected(IntPtr handle) {
+            FileType fileType = GetFileType(handle);
+
+            return (fileType == FileType.Disk) || (fileType == FileType.Pipe);
+        }
+
+        public static void Redirect() {
+            if (IsRedirected(GetStdHandle(StandardHandle.Output))) {
+                var initialiseOut = Console.Out;
+            }
+
+            bool errorRedirected = IsRedirected(GetStdHandle(StandardHandle.Error));
+            if (errorRedirected) {
+                var initialiseError = Console.Error;
+            }
+
+            AttachConsole(-1);
+
+            if (!errorRedirected)
+                SetStdHandle(StandardHandle.Error, GetStdHandle(StandardHandle.Output));
         }
     }
 }
