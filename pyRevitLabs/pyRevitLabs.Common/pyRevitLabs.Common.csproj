@@ -60,6 +60,7 @@
     <Compile Include="GitInstaller.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CommonUtils.cs" />
+    <Compile Include="Security.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
