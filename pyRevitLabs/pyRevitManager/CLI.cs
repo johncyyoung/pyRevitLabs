@@ -51,7 +51,7 @@ namespace pyRevitManager.Views {
         pyrevit clones branch <clone_name> [<branch_name>] [--log=<log_file>]
         pyrevit clones version <clone_name> [<tag_name>] [--log=<log_file>]
         pyrevit clones commit <clone_name> [<commit_hash>] [--log=<log_file>]
-        pyrevit clones update (--all | <clone_name>) [--log=<log_file>]
+        pyrevit clones update (--all | <clone_name>) [--log=<log_file>] [--gui]
         pyrevit clones deployments <clone_name>
         pyrevit clones engines <clone_name>
         pyrevit attach <clone_name> (latest | dynamosafe | <engine_version>) (<revit_year> | --installed | --attached) [--allusers] [--log=<log_file>]
@@ -443,7 +443,7 @@ namespace pyRevitManager.Views {
             }
 
             // =======================================================================================================
-            // $ pyrevit clones update (--all | <clone_name>)
+            // $ pyrevit clones update (--all | <clone_name>) [--gui]
             // =======================================================================================================
             else if (VerifyCommand(activeKeys, "clones", "update")) {
                 // TODO: ask for closing running Revits
@@ -480,7 +480,7 @@ namespace pyRevitManager.Views {
 
                 // now update myClone if any, as last step
                 if (myClone != null)
-                    UpdateFromOutsideAndClose(myClone);
+                    UpdateFromOutsideAndClose(myClone, showgui: arguments["--gui"].IsTrue);
             }
 
             // =======================================================================================================
@@ -1181,7 +1181,7 @@ namespace pyRevitManager.Views {
             return GetProcessPath().NormalizeAsPath().Contains(clone.ClonePath.NormalizeAsPath());
         }
 
-        private static void UpdateFromOutsideAndClose(PyRevitClone clone) {
+        private static void UpdateFromOutsideAndClose(PyRevitClone clone, bool showgui = false) {
             var userTemp = Environment.ExpandEnvironmentVariables("%TEMP%");
             var sourceUpdater = Path.Combine(GetProcessPath(), updaterExecutive);
             var updaterPath = Path.Combine(userTemp, updaterExecutive);
@@ -1196,7 +1196,10 @@ namespace pyRevitManager.Views {
                 batFile.WriteLine("@ECHO OFF");
                 batFile.WriteLine("TIMEOUT /t 1 /nobreak >NUL  2>NUL");
                 batFile.WriteLine("TASKKILL /IM \"{0}\" >NUL  2>NUL", Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
-                batFile.WriteLine("START \"\" /B \"{0}\" \"{1}\"", updaterPath, clone.ClonePath);
+                if(showgui)
+                    batFile.WriteLine("START \"\" /B \"{0}\" \"{1}\" --gui", updaterPath, clone.ClonePath);
+                else
+                    batFile.WriteLine("START \"\" /B \"{0}\" \"{1}\"", updaterPath, clone.ClonePath);
             }
 
             // launch update

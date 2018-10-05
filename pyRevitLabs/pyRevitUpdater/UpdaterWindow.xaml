@@ -1,4 +1,4 @@
-﻿<Window x:Class="pyRevitLabs.CommonWPF.Windows.InstallerWindow"
+﻿<Window x:Class="pyRevitUpdater.UpdaterWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -325,7 +325,7 @@
                            FontSize="44">
                     <Run Text="pyRevit"/><Run x:Name="short_version_info"
                                               FontSize="20"
-                                              Text=""/>
+                                              Text="v4.6"/>
                     </TextBlock>
                     <TextBlock x:Name="pyrevit_subtitle"
                            HorizontalAlignment="Center"
@@ -338,15 +338,15 @@
                 </StackPanel>
                 <StackPanel Margin="0,110,0,0"
                             HorizontalAlignment="Center">
-                    <ProgressBar x:Name="InstallButton" Value="0" IsIndeterminate="False"
-                                 Width="320" Height="36" Tag="Install"/>
-                    <Button x:Name="CustomizeButton" Visibility="Collapsed"
-                            Content="Customize"
+                    <ProgressBar x:Name="UpdateButton" Value="0" IsIndeterminate="False"
+                                 Width="320" Height="48" Tag="update" MouseUp="UpdateButton_MouseUp"/>
+                    <!--<Button x:Name="CloseButton" Visibility="Visible"
+                            Content="Close"
                             FontSize="14"
                             Width="150" Height="24"
-                            Margin="0,5,0,0"/>
+                            Margin="0,5,0,0" Click="CloseButton_Click"/>-->
                 </StackPanel>
-                <StackPanel Margin="0,210,0,0">
+                <StackPanel Margin="0,200,0,0">
                     <TextBlock x:Name="coded_with_love"
                                FontSize="14"
                                TextWrapping="Wrap"
