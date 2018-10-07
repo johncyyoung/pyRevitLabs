@@ -17,7 +17,9 @@ namespace pyRevitUpdater {
                 }
                 else {
                     ConsoleProvider.Attach();
+                    Console.WriteLine("Updating...");
                     RunUpdate(clonePath);
+                    Console.WriteLine("Updating completed.");
                     ConsoleProvider.Detach();
                 }
             }
