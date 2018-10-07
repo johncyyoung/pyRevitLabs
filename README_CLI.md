@@ -20,9 +20,13 @@
   * [Managing Extensions Lookup Sources](#managing-extensions-lookup-sources)
 - [Getting Environment Info](#getting-environment-info)
 - [Configuring pyRevit](#configuring-pyrevit)
+  * [Configuring Sensitive Tools](#configuring-sensitive-tools)
+  * [Configuring Your Own Options](#configuring-your-own-options)
+  * [Using Config as Seed](#using-config-as-seed)
 - [Extra Revit-Related Functionality](#extra-revit-related-functionality)
   * [Clear pyRevit Cache Files](#clear-pyrevit-cache-files)
 - [Logging CLI messages](#logging-cli-messages)
+- [Creating Shortcuts](#creating-shortcuts)
 
 
 ## Getting Help
@@ -443,6 +447,22 @@ pyrevit configs outputcss [<css_path>] [--log=<log_file>]
 $ pyrevit configs outputcss "C:\myOutputStyle.css"  # setting custom output window styling
 ```
 
+### Configuring Sensitive Tools
+
+You can Enable/Disable a few tools in pyRevit configurations:
+
+``` shell
+pyrevit configs usercanupdate [(Yes | No)] [--log=<log_file>]
+pyrevit configs usercanextend [(Yes | No)] [--log=<log_file>]
+pyrevit configs usercanconfig [(Yes | No)] [--log=<log_file>]
+```
+
+- `usercanupdate`: Enable/Disable Update tool in pyRevit main tools
+- `usercanextend`: Enable/Disable Extensions tool in pyRevit main tools
+- `usercanconfig`: Enable/Disable Settings tool in pyRevit main tools
+
+### Configuring Your Own Options
+
 Use the `configs` command to configure your custom config options. Specify the option in `section:option` format:
 
 ``` shell
@@ -452,6 +472,8 @@ pyrevit configs <option_path> [<option_value>] [--log=<log_file>]
 $ pyrevit configs mysection:myswitch enable      # set myswitch to True
 $ pyrevit configs mysection:myvalue 12           # set myvalue to 12
 ```
+
+### Using Config as Seed
 
 Seed the configuration to `%PROGRAMDATA%/pyRevit` to be used as basis for pyRevit configurtions when configuring pyRevit using System account on a user machine:
 
@@ -517,3 +539,17 @@ With many commands you can log the complete log messages to a log file:
 ``` shell
 $ pyrevit clone master --log="C:\logfile.txt"
 ```
+
+
+## Creating Shortcuts
+
+You can use the cli tool to create shortcuts in start menu for various tasks.
+
+``` shell
+pyrevit cli addshortcut <shortcut_name> <shortcut_args> [--desc=<shortcut_description>] [--allusers]
+
+$ pyrevit cli addshortcut "Update pyRevit" "clones update --all"
+```
+
+- `--desc`: Description for the Start menu shortcut
+- `--alusers`: Create shortcut for all users or current user
