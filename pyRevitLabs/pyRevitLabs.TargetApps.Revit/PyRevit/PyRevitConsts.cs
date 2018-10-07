@@ -91,7 +91,11 @@ namespace pyRevitLabs.TargetApps.Revit {
         }
 
         public static string GetZipPackageInternalBranchPath(string branchName) {
-            return string.Format(OriginalZipInternalBranchPath, DefaultCloneInstallName, branchName);
+            return string.Format(
+                OriginalZipInternalBranchPath,
+                DefaultCloneInstallName,
+                branchName.Replace("/", "-")
+                );
         }
     }
 }
