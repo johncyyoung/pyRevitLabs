@@ -340,7 +340,7 @@
     <ATTRIBUTE name="PrereqsOrder" value="F0010743E2808FF669B5E11421 A29CF2DAF30403F8D44F6E2FF8D1654"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.PreReqSearchComponent">
-    <ROW SearchKey="A29CF2DAF30403F8D44F6E2FF8D1654Release" Prereq="A29CF2DAF30403F8D44F6E2FF8D1654" SearchType="9" SearchString="HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\Release" RefContent="G461309" Order="1" Property="PreReqSearch_D5734F904894AAF3007352"/>
+    <ROW SearchKey="A29CF2DAF30403F8D44F6E2FF8D1654Release" Prereq="A29CF2DAF30403F8D44F6E2FF8D1654" SearchType="9" SearchString="HKLM\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\Release" RefContent="G461307" Order="1" Property="PreReqSearch_D5734F904894AAF3007352"/>
     <ROW SearchKey="F0010743E2808FF669B5E11421Micro" Prereq="F0010743E2808FF669B5E11421" SearchType="12" SearchString="HKLM\SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App" VerMin="2.0.7" Order="1" Property="PreReqSearch_B0F9A029CA4177BAFD09E9"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.SynchronizedFolderComponent">
