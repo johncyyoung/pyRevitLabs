@@ -173,8 +173,7 @@ namespace pyRevitLabs.TargetApps.Revit.Controls {
                     double alternator = 0;
 
                     // draw moving forward
-                    //while (LineIntersectsRect(matrix, viewRect) && safety > 0) {
-                    while (IntersectsWith(matrix.OffsetX, matrix.OffsetY, viewRect) && safety > 0) {
+                    while (IntersectsWith(matrix, viewRect) && safety > 0) {
                         gfx.Transform = matrix;
                         gfx.DrawLine(pen, 0, 0, _length, 0);
 
@@ -192,7 +191,7 @@ namespace pyRevitLabs.TargetApps.Revit.Controls {
                     // draw moving backward
                     safety = 250;
                     alternator = 0;
-                    while (LineIntersectsRect(backMatrix, viewRect) && safety > 0) {
+                    while (IntersectsWith(backMatrix, viewRect) && safety > 0) {
                         gfx.Transform = backMatrix;
                         gfx.DrawLine(pen, 0, 0, _length, 0);
 
@@ -213,9 +212,17 @@ namespace pyRevitLabs.TargetApps.Revit.Controls {
             }
         }
 
-        private bool IntersectsWith(float X, float Y, Rectangle rect) {
-            float tmin = (rect.Left - X) / (X + 200);
-            float tmax = (rect.Right - X) / (X + 200);
+        private bool IntersectsWith(Matrix sourceMatrix, Rectangle rect) {
+            Matrix rayMatrix = sourceMatrix.Clone();
+            rayMatrix.Translate(250, 0);
+
+            var X = sourceMatrix.OffsetX;
+            var Y = sourceMatrix.OffsetY;
+            var Xd = rayMatrix.OffsetX;
+            var Yd = rayMatrix.OffsetY;
+
+            float tmin = (rect.Left - X) / Xd;
+            float tmax = (rect.Right - X) / Xd;
 
             if (tmin > tmax) {
                 var temp = tmin;
@@ -223,8 +230,8 @@ namespace pyRevitLabs.TargetApps.Revit.Controls {
                 tmax = temp;
             }
 
-            float tymin = (rect.Bottom - Y) / Y;
-            float tymax = (rect.Top - Y) / Y;
+            float tymin = (rect.Bottom - Y) / Yd;
+            float tymax = (rect.Top - Y) / Yd;
 
             if (tymin > tymax) {
                 var temp = tymin;
@@ -236,46 +243,6 @@ namespace pyRevitLabs.TargetApps.Revit.Controls {
                 return false;
 
             return true;
-        }
-
-        private bool LineIntersectsRect(Matrix rayMatrix, Rectangle rect) {
-            Matrix m = rayMatrix.Clone();
-            m.Translate(200, 0);
-            return LineIntersectsRect(new Point((int)rayMatrix.OffsetX, (int)rayMatrix.OffsetY),
-                                      new Point((int)m.OffsetX, (int)m.OffsetY),
-                                      rect);
-        }
-
-        private bool LineIntersectsRect(Point p1, Point p2, Rectangle rect) {
-            return LineIntersectsLine(p1, p2, new Point(rect.X, rect.Y), new Point(rect.X + rect.Width, rect.Y))
-                || LineIntersectsLine(p1, p2, new Point(rect.X + rect.Width, rect.Y), new Point(rect.X + rect.Width, rect.Y + rect.Height))
-                || LineIntersectsLine(p1, p2, new Point(rect.X + rect.Width, rect.Y + rect.Height), new Point(rect.X, rect.Y + rect.Height))
-                || LineIntersectsLine(p1, p2, new Point(rect.X, rect.Y + rect.Height), new Point(rect.X, rect.Y))
-                || (rect.Contains(p1) && rect.Contains(p2));
-        }
-
-        private bool LineIntersectsLine(Point l1p1, Point l1p2, Point l2p1, Point l2p2) {
-            try {
-                long d = (l1p2.X - l1p1.X) * (l2p2.Y - l2p1.Y) - (l1p2.Y - l1p1.Y) * (l2p2.X - l2p1.X);
-                if (d == 0) return false;
-
-                long q = (l1p1.Y - l2p1.Y) * (l2p2.X - l2p1.X) - (l1p1.X - l2p1.X) * (l2p2.Y - l2p1.Y);
-                long r = q / d;
-
-                long q1 = (l1p1.Y - l2p1.Y) * (l1p2.X - l1p1.X);
-                long q2 = (l1p1.X - l2p1.X) * (l1p2.Y - l1p1.Y);
-
-                q = q1 - q2;
-                long s = q / d;
-
-                if (r < 0 || r > 1 || s < 0 || s > 1)
-                    return false;
-
-                return true;
-            }
-            catch (OverflowException) {
-                return false;
-            }
         }
     }
 }
